@@ -20,25 +20,39 @@ button{font:inherit;cursor:pointer}
 .sound-dot:after{content:"";position:absolute;inset:9px;border-radius:50%;background:#002f38;box-shadow:inset 1px 1px 3px #0008}
 .sound-option input:checked+.sound-dot{background:radial-gradient(circle at 35% 30%,#c0ffff 0 18%,#40c8d6 40%,#057c8a 75%);box-shadow:0 0 9px #58d9e5}
 .sound-option input:checked+.sound-dot:after{background:#82e9ee}
+
 .timer-wrap{width:min(970px,100%);margin:0 auto;position:relative;padding:60px 0 64px}
 
-/* Arrow overlay: each .arrow-cell is a zero-width column whose "left" is set by JS
-   to the exact horizontal centre of its digit. Triangles centre on that line. */
-.digit-arrows{position:absolute;inset:0;pointer-events:none}
-.arrow-cell{position:absolute;top:0;bottom:0;width:0;left:0;pointer-events:auto}
-.triangle{position:absolute;left:0;transform:translateX(-50%);width:clamp(28px,3.7vw,54px);height:clamp(31px,4.2vw,59px);padding:0;border:0;background:linear-gradient(135deg,#f9f9f9 0%,#a8a8a8 46%,#424242 100%);filter:drop-shadow(2px 3px 1px #000);clip-path:polygon(50% 0,0 100%,100% 100%);transition:filter .08s}
-.triangle:before{content:"";position:absolute;inset:5px 5px 7px;background:radial-gradient(ellipse at 45% 28%,#fff 0%,#e6e6e6 35%,#999 76%,#555 100%);clip-path:polygon(50% 0,0 100%,100% 100%)}
-.triangle.up{top:0}
-.triangle.down{bottom:0;transform:translateX(-50%) rotate(180deg)}
-.triangle:active{filter:brightness(.75) drop-shadow(1px 1px 1px #000)}
-
-.display{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) clamp(18px,2.2vw,32px) minmax(0,1fr) minmax(0,1fr) clamp(18px,2.2vw,32px) minmax(0,1fr) minmax(0,1fr) clamp(20px,2.5vw,36px) minmax(0,1fr) minmax(0,1fr);align-items:center;justify-items:stretch;column-gap:clamp(1px,.15vw,3px);height:clamp(130px,11.8vw,192px);padding:9px clamp(9px,1.5vw,24px);background:#000;border:clamp(7px,.85vw,13px) solid var(--cyan);border-radius:clamp(23px,2.2vw,34px);box-shadow:inset 0 0 0 2px #071b1d;overflow:hidden}
-.digit{height:100%;width:100%;min-width:0;position:relative;overflow:hidden;transform:none}
-.digit svg{width:100%;height:100%;display:block;overflow:hidden;transform:none}
+/* Display is a simple flex row. Each digit column owns its own arrows,
+   so arrows can never be misaligned with their digit. */
+.display{
+  --bw:clamp(7px,.85vw,13px);   /* border width */
+  --vpad:9px;                   /* vertical padding */
+  --pad:clamp(9px,1.5vw,24px);  /* horizontal padding */
+  --sep:clamp(18px,2.2vw,32px); /* colon column width */
+  --sepd:clamp(20px,2.5vw,36px);/* decimal point column width */
+  position:relative;display:flex;align-items:stretch;
+  height:clamp(130px,11.8vw,192px);padding:var(--vpad) var(--pad);
+  background:#000;border:var(--bw) solid var(--cyan);border-radius:clamp(23px,2.2vw,34px);
+  box-shadow:inset 0 0 0 2px #071b1d}
+.digit{flex:1 1 0;min-width:0;position:relative}
+.digit svg{width:100%;height:100%;display:block}
 .segment{fill:transparent;stroke:none}
 .segment.on{fill:#67c8d8;stroke:none;filter:none}
-.separator{height:100%;width:100%;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.4vw,26px);align-items:center}
-.separator i{display:block;width:clamp(13px,1.9vw,26px);height:clamp(13px,1.9vw,26px);flex:none;border-radius:50%;background:var(--cyan);box-shadow:3px 5px 0 #606060}.separator.decimal{justify-content:flex-end;padding-bottom:clamp(10px,1.4vw,20px)}.separator.decimal i{width:clamp(18px,2.3vw,32px);height:clamp(18px,2.3vw,32px)}
+
+.triangle{position:absolute;left:50%;width:clamp(28px,3.7vw,54px);height:clamp(31px,4.2vw,59px);padding:0;border:0;background:linear-gradient(135deg,#f9f9f9 0%,#a8a8a8 46%,#424242 100%);filter:drop-shadow(2px 3px 1px #000);clip-path:polygon(50% 0,0 100%,100% 100%);transition:filter .08s,opacity .15s}
+.triangle:before{content:"";position:absolute;inset:5px 5px 7px;background:radial-gradient(ellipse at 45% 28%,#fff 0%,#e6e6e6 35%,#999 76%,#555 100%);clip-path:polygon(50% 0,0 100%,100% 100%)}
+.triangle.up{bottom:calc(100% + var(--vpad) + var(--bw) + 6px);transform:translateX(-50%)}
+.triangle.down{top:calc(100% + var(--vpad) + var(--bw) + 6px);transform:translateX(-50%) rotate(180deg)}
+.triangle:active{filter:brightness(.75) drop-shadow(1px 1px 1px #000)}
+.display.running .triangle{opacity:.35}
+
+.separator{flex:none;width:var(--sep);display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.4vw,26px);align-items:center}
+.separator.decimal{width:var(--sepd)}
+.separator i{display:block;width:clamp(13px,1.9vw,26px);height:clamp(13px,1.9vw,26px);flex:none;border-radius:50%;background:var(--cyan);box-shadow:3px 5px 0 #606060}
+.separator.decimal{justify-content:flex-end;padding-bottom:clamp(10px,1.4vw,20px)}
+.separator.decimal i{width:clamp(18px,2.3vw,32px);height:clamp(18px,2.3vw,32px)}
+
 .controls{display:flex;justify-content:center;gap:clamp(30px,3.5vw,56px);margin:32px auto 22px}
 .main-control{width:clamp(68px,5.3vw,88px);height:clamp(68px,5.3vw,88px);border:2px solid #ddd;border-radius:5px;background:linear-gradient(#fff,#eee);color:#050505;box-shadow:0 2px 2px #000a;display:grid;place-items:center}
 .main-control:active{transform:translateY(2px);box-shadow:none}
@@ -52,8 +66,33 @@ button{font:inherit;cursor:pointer}
 .brand{margin-left:auto;font-size:clamp(27px,3.3vw,49px);font-weight:300;color:#c5c5c5;letter-spacing:-2px;white-space:nowrap}
 .brand b{font-weight:300}.brand .dot{color:var(--cyan);font-weight:700}
 .status{position:absolute;left:50%;transform:translateX(-50%);bottom:4px;font-size:11px;color:#aaa;white-space:nowrap}
-@media(max-width:700px){.app{padding:20px 12px 0}.sound-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:10px auto 28px}.sound-option{justify-content:space-between;gap:8px}.sound-dot{flex-basis:30px;width:30px;height:30px}.sound-dot:after{inset:8px}.timer-wrap{padding:46px 0 50px}.display{height:clamp(92px,22vw,140px);border-radius:18px;padding:6px;column-gap:1px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr)}.triangle{width:27px;height:30px}.triangle:before{inset:4px 4px 6px}.controls{margin:24px auto 18px}.bottom-bar{padding:5px 8px;min-height:58px}.small-control{height:34px;min-width:34px;font-size:22px}.stopwatch{width:140px;height:37px;font-size:14px;top:7px}.brand{font-size:22px;letter-spacing:-1px}.status{display:none}}
-@media(max-width:390px){.sound-option{font-size:12px}.sound-grid{column-gap:12px}.separator{width:100%;flex-basis:auto}.separator i{width:8px;height:8px;box-shadow:1px 2px 0 #666}.separator.decimal{padding-bottom:7px}.display{gap:1px;padding:4px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 8px minmax(0,1fr) minmax(0,1fr) 8px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr)}.bottom-bar{gap:5px}.brand{font-size:19px}.stopwatch{width:116px}}
+@media(max-width:700px){
+  .app{padding:20px 12px 0}
+  .sound-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:10px auto 28px}
+  .sound-option{justify-content:space-between;gap:8px}
+  .sound-dot{flex-basis:30px;width:30px;height:30px}
+  .sound-dot:after{inset:8px}
+  .timer-wrap{padding:46px 0 50px}
+  .display{--vpad:6px;--pad:6px;--sep:10px;--sepd:10px;height:clamp(92px,22vw,140px);border-radius:18px}
+  .triangle{width:27px;height:30px}
+  .triangle:before{inset:4px 4px 6px}
+  .controls{margin:24px auto 18px}
+  .bottom-bar{padding:5px 8px;min-height:58px}
+  .small-control{height:34px;min-width:34px;font-size:22px}
+  .stopwatch{width:140px;height:37px;font-size:14px;top:7px}
+  .brand{font-size:22px;letter-spacing:-1px}
+  .status{display:none}
+}
+@media(max-width:390px){
+  .sound-option{font-size:12px}
+  .sound-grid{column-gap:12px}
+  .display{--vpad:4px;--pad:4px;--sep:8px;--sepd:10px}
+  .separator i{width:8px;height:8px;box-shadow:1px 2px 0 #666}
+  .separator.decimal{padding-bottom:7px}
+  .bottom-bar{gap:5px}
+  .brand{font-size:19px}
+  .stopwatch{width:116px}
+}
 </style>
 </head>
 <body>
@@ -73,7 +112,6 @@ button{font:inherit;cursor:pointer}
     <label class="sound-option"><span>ha ha</span><input type="radio" name="alarm" value="ha-ha"><span class="sound-dot"></span></label>
   </section>
   <section class="timer-wrap" aria-label="Timer display">
-    <div class="digit-arrows" id="arrows"></div>
     <div class="display" id="display" aria-label="00 hours, 00 minutes, 00 seconds, 00 hundredths"></div>
   </section>
   <div class="controls">
@@ -91,7 +129,7 @@ button{font:inherit;cursor:pointer}
 <script>
 (function(){
 "use strict";
-const display=document.getElementById("display"),arrows=document.getElementById("arrows"),startButton=document.getElementById("start"),playIcon=document.getElementById("playIcon"),resetButton=document.getElementById("reset"),modeButton=document.getElementById("mode"),status=document.getElementById("status"),soundToggle=document.getElementById("soundToggle");
+const display=document.getElementById("display"),startButton=document.getElementById("start"),playIcon=document.getElementById("playIcon"),resetButton=document.getElementById("reset"),modeButton=document.getElementById("mode"),status=document.getElementById("status"),soundToggle=document.getElementById("soundToggle");
 const segmentPaths={
  a:"18,8 82,8 90,16 82,24 18,24 10,16",
  b:"76,20 84,12 92,20 84,68 76,76 68,68",
@@ -102,23 +140,16 @@ const segmentPaths={
  g:"18,72 26,64 74,64 82,72 74,80 26,80"
 };
 const digitSegments={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
-const digits=[],arrowCells=[];
+const digits=[];
 for(let i=0;i<8;i++){
- const cell=document.createElement("div");cell.className="arrow-cell";
+ if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator"+(i===6?" decimal":"");sep.innerHTML=i===6?"<i></i>":"<i></i><i></i>";display.append(sep)}
+ const digit=document.createElement("div");digit.className="digit";
+ digit.innerHTML='<svg viewBox="0 0 92 160" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";
  const up=document.createElement("button");up.className="triangle up";up.type="button";up.setAttribute("aria-label","Increase digit "+(i+1));
  const down=document.createElement("button");down.className="triangle down";down.type="button";down.setAttribute("aria-label","Decrease digit "+(i+1));
- up.addEventListener("click",()=>adjustDigit(i,1));down.addEventListener("click",()=>adjustDigit(i,-1));cell.append(up,down);arrows.append(cell);arrowCells.push(cell);
- if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator"+(i===6?" decimal":"");sep.innerHTML=i===6?"<i></i>":"<i></i><i></i>";display.append(sep)}
- const digit=document.createElement("div");digit.className="digit";digit.innerHTML='<svg viewBox="0 0 92 160" preserveAspectRatio="none" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";display.append(digit);digits.push(digit);
+ up.addEventListener("click",()=>adjustDigit(i,1));down.addEventListener("click",()=>adjustDigit(i,-1));
+ digit.append(up,down);display.append(digit);digits.push(digit);
 }
-/* Put each arrow pair exactly over the centre of its real on-screen digit. */
-function alignArrows(){
- const wrap=arrows.getBoundingClientRect();
- digits.forEach((d,i)=>{const r=d.getBoundingClientRect();arrowCells[i].style.left=(r.left+r.width/2-wrap.left)+"px"});
-}
-window.addEventListener("resize",alignArrows);
-window.addEventListener("load",alignArrows);
-if(window.ResizeObserver){new ResizeObserver(alignArrows).observe(display)}
 let values=[0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,remaining=0,elapsed=0,lastTick=0,raf=0,muted=false,audioContext=null,alarmAudio=null,alarmInterval=0;
 function render(){
  digits.forEach((el,i)=>{const value=String(values[i]);el.querySelectorAll(".segment").forEach(s=>s.classList.toggle("on",digitSegments[value].includes(s.dataset.segment)))});
@@ -130,7 +161,7 @@ function totalFromDigits(){return ((values[0]*10+values[1])*3600+(values[2]*10+v
 function setFromMilliseconds(ms){ms=Math.max(0,Math.min(359999990,Math.floor(ms)));const hours=Math.floor(ms/3600000);ms%=3600000;const minutes=Math.floor(ms/60000);ms%=60000;const seconds=Math.floor(ms/1000);const centis=Math.floor(ms%1000/10);const str=String(hours).padStart(2,"0")+String(minutes).padStart(2,"0")+String(seconds).padStart(2,"0")+String(centis).padStart(2,"0");values=str.split("").map(Number);render()}
 function formatted(){return values.slice(0,2).join("")+":"+values.slice(2,4).join("")+":"+values.slice(4,6).join("")+"."+values.slice(6,8).join("")}
 function tick(now){if(!running)return;const diff=now-lastTick;lastTick=now;if(stopwatchMode){elapsed+=diff;setFromMilliseconds(elapsed)}else{remaining-=diff;setFromMilliseconds(Math.max(0,remaining));if(remaining<=0){running=false;cancelAnimationFrame(raf);setRunningUI();ringAlarm();status.textContent="Time is up";return}}raf=requestAnimationFrame(tick)}
-function setRunningUI(){playIcon.className=running?"pause-icon":"play-icon";startButton.setAttribute("aria-label",running?"Pause":"Start");startButton.title=running?"Pause":"Start";arrows.style.opacity=running?".35":"1";status.textContent=running?(stopwatchMode?"Stopwatch running":"Timer running"):"Paused"}
+function setRunningUI(){playIcon.className=running?"pause-icon":"play-icon";startButton.setAttribute("aria-label",running?"Pause":"Start");startButton.title=running?"Pause":"Start";display.classList.toggle("running",running);status.textContent=running?(stopwatchMode?"Stopwatch running":"Timer running"):"Paused"}
 function startPause(){if(running){running=false;cancelAnimationFrame(raf);setRunningUI();return}if(!stopwatchMode&&totalFromDigits()<=0){status.textContent="Set a time first";return}if(stopwatchMode&&elapsed===0)elapsed=totalFromDigits();if(!stopwatchMode&&remaining<=0)remaining=totalFromDigits();running=true;lastTick=performance.now();setRunningUI();raf=requestAnimationFrame(tick)}
 function reset(){running=false;cancelAnimationFrame(raf);clearAlarm();remaining=0;elapsed=0;values=Array(8).fill(0);setRunningUI();render();status.textContent="Timer reset"}
 function toggleMode(){running=false;cancelAnimationFrame(raf);stopwatchMode=!stopwatchMode;remaining=0;elapsed=0;values=Array(8).fill(0);modeButton.textContent=stopwatchMode?"TIMER":"STOPWATCH";setRunningUI();render();status.textContent=stopwatchMode?"Stopwatch mode":"Timer mode"}
@@ -143,7 +174,7 @@ soundToggle.addEventListener("click",()=>{muted=!muted;soundToggle.classList.tog
 document.getElementById("home").addEventListener("click",()=>{reset();stopwatchMode=false;modeButton.textContent="STOPWATCH";status.textContent="Timer reset"});
 document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{status.textContent="Alarm: "+r.parentElement.querySelector("span").textContent;if(r.checked&&r.value!=="none"&&!muted)playFallback()}));
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&running){lastTick=performance.now()}});
-render();setRunningUI();alignArrows();
+render();setRunningUI();
 })();
 </script>
 </body>
