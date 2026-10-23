@@ -1,1 +1,134 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#00343d">
+<title>eChalk Timer</title>
+<link rel="icon" href="/assets/pictures/favicon.png">
+<style>
+:root{color-scheme:dark;--bg:#00343d;--cyan:#68c8d8;--cyan-dark:#087d8b;--pink:#ff4f91}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif}
+body{background:var(--bg);color:#f4f7f8;overflow-x:hidden}
+button{font:inherit;cursor:pointer}
+.app{width:min(1460px,100%);min-height:100vh;margin:auto;display:flex;flex-direction:column;padding:30px 5.7% 0}
+.sound-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:clamp(18px,4vw,65px);row-gap:16px;width:min(870px,100%);margin:12px auto 26px}
+.sound-option{display:flex;align-items:center;justify-content:flex-end;gap:18px;min-height:36px;font-size:clamp(13px,1.25vw,18px);font-weight:700;white-space:nowrap}
+.sound-option input{position:absolute;opacity:0;pointer-events:none}
+.sound-dot{flex:0 0 35px;width:35px;height:35px;border-radius:50%;border:1px solid #087c89;background:radial-gradient(circle at 38% 35%,#1c9ca9 0 17%,#00606b 48%,#003f49 70%);box-shadow:inset 2px 2px 5px #6dd7df66,0 0 2px #71dce7;position:relative}
+.sound-dot:after{content:"";position:absolute;inset:9px;border-radius:50%;background:#002f38;box-shadow:inset 1px 1px 3px #0008}
+.sound-option input:checked+.sound-dot{background:radial-gradient(circle at 35% 30%,#c0ffff 0 18%,#40c8d6 40%,#057c8a 75%);box-shadow:0 0 9px #58d9e5}
+.sound-option input:checked+.sound-dot:after{background:#82e9ee}
+.timer-wrap{width:min(970px,100%);margin:0 auto;position:relative;padding:60px 0 64px}
+.digit-arrows{position:absolute;inset:0;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));column-gap:clamp(3px,.55vw,9px);pointer-events:none}
+.arrow-cell{position:relative;pointer-events:auto}
+.triangle{position:absolute;left:50%;transform:translateX(-50%);width:0;height:0;border-left:clamp(13px,1.9vw,27px) solid transparent;border-right:clamp(13px,1.9vw,27px) solid transparent;padding:0;background:none;filter:drop-shadow(1px 2px 1px #000)}
+.triangle.up{top:0;border-bottom:clamp(29px,4vw,56px) solid #d9d9d9}
+.triangle.down{bottom:0;border-top:clamp(29px,4vw,56px) solid #d9d9d9}
+.triangle:before{content:"";position:absolute;left:calc(clamp(13px,1.9vw,27px)*-1);width:0;height:0;border-left:clamp(13px,1.9vw,27px) solid transparent;border-right:clamp(13px,1.9vw,27px) solid transparent}
+.triangle.up:before{top:5px;border-bottom:clamp(22px,3vw,42px) solid #fff}
+.triangle.down:before{top:calc(clamp(29px,4vw,56px)*-1 + 5px);border-top:clamp(22px,3vw,42px) solid #fff}
+.triangle:active{filter:brightness(.7)}
+.display{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:clamp(2px,.5vw,8px);height:clamp(130px,11.8vw,192px);padding:9px clamp(9px,1.5vw,24px);background:#000;border:clamp(7px,.85vw,13px) solid var(--cyan);border-radius:clamp(23px,2.2vw,34px);box-shadow:inset 0 0 0 2px #071b1d;overflow:hidden}
+.digit{height:100%;min-width:0;flex:1;position:relative;max-width:94px}
+.digit svg{width:100%;height:100%;display:block;overflow:visible}
+.segment{fill:#10272a;stroke:#050c0d;stroke-width:1.5;stroke-linejoin:round}
+.segment.on{fill:var(--cyan);filter:drop-shadow(0 0 1px #8ce4ee)}
+.separator{height:100%;display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;width:clamp(12px,2vw,27px);flex:0 0 clamp(12px,2vw,27px)}
+.separator i{display:block;width:clamp(13px,1.9vw,26px);height:clamp(13px,1.9vw,26px);border-radius:50%;background:var(--cyan);box-shadow:3px 5px 0 #606060}
+.controls{display:flex;justify-content:center;gap:clamp(30px,3.5vw,56px);margin:32px auto 22px}
+.main-control{width:clamp(68px,5.3vw,88px);height:clamp(68px,5.3vw,88px);border:2px solid #ddd;border-radius:5px;background:linear-gradient(#fff,#eee);color:#050505;box-shadow:0 2px 2px #000a;display:grid;place-items:center}
+.main-control:active{transform:translateY(2px);box-shadow:none}
+.play-icon{width:0;height:0;border-top:clamp(18px,1.4vw,24px) solid transparent;border-bottom:clamp(18px,1.4vw,24px) solid transparent;border-left:clamp(27px,2.1vw,36px) solid #000;margin-left:7px}
+.pause-icon{width:27px;height:35px;border-left:9px solid #000;border-right:9px solid #000}
+.reset-icon{font-size:40px;line-height:1;font-weight:900;letter-spacing:-7px;margin-right:7px}
+.bottom-bar{margin-top:auto;min-height:62px;border-top:5px solid #56c6d3;background:linear-gradient(#333,#080808 22%,#222);display:flex;align-items:center;padding:5px 16% 5px 16%;gap:10px;position:relative}
+.small-control{height:42px;min-width:42px;border:1px solid #aaa;border-radius:3px;background:#fff;color:#111;font-size:27px;display:grid;place-items:center;padding:0 4px}
+.small-control.sound-on{background:#71e7ef;border-color:#0095a4}
+.stopwatch{position:absolute;left:50%;transform:translateX(-50%);top:6px;width:248px;height:45px;background:linear-gradient(#ff70ac,#ff3980);border:4px solid #a71959;border-radius:12px;color:#fff;font-size:18px;font-weight:900;font-style:italic;text-shadow:0 1px 2px #b51b5a;box-shadow:0 2px 2px #0008}
+.brand{margin-left:auto;font-size:clamp(27px,3.3vw,49px);font-weight:300;color:#c5c5c5;letter-spacing:-2px;white-space:nowrap}
+.brand b{font-weight:300}.brand .dot{color:var(--cyan);font-weight:700}
+.status{position:absolute;left:50%;transform:translateX(-50%);bottom:4px;font-size:11px;color:#aaa;white-space:nowrap}
+@media(max-width:700px){.app{padding:20px 12px 0}.sound-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:10px auto 28px}.sound-option{justify-content:space-between;gap:8px}.sound-dot{flex-basis:30px;width:30px;height:30px}.sound-dot:after{inset:8px}.timer-wrap{padding:46px 0 50px}.display{height:clamp(92px,22vw,140px);border-radius:18px;padding:6px}.digit-arrows{column-gap:2px}.triangle.up{border-left-width:10px;border-right-width:10px}.controls{margin:24px auto 18px}.bottom-bar{padding:5px 8px;min-height:58px}.small-control{height:34px;min-width:34px;font-size:22px}.stopwatch{width:140px;height:37px;font-size:14px;top:7px}.brand{font-size:22px;letter-spacing:-1px}.status{display:none}}
+@media(max-width:390px){.sound-option{font-size:12px}.sound-grid{column-gap:12px}.separator{width:8px;flex-basis:8px}.separator i{width:8px;height:8px;box-shadow:1px 2px 0 #666}.display{gap:1px;padding:4px}.bottom-bar{gap:5px}.brand{font-size:19px}.stopwatch{width:116px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="sound-grid" aria-label="Alarm sound">
+    <label class="sound-option"><span>no alarm</span><input type="radio" name="alarm" value="none"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>knelling bell</span><input type="radio" name="alarm" value="knelling-bell"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>dalek</span><input type="radio" name="alarm" value="dalek"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>horrible raspberry</span><input type="radio" name="alarm" value="horrible-raspberry"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>klaxon</span><input type="radio" name="alarm" value="klaxon"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>cat howl</span><input type="radio" name="alarm" value="cat-howl"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>belch</span><input type="radio" name="alarm" value="belch"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>air raid siren</span><input type="radio" name="alarm" value="air-raid-siren"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>woo hoo</span><input type="radio" name="alarm" value="woo-hoo"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>cow moo</span><input type="radio" name="alarm" value="cow-moo" checked><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>despair</span><input type="radio" name="alarm" value="despair"><span class="sound-dot"></span></label>
+    <label class="sound-option"><span>ha ha</span><input type="radio" name="alarm" value="ha-ha"><span class="sound-dot"></span></label>
+  </section>
+  <section class="timer-wrap" aria-label="Timer display">
+    <div class="digit-arrows" id="arrows"></div>
+    <div class="display" id="display" aria-label="00 hours, 00 minutes, 00 seconds, 00 hundredths"></div>
+  </section>
+  <div class="controls">
+    <button class="main-control" id="start" aria-label="Start timer" title="Start"><span class="play-icon" id="playIcon"></span></button>
+    <button class="main-control" id="reset" aria-label="Reset timer" title="Reset"><span class="reset-icon">◀◀</span></button>
+  </div>
+  <footer class="bottom-bar">
+    <button class="small-control" id="home" aria-label="Home" title="Home">◆</button>
+    <button class="small-control sound-on" id="soundToggle" aria-label="Toggle sound" title="Toggle sound">◖))</button>
+    <button class="stopwatch" id="mode">STOPWATCH</button>
+    <div class="brand"><b>e</b><span class="dot">•</span>chalk</div>
+    <div class="status" id="status" aria-live="polite">Set the time with the arrows</div>
+  </footer>
+</main>
+<script>
+(function(){
+"use strict";
+const display=document.getElementById("display"),arrows=document.getElementById("arrows"),startButton=document.getElementById("start"),playIcon=document.getElementById("playIcon"),resetButton=document.getElementById("reset"),modeButton=document.getElementById("mode"),status=document.getElementById("status"),soundToggle=document.getElementById("soundToggle");
+const segmentPaths={
+ a:"10,3 42,3 35,10 17,10",b:"44,5 51,12 45,31 38,37 42,16",c:"46,39 41,59 34,66 38,45",d:"8,67 33,67 26,74 1,74",e:"0,44 7,38 15,44 11,60 4,66",f:"9,12 16,10 12,31 5,37 2,32",g:"11,35 36,35 31,42 7,42"
+};
+const digitSegments={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
+const digits=[];
+for(let i=0;i<10;i++){
+ const cell=document.createElement("div");cell.className="arrow-cell";
+ const up=document.createElement("button");up.className="triangle up";up.type="button";up.setAttribute("aria-label","Increase digit "+(i+1));
+ const down=document.createElement("button");down.className="triangle down";down.type="button";down.setAttribute("aria-label","Decrease digit "+(i+1));
+ up.addEventListener("click",()=>adjustDigit(i,1));down.addEventListener("click",()=>adjustDigit(i,-1));cell.append(up,down);arrows.append(cell);
+ if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator";sep.innerHTML="<i></i><i></i>";display.append(sep)}
+ const digit=document.createElement("div");digit.className="digit";digit.innerHTML='<svg viewBox="0 0 52 77" preserveAspectRatio="none" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";display.append(digit);digits.push(digit);
+}
+let values=[0,0,0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,remaining=0,elapsed=0,lastTick=0,raf=0,muted=false,audioContext=null,alarmAudio=null,alarmInterval=0;
+function render(){
+ digits.forEach((el,i)=>{const value=String(values[i]);el.querySelectorAll(".segment").forEach(s=>s.classList.toggle("on",digitSegments[value].includes(s.dataset.segment)))});
+ const label=values.slice(0,2).join("")+":"+values.slice(2,4).join("")+":"+values.slice(4,6).join("")+"."+values.slice(6,8).join("");
+ display.setAttribute("aria-label",label);
+}
+function adjustDigit(index,delta){if(running)return;values[index]=(values[index]+delta+10)%10;render();status.textContent="Time set to "+formatted()}
+function totalFromDigits(){return ((values[0]*10+values[1])*3600+(values[2]*10+values[3])*60+(values[4]*10+values[5]))*1000+(values[6]*10+values[7])*10}
+function setFromMilliseconds(ms){ms=Math.max(0,Math.min(359999990,Math.floor(ms)));const hours=Math.floor(ms/3600000);ms%=3600000;const minutes=Math.floor(ms/60000);ms%=60000;const seconds=Math.floor(ms/1000);const centis=Math.floor(ms%1000/10);const str=String(hours).padStart(2,"0")+String(minutes).padStart(2,"0")+String(seconds).padStart(2,"0")+String(centis).padStart(2,"0");values=str.split("").map(Number);render()}
+function formatted(){return values.slice(0,2).join("")+":"+values.slice(2,4).join("")+":"+values.slice(4,6).join("")+"."+values.slice(6,8).join("")}
+function tick(now){if(!running)return;const diff=now-lastTick;lastTick=now;if(stopwatchMode){elapsed+=diff;setFromMilliseconds(elapsed)}else{remaining-=diff;setFromMilliseconds(Math.max(0,remaining));if(remaining<=0){running=false;cancelAnimationFrame(raf);setRunningUI();ringAlarm();status.textContent="Time is up";return}}raf=requestAnimationFrame(tick)}
+function setRunningUI(){playIcon.className=running?"pause-icon":"play-icon";startButton.setAttribute("aria-label",running?"Pause":"Start");startButton.title=running?"Pause":"Start";arrows.style.opacity=running?".35":"1";status.textContent=running?(stopwatchMode?"Stopwatch running":"Timer running"):"Paused"}
+function startPause(){if(running){running=false;cancelAnimationFrame(raf);setRunningUI();return}if(!stopwatchMode&&totalFromDigits()<=0){status.textContent="Set a time first";return}if(stopwatchMode&&elapsed===0)elapsed=totalFromDigits();if(!stopwatchMode&&remaining<=0)remaining=totalFromDigits();running=true;lastTick=performance.now();setRunningUI();raf=requestAnimationFrame(tick)}
+function reset(){running=false;cancelAnimationFrame(raf);clearAlarm();remaining=0;elapsed=0;values=Array(10).fill(0);setRunningUI();render();status.textContent="Timer reset"}
+function toggleMode(){running=false;cancelAnimationFrame(raf);stopwatchMode=!stopwatchMode;remaining=0;elapsed=0;values=Array(10).fill(0);modeButton.textContent=stopwatchMode?"TIMER":"STOPWATCH";setRunningUI();render();status.textContent=stopwatchMode?"Stopwatch mode":"Timer mode"}
+function getAudio(){if(!audioContext)audioContext=new(window.AudioContext||window.webkitAudioContext)();if(audioContext.state==="suspended")audioContext.resume();return audioContext}
+function playFallback(){if(muted||document.querySelector('input[name="alarm"]:checked').value==="none")return;try{const ctx=getAudio(),choice=document.querySelector('input[name="alarm"]:checked').value;const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=choice==="cow-moo"?"sawtooth":choice==="dalek"?"square":"sine";osc.frequency.value=choice==="cow-moo"?95:choice==="klaxon"?700:choice==="air-raid-siren"?440:choice==="knelling-bell"?620:choice==="cat-howl"?520:choice==="despair"?160:choice==="woo-hoo"?850:choice==="ha-ha"?330:choice==="belch"?110:choice==="horrible-raspberry"?85:440;gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.12,ctx.currentTime+.04);gain.gain.setTargetAtTime(.0001,ctx.currentTime+.35,.12);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.9)}catch(e){}}
+function ringAlarm(){clearAlarm();if(muted||document.querySelector('input[name="alarm"]:checked').value==="none")return;const choice=document.querySelector('input[name="alarm"]:checked').value;const audio=new Audio("/assets/sounds/"+choice+".mp3");audio.loop=true;alarmAudio=audio;audio.play().catch(()=>playFallback());alarmInterval=setTimeout(()=>{if(alarmAudio){alarmAudio.pause();alarmAudio.currentTime=0}},15000)}
+function clearAlarm(){clearTimeout(alarmInterval);if(alarmAudio){alarmAudio.pause();alarmAudio.currentTime=0;alarmAudio=null}}
+startButton.addEventListener("click",startPause);resetButton.addEventListener("click",reset);modeButton.addEventListener("click",toggleMode);
+soundToggle.addEventListener("click",()=>{muted=!muted;soundToggle.classList.toggle("sound-on",!muted);soundToggle.textContent=muted?"◖×)":"◖))";soundToggle.setAttribute("aria-label",muted?"Enable sound":"Mute sound");if(muted)clearAlarm()});
+document.getElementById("home").addEventListener("click",()=>{reset();stopwatchMode=false;modeButton.textContent="STOPWATCH";status.textContent="Timer reset"});
+document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{status.textContent="Alarm: "+r.parentElement.querySelector("span").textContent;if(r.checked&&r.value!=="none"&&!muted)playFallback()}));
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&running){lastTick=performance.now()}});
+render();setRunningUI();
+})();
+</script>
+</body>
+</html>
