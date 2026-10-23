@@ -130,7 +130,7 @@ button{font:inherit;cursor:pointer}
 (function(){
 "use strict";
 const display=document.getElementById("display"),startButton=document.getElementById("start"),playIcon=document.getElementById("playIcon"),resetButton=document.getElementById("reset"),modeButton=document.getElementById("mode"),status=document.getElementById("status"),soundToggle=document.getElementById("soundToggle");
-/* Plain rectangles: x, y, width, height. All edges are straight horizontal/vertical. */
+/* Rectangles: x, y, width, height. Straight horizontal/vertical sides, rounded corners. */
 const segmentRects={
  a:[22,8,56,16],
  b:[82,28,16,40],
@@ -140,12 +140,13 @@ const segmentRects={
  f:[2,28,16,40],
  g:[22,72,56,16]
 };
+const CORNER=6; /* corner radius: raise for rounder, lower for squarer (max 8) */
 const digitSegments={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
 const digits=[];
 for(let i=0;i<8;i++){
  if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator"+(i===6?" decimal":"");sep.innerHTML=i===6?"<i></i>":"<i></i><i></i>";display.append(sep)}
  const digit=document.createElement("div");digit.className="digit";
- digit.innerHTML='<svg viewBox="0 0 100 160" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+Object.entries(segmentRects).map(([k,r])=>'<rect class="segment" data-segment="'+k+'" x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'"></rect>').join("")+"</svg>";
+ digit.innerHTML='<svg viewBox="0 0 100 160" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+Object.entries(segmentRects).map(([k,r])=>'<rect class="segment" data-segment="'+k+'" x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'" rx="'+CORNER+'" ry="'+CORNER+'"></rect>').join("")+"</svg>";
  const up=document.createElement("button");up.className="triangle up";up.type="button";up.setAttribute("aria-label","Increase digit "+(i+1));
  const down=document.createElement("button");down.className="triangle down";down.type="button";down.setAttribute("aria-label","Decrease digit "+(i+1));
  up.addEventListener("click",()=>adjustDigit(i,1));down.addEventListener("click",()=>adjustDigit(i,-1));
