@@ -21,7 +21,7 @@ button{font:inherit;cursor:pointer}
 .sound-option input:checked+.sound-dot{background:radial-gradient(circle at 35% 30%,#c0ffff 0 18%,#40c8d6 40%,#057c8a 75%);box-shadow:0 0 9px #58d9e5}
 .sound-option input:checked+.sound-dot:after{background:#82e9ee}
 .timer-wrap{width:min(970px,100%);margin:0 auto;position:relative;padding:60px 0 64px}
-.digit-arrows{position:absolute;inset:0;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));column-gap:clamp(3px,.55vw,9px);pointer-events:none}
+.digit-arrows{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));column-gap:clamp(3px,.55vw,9px);pointer-events:none}
 .arrow-cell{position:relative;pointer-events:auto}
 .triangle{position:absolute;left:50%;transform:translateX(-50%);width:0;height:0;border-left:clamp(13px,1.9vw,27px) solid transparent;border-right:clamp(13px,1.9vw,27px) solid transparent;padding:0;background:none;filter:drop-shadow(1px 2px 1px #000)}
 .triangle.up{top:0;border-bottom:clamp(29px,4vw,56px) solid #d9d9d9}
@@ -95,7 +95,7 @@ const segmentPaths={
 };
 const digitSegments={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
 const digits=[];
-for(let i=0;i<10;i++){
+for(let i=0;i<8;i++){
  const cell=document.createElement("div");cell.className="arrow-cell";
  const up=document.createElement("button");up.className="triangle up";up.type="button";up.setAttribute("aria-label","Increase digit "+(i+1));
  const down=document.createElement("button");down.className="triangle down";down.type="button";down.setAttribute("aria-label","Decrease digit "+(i+1));
@@ -103,7 +103,7 @@ for(let i=0;i<10;i++){
  if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator";sep.innerHTML="<i></i><i></i>";display.append(sep)}
  const digit=document.createElement("div");digit.className="digit";digit.innerHTML='<svg viewBox="0 0 52 77" preserveAspectRatio="none" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";display.append(digit);digits.push(digit);
 }
-let values=[0,0,0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,remaining=0,elapsed=0,lastTick=0,raf=0,muted=false,audioContext=null,alarmAudio=null,alarmInterval=0;
+let values=[0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,remaining=0,elapsed=0,lastTick=0,raf=0,muted=false,audioContext=null,alarmAudio=null,alarmInterval=0;
 function render(){
  digits.forEach((el,i)=>{const value=String(values[i]);el.querySelectorAll(".segment").forEach(s=>s.classList.toggle("on",digitSegments[value].includes(s.dataset.segment)))});
  const label=values.slice(0,2).join("")+":"+values.slice(2,4).join("")+":"+values.slice(4,6).join("")+"."+values.slice(6,8).join("");
@@ -116,7 +116,7 @@ function formatted(){return values.slice(0,2).join("")+":"+values.slice(2,4).joi
 function tick(now){if(!running)return;const diff=now-lastTick;lastTick=now;if(stopwatchMode){elapsed+=diff;setFromMilliseconds(elapsed)}else{remaining-=diff;setFromMilliseconds(Math.max(0,remaining));if(remaining<=0){running=false;cancelAnimationFrame(raf);setRunningUI();ringAlarm();status.textContent="Time is up";return}}raf=requestAnimationFrame(tick)}
 function setRunningUI(){playIcon.className=running?"pause-icon":"play-icon";startButton.setAttribute("aria-label",running?"Pause":"Start");startButton.title=running?"Pause":"Start";arrows.style.opacity=running?".35":"1";status.textContent=running?(stopwatchMode?"Stopwatch running":"Timer running"):"Paused"}
 function startPause(){if(running){running=false;cancelAnimationFrame(raf);setRunningUI();return}if(!stopwatchMode&&totalFromDigits()<=0){status.textContent="Set a time first";return}if(stopwatchMode&&elapsed===0)elapsed=totalFromDigits();if(!stopwatchMode&&remaining<=0)remaining=totalFromDigits();running=true;lastTick=performance.now();setRunningUI();raf=requestAnimationFrame(tick)}
-function reset(){running=false;cancelAnimationFrame(raf);clearAlarm();remaining=0;elapsed=0;values=Array(10).fill(0);setRunningUI();render();status.textContent="Timer reset"}
+function reset(){running=false;cancelAnimationFrame(raf);clearAlarm();remaining=0;elapsed=0;values=Array(8).fill(0);setRunningUI();render();status.textContent="Timer reset"}
 function toggleMode(){running=false;cancelAnimationFrame(raf);stopwatchMode=!stopwatchMode;remaining=0;elapsed=0;values=Array(10).fill(0);modeButton.textContent=stopwatchMode?"TIMER":"STOPWATCH";setRunningUI();render();status.textContent=stopwatchMode?"Stopwatch mode":"Timer mode"}
 function getAudio(){if(!audioContext)audioContext=new(window.AudioContext||window.webkitAudioContext)();if(audioContext.state==="suspended")audioContext.resume();return audioContext}
 function playFallback(){if(muted||document.querySelector('input[name="alarm"]:checked').value==="none")return;try{const ctx=getAudio(),choice=document.querySelector('input[name="alarm"]:checked').value;const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=choice==="cow-moo"?"sawtooth":choice==="dalek"?"square":"sine";osc.frequency.value=choice==="cow-moo"?95:choice==="klaxon"?700:choice==="air-raid-siren"?440:choice==="knelling-bell"?620:choice==="cat-howl"?520:choice==="despair"?160:choice==="woo-hoo"?850:choice==="ha-ha"?330:choice==="belch"?110:choice==="horrible-raspberry"?85:440;gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.12,ctx.currentTime+.04);gain.gain.setTargetAtTime(.0001,ctx.currentTime+.35,.12);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.9)}catch(e){}}
