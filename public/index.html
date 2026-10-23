@@ -36,7 +36,7 @@ button{font:inherit;cursor:pointer}
 .segment{fill:#10272a;stroke:#050c0d;stroke-width:1.5;stroke-linejoin:round}
 .segment.on{fill:var(--cyan);filter:drop-shadow(0 0 1px #8ce4ee)}
 .separator{height:100%;display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;width:clamp(12px,2vw,27px);flex:0 0 clamp(12px,2vw,27px)}
-.separator i{display:block;width:clamp(13px,1.9vw,26px);height:clamp(13px,1.9vw,26px);border-radius:50%;background:var(--cyan);box-shadow:3px 5px 0 #606060}
+.separator i{display:block;width:clamp(13px,1.9vw,26px);height:clamp(13px,1.9vw,26px);border-radius:50%;background:var(--cyan);box-shadow:3px 5px 0 #606060}.separator.decimal{justify-content:center}.separator.decimal i{width:clamp(18px,2.3vw,32px);height:clamp(18px,2.3vw,32px)}
 .controls{display:flex;justify-content:center;gap:clamp(30px,3.5vw,56px);margin:32px auto 22px}
 .main-control{width:clamp(68px,5.3vw,88px);height:clamp(68px,5.3vw,88px);border:2px solid #ddd;border-radius:5px;background:linear-gradient(#fff,#eee);color:#050505;box-shadow:0 2px 2px #000a;display:grid;place-items:center}
 .main-control:active{transform:translateY(2px);box-shadow:none}
@@ -100,7 +100,7 @@ for(let i=0;i<8;i++){
  const up=document.createElement("button");up.className="triangle up";up.type="button";up.setAttribute("aria-label","Increase digit "+(i+1));
  const down=document.createElement("button");down.className="triangle down";down.type="button";down.setAttribute("aria-label","Decrease digit "+(i+1));
  up.addEventListener("click",()=>adjustDigit(i,1));down.addEventListener("click",()=>adjustDigit(i,-1));cell.append(up,down);arrows.append(cell);
- if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator";sep.innerHTML="<i></i><i></i>";display.append(sep)}
+ if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator"+(i===6?" decimal":"");sep.innerHTML=i===6?"<i></i>":"<i></i><i></i>";display.append(sep)}
  const digit=document.createElement("div");digit.className="digit";digit.innerHTML='<svg viewBox="0 0 52 77" preserveAspectRatio="none" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";display.append(digit);digits.push(digit);
 }
 let values=[0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,remaining=0,elapsed=0,lastTick=0,raf=0,muted=false,audioContext=null,alarmAudio=null,alarmInterval=0;
