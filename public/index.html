@@ -30,8 +30,8 @@ button{font:inherit;cursor:pointer}
 .triangle:active{filter:brightness(.75) drop-shadow(1px 1px 1px #000)}
 
 .display{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:clamp(2px,.5vw,8px);height:clamp(130px,11.8vw,192px);padding:9px clamp(9px,1.5vw,24px);background:#000;border:clamp(7px,.85vw,13px) solid var(--cyan);border-radius:clamp(23px,2.2vw,34px);box-shadow:inset 0 0 0 2px #071b1d;overflow:hidden}
-.digit{height:100%;min-width:0;flex:1;position:relative;max-width:94px}
-.digit svg{width:100%;height:100%;display:block;overflow:visible}
+.digit{height:100%;min-width:0;flex:1 1 0;position:relative;max-width:94px;overflow:hidden}
+.digit svg{width:100%;height:100%;display:block;overflow:hidden}
 .segment{fill:transparent;stroke:none;stroke-width:0;stroke-linejoin:round}
 .segment.on{fill:#67c8d8;stroke:none;filter:none}
 .separator{height:100%;display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.4vw,26px);align-items:center;width:clamp(12px,2vw,27px);flex:0 0 clamp(12px,2vw,27px)}
@@ -90,13 +90,13 @@ button{font:inherit;cursor:pointer}
 "use strict";
 const display=document.getElementById("display"),arrows=document.getElementById("arrows"),startButton=document.getElementById("start"),playIcon=document.getElementById("playIcon"),resetButton=document.getElementById("reset"),modeButton=document.getElementById("mode"),status=document.getElementById("status"),soundToggle=document.getElementById("soundToggle");
 const segmentPaths={
- a:"22,8 78,8 86,16 78,24 22,24 14,16",
- b:"78,18 86,26 78,68 70,76 64,68 70,26",
- c:"70,84 78,76 86,84 78,130 70,138 64,130",
- d:"22,132 78,132 86,140 78,148 22,148 14,140",
- e:"14,84 22,76 30,84 24,130 16,138 8,130",
- f:"14,26 22,18 30,26 24,68 16,76 8,68",
- g:"22,75 30,68 70,68 78,75 70,82 30,82"
+ a:"18,7 82,7 88,13 82,19 18,19 12,13",
+ b:"79,23 85,17 91,23 85,63 79,69 73,63",
+ c:"79,87 85,81 91,87 85,127 79,133 73,127",
+ d:"18,137 82,137 88,143 82,149 18,149 12,143",
+ e:"9,87 15,81 21,87 15,127 9,133 3,127",
+ f:"9,23 15,17 21,23 15,63 9,69 3,63",
+ g:"20,70 26,64 74,64 80,70 74,76 26,76"
 };
 const digitSegments={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
 const digits=[];
@@ -106,7 +106,7 @@ for(let i=0;i<8;i++){
  const down=document.createElement("button");down.className="triangle down";down.type="button";down.setAttribute("aria-label","Decrease digit "+(i+1));
  up.addEventListener("click",()=>adjustDigit(i,1));down.addEventListener("click",()=>adjustDigit(i,-1));cell.append(up,down);arrows.append(cell);
  if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator"+(i===6?" decimal":"");sep.innerHTML=i===6?"<i></i>":"<i></i><i></i>";display.append(sep)}
- const digit=document.createElement("div");digit.className="digit";digit.innerHTML='<svg viewBox="0 0 100 160" preserveAspectRatio="none" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";display.append(digit);digits.push(digit);
+ const digit=document.createElement("div");digit.className="digit";digit.innerHTML='<svg viewBox="0 0 100 160" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";display.append(digit);digits.push(digit);
 }
 let values=[0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,remaining=0,elapsed=0,lastTick=0,raf=0,muted=false,audioContext=null,alarmAudio=null,alarmInterval=0;
 function render(){
