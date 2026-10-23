@@ -30,9 +30,9 @@ button{font:inherit;cursor:pointer}
 .triangle:active{filter:brightness(.75) drop-shadow(1px 1px 1px #000)}
 
 .display{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:clamp(2px,.5vw,8px);height:clamp(130px,11.8vw,192px);padding:9px clamp(9px,1.5vw,24px);background:#000;border:clamp(7px,.85vw,13px) solid var(--cyan);border-radius:clamp(23px,2.2vw,34px);box-shadow:inset 0 0 0 2px #071b1d;overflow:hidden}
-.digit{height:100%;min-width:0;flex:1 1 0;position:relative;max-width:94px;overflow:hidden}
-.digit svg{width:100%;height:100%;display:block;overflow:hidden}
-.segment{fill:transparent;stroke:none;stroke-width:0;stroke-linejoin:round}
+.digit{height:100%;min-width:0;flex:1 1 0;position:relative;max-width:94px;overflow:hidden;transform:none}
+.digit svg{width:100%;height:100%;display:block;overflow:hidden;transform:none}
+.segment{fill:transparent;stroke:none;stroke-width:0;stroke-linejoin:miter}
 .segment.on{fill:#67c8d8;stroke:none;filter:none}
 .separator{height:100%;display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.4vw,26px);align-items:center;width:clamp(12px,2vw,27px);flex:0 0 clamp(12px,2vw,27px)}
 .separator i{display:block;width:clamp(13px,1.9vw,26px);height:clamp(13px,1.9vw,26px);border-radius:50%;background:var(--cyan);box-shadow:3px 5px 0 #606060}.separator.decimal{justify-content:flex-end;padding-bottom:clamp(10px,1.4vw,20px)}.separator.decimal i{width:clamp(18px,2.3vw,32px);height:clamp(18px,2.3vw,32px)}
@@ -90,13 +90,13 @@ button{font:inherit;cursor:pointer}
 "use strict";
 const display=document.getElementById("display"),arrows=document.getElementById("arrows"),startButton=document.getElementById("start"),playIcon=document.getElementById("playIcon"),resetButton=document.getElementById("reset"),modeButton=document.getElementById("mode"),status=document.getElementById("status"),soundToggle=document.getElementById("soundToggle");
 const segmentPaths={
- a:"18,7 82,7 88,13 82,19 18,19 12,13",
- b:"79,23 85,17 91,23 85,63 79,69 73,63",
- c:"79,87 85,81 91,87 85,127 79,133 73,127",
- d:"18,137 82,137 88,143 82,149 18,149 12,143",
- e:"9,87 15,81 21,87 15,127 9,133 3,127",
- f:"9,23 15,17 21,23 15,63 9,69 3,63",
- g:"20,70 26,64 74,64 80,70 74,76 26,76"
+ a:"18,5 82,5 91,14 82,23 18,23 9,14",
+ b:"78,19 87,11 94,18 86,67 78,75 70,67",
+ c:"78,86 86,78 94,86 87,135 79,143 71,135",
+ d:"18,137 82,137 91,146 82,155 18,155 9,146",
+ e:"13,86 21,78 29,86 21,135 13,143 5,135",
+ f:"13,18 21,11 29,19 21,67 13,75 5,67",
+ g:"20,75 28,67 72,67 80,75 72,83 28,83"
 };
 const digitSegments={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
 const digits=[];
