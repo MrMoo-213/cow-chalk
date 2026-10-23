@@ -20,27 +20,19 @@ button{font:inherit;cursor:pointer}
 .sound-dot:after{content:"";position:absolute;inset:9px;border-radius:50%;background:#002f38;box-shadow:inset 1px 1px 3px #0008}
 .sound-option input:checked+.sound-dot{background:radial-gradient(circle at 35% 30%,#c0ffff 0 18%,#40c8d6 40%,#057c8a 75%);box-shadow:0 0 9px #58d9e5}
 .sound-option input:checked+.sound-dot:after{background:#82e9ee}
+.timer-wrap{width:min(970px,100%);margin:0 auto;position:relative;padding:60px 0 64px}
 
-/* Shared layout variables: the display and the arrow overlay both use these,
-   so digits and arrows always line up. */
-.timer-wrap{
-  --bw:clamp(7px,.85vw,13px);            /* display border width */
-  --pad:clamp(9px,1.5vw,24px);           /* display horizontal padding */
-  --vpad:9px;                            /* display vertical padding */
-  --gap:clamp(1px,.15vw,3px);            /* column gap */
-  --cols:minmax(0,1fr) minmax(0,1fr) clamp(18px,2.2vw,32px) minmax(0,1fr) minmax(0,1fr) clamp(18px,2.2vw,32px) minmax(0,1fr) minmax(0,1fr) clamp(20px,2.5vw,36px) minmax(0,1fr) minmax(0,1fr);
-  width:min(970px,100%);margin:0 auto;position:relative;padding:60px 0 64px}
-.digit-arrows{position:absolute;inset:0;display:grid;grid-template-columns:var(--cols);column-gap:var(--gap);pointer-events:none;
-  /* include the border so the arrow columns match the display's content box */
-  padding:0 calc(var(--pad) + var(--bw))}
-.arrow-cell{position:relative;pointer-events:auto}
-.triangle{position:absolute;left:50%;transform:translateX(-50%);width:clamp(28px,3.7vw,54px);height:clamp(31px,4.2vw,59px);padding:0;border:0;background:linear-gradient(135deg,#f9f9f9 0%,#a8a8a8 46%,#424242 100%);filter:drop-shadow(2px 3px 1px #000);clip-path:polygon(50% 0,0 100%,100% 100%);transition:filter .08s}
+/* Arrow overlay: each .arrow-cell is a zero-width column whose "left" is set by JS
+   to the exact horizontal centre of its digit. Triangles centre on that line. */
+.digit-arrows{position:absolute;inset:0;pointer-events:none}
+.arrow-cell{position:absolute;top:0;bottom:0;width:0;left:0;pointer-events:auto}
+.triangle{position:absolute;left:0;transform:translateX(-50%);width:clamp(28px,3.7vw,54px);height:clamp(31px,4.2vw,59px);padding:0;border:0;background:linear-gradient(135deg,#f9f9f9 0%,#a8a8a8 46%,#424242 100%);filter:drop-shadow(2px 3px 1px #000);clip-path:polygon(50% 0,0 100%,100% 100%);transition:filter .08s}
 .triangle:before{content:"";position:absolute;inset:5px 5px 7px;background:radial-gradient(ellipse at 45% 28%,#fff 0%,#e6e6e6 35%,#999 76%,#555 100%);clip-path:polygon(50% 0,0 100%,100% 100%)}
 .triangle.up{top:0}
 .triangle.down{bottom:0;transform:translateX(-50%) rotate(180deg)}
 .triangle:active{filter:brightness(.75) drop-shadow(1px 1px 1px #000)}
 
-.display{position:relative;z-index:1;display:grid;grid-template-columns:var(--cols);align-items:center;justify-items:stretch;column-gap:var(--gap);height:clamp(130px,11.8vw,192px);padding:var(--vpad) var(--pad);background:#000;border:var(--bw) solid var(--cyan);border-radius:clamp(23px,2.2vw,34px);box-shadow:inset 0 0 0 2px #071b1d;overflow:hidden}
+.display{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) clamp(18px,2.2vw,32px) minmax(0,1fr) minmax(0,1fr) clamp(18px,2.2vw,32px) minmax(0,1fr) minmax(0,1fr) clamp(20px,2.5vw,36px) minmax(0,1fr) minmax(0,1fr);align-items:center;justify-items:stretch;column-gap:clamp(1px,.15vw,3px);height:clamp(130px,11.8vw,192px);padding:9px clamp(9px,1.5vw,24px);background:#000;border:clamp(7px,.85vw,13px) solid var(--cyan);border-radius:clamp(23px,2.2vw,34px);box-shadow:inset 0 0 0 2px #071b1d;overflow:hidden}
 .digit{height:100%;width:100%;min-width:0;position:relative;overflow:hidden;transform:none}
 .digit svg{width:100%;height:100%;display:block;overflow:hidden;transform:none}
 .segment{fill:transparent;stroke:none}
@@ -60,34 +52,8 @@ button{font:inherit;cursor:pointer}
 .brand{margin-left:auto;font-size:clamp(27px,3.3vw,49px);font-weight:300;color:#c5c5c5;letter-spacing:-2px;white-space:nowrap}
 .brand b{font-weight:300}.brand .dot{color:var(--cyan);font-weight:700}
 .status{position:absolute;left:50%;transform:translateX(-50%);bottom:4px;font-size:11px;color:#aaa;white-space:nowrap}
-@media(max-width:700px){
-  .app{padding:20px 12px 0}
-  .sound-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:10px auto 28px}
-  .sound-option{justify-content:space-between;gap:8px}
-  .sound-dot{flex-basis:30px;width:30px;height:30px}
-  .sound-dot:after{inset:8px}
-  .timer-wrap{--pad:6px;--vpad:6px;--gap:1px;--cols:minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr);padding:46px 0 50px}
-  .display{height:clamp(92px,22vw,140px);border-radius:18px}
-  .triangle{width:27px;height:30px}
-  .triangle:before{inset:4px 4px 6px}
-  .controls{margin:24px auto 18px}
-  .bottom-bar{padding:5px 8px;min-height:58px}
-  .small-control{height:34px;min-width:34px;font-size:22px}
-  .stopwatch{width:140px;height:37px;font-size:14px;top:7px}
-  .brand{font-size:22px;letter-spacing:-1px}
-  .status{display:none}
-}
-@media(max-width:390px){
-  .sound-option{font-size:12px}
-  .sound-grid{column-gap:12px}
-  .timer-wrap{--pad:4px;--vpad:4px;--cols:minmax(0,1fr) minmax(0,1fr) 8px minmax(0,1fr) minmax(0,1fr) 8px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr)}
-  .separator{width:100%;flex-basis:auto}
-  .separator i{width:8px;height:8px;box-shadow:1px 2px 0 #666}
-  .separator.decimal{padding-bottom:7px}
-  .bottom-bar{gap:5px}
-  .brand{font-size:19px}
-  .stopwatch{width:116px}
-}
+@media(max-width:700px){.app{padding:20px 12px 0}.sound-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:10px auto 28px}.sound-option{justify-content:space-between;gap:8px}.sound-dot{flex-basis:30px;width:30px;height:30px}.sound-dot:after{inset:8px}.timer-wrap{padding:46px 0 50px}.display{height:clamp(92px,22vw,140px);border-radius:18px;padding:6px;column-gap:1px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr)}.triangle{width:27px;height:30px}.triangle:before{inset:4px 4px 6px}.controls{margin:24px auto 18px}.bottom-bar{padding:5px 8px;min-height:58px}.small-control{height:34px;min-width:34px;font-size:22px}.stopwatch{width:140px;height:37px;font-size:14px;top:7px}.brand{font-size:22px;letter-spacing:-1px}.status{display:none}}
+@media(max-width:390px){.sound-option{font-size:12px}.sound-grid{column-gap:12px}.separator{width:100%;flex-basis:auto}.separator i{width:8px;height:8px;box-shadow:1px 2px 0 #666}.separator.decimal{padding-bottom:7px}.display{gap:1px;padding:4px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 8px minmax(0,1fr) minmax(0,1fr) 8px minmax(0,1fr) minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr)}.bottom-bar{gap:5px}.brand{font-size:19px}.stopwatch{width:116px}}
 </style>
 </head>
 <body>
@@ -136,16 +102,23 @@ const segmentPaths={
  g:"18,72 26,64 74,64 82,72 74,80 26,80"
 };
 const digitSegments={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
-const digits=[];
-const arrowColumns=[1,2,4,5,7,8,10,11];
+const digits=[],arrowCells=[];
 for(let i=0;i<8;i++){
- const cell=document.createElement("div");cell.className="arrow-cell";cell.style.gridColumn=String(arrowColumns[i]);
+ const cell=document.createElement("div");cell.className="arrow-cell";
  const up=document.createElement("button");up.className="triangle up";up.type="button";up.setAttribute("aria-label","Increase digit "+(i+1));
  const down=document.createElement("button");down.className="triangle down";down.type="button";down.setAttribute("aria-label","Decrease digit "+(i+1));
- up.addEventListener("click",()=>adjustDigit(i,1));down.addEventListener("click",()=>adjustDigit(i,-1));cell.append(up,down);arrows.append(cell);
+ up.addEventListener("click",()=>adjustDigit(i,1));down.addEventListener("click",()=>adjustDigit(i,-1));cell.append(up,down);arrows.append(cell);arrowCells.push(cell);
  if([2,4,6].includes(i)){const sep=document.createElement("div");sep.className="separator"+(i===6?" decimal":"");sep.innerHTML=i===6?"<i></i>":"<i></i><i></i>";display.append(sep)}
- const digit=document.createElement("div");digit.className="digit";digit.innerHTML='<svg viewBox="0 0 100 160" preserveAspectRatio="none" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";display.append(digit);digits.push(digit);
+ const digit=document.createElement("div");digit.className="digit";digit.innerHTML='<svg viewBox="0 0 92 160" preserveAspectRatio="none" aria-hidden="true">'+Object.entries(segmentPaths).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+"</svg>";display.append(digit);digits.push(digit);
 }
+/* Put each arrow pair exactly over the centre of its real on-screen digit. */
+function alignArrows(){
+ const wrap=arrows.getBoundingClientRect();
+ digits.forEach((d,i)=>{const r=d.getBoundingClientRect();arrowCells[i].style.left=(r.left+r.width/2-wrap.left)+"px"});
+}
+window.addEventListener("resize",alignArrows);
+window.addEventListener("load",alignArrows);
+if(window.ResizeObserver){new ResizeObserver(alignArrows).observe(display)}
 let values=[0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,remaining=0,elapsed=0,lastTick=0,raf=0,muted=false,audioContext=null,alarmAudio=null,alarmInterval=0;
 function render(){
  digits.forEach((el,i)=>{const value=String(values[i]);el.querySelectorAll(".segment").forEach(s=>s.classList.toggle("on",digitSegments[value].includes(s.dataset.segment)))});
@@ -170,7 +143,7 @@ soundToggle.addEventListener("click",()=>{muted=!muted;soundToggle.classList.tog
 document.getElementById("home").addEventListener("click",()=>{reset();stopwatchMode=false;modeButton.textContent="STOPWATCH";status.textContent="Timer reset"});
 document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{status.textContent="Alarm: "+r.parentElement.querySelector("span").textContent;if(r.checked&&r.value!=="none"&&!muted)playFallback()}));
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&running){lastTick=performance.now()}});
-render();setRunningUI();
+render();setRunningUI();alignArrows();
 })();
 </script>
 </body>
