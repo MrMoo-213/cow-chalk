@@ -232,7 +232,7 @@ document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("
   clearAlarm();
   if(r.value==="none")return;
   const preview=new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/clarabelle.MP3");
-  preview.play().then(()=>setTimeout(()=>preview.pause(),1500)).catch(fallbackMoo);
+  preview.play().catch(fallbackMoo);
 }));
 
 startButton.addEventListener("click",startPause);
