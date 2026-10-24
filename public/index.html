@@ -17,8 +17,9 @@ button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:calc(30*var(--u))}
 
 /* ---------- sound options ---------- */
-.sounds{margin-top:calc(35*var(--u));height:auto;width:min(calc(1125*var(--u)),94vw);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:calc(20*var(--u)) calc(42*var(--u))}
-.opt{gap:calc(12*var(--u));font-size:calc(20*var(--u))}
+.sounds{margin-top:calc(50*var(--u));height:auto;width:min(calc(1125*var(--u)),94vw);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:calc(18*var(--u)) calc(42*var(--u))}
+.opt{position:relative;display:flex;align-items:center;gap:calc(22*var(--u));font-size:calc(23*var(--u));font-weight:700;white-space:nowrap;cursor:pointer}
+.opt input{position:absolute;opacity:0;pointer-events:none}
 .dot{position:relative;flex:none;width:calc(40*var(--u));height:calc(40*var(--u));border-radius:50%;border:calc(1.5*var(--u)) solid #0a8a97;
   background:radial-gradient(circle at 35% 30%,#46d3de 0 12%,#1aa3b0 36%,#087a87 70%,#056571 100%);
   box-shadow:inset calc(2*var(--u)) calc(2*var(--u)) calc(5*var(--u)) #7fe3ea88,0 0 calc(2*var(--u)) #71dce7}
