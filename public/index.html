@@ -230,9 +230,6 @@ function clearAlarm(){
 }
 document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{
   clearAlarm();
-  if(r.value==="none")return;
-  const preview=new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/clarabelle.MP3");
-  preview.play().catch(fallbackMoo);
 }));
 
 startButton.addEventListener("click",startPause);
