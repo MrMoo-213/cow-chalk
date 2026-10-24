@@ -226,6 +226,11 @@ function toggleMode(){
   stopwatchMode=!stopwatchMode;
   page.classList.toggle("stopwatch-on",stopwatchMode);
   modeButton.textContent=stopwatchMode?"TIMER":"STOPWATCH";
+  if(stopwatchMode&&showMoreButton.getAttribute("aria-expanded")==="true"){
+    document.querySelectorAll(".sounds .opt").forEach((option,index)=>{if(index>=11)option.classList.add("hidden-sound")});
+    showMoreButton.setAttribute("aria-expanded","false");
+    showMoreButton.textContent="Show More";
+  }
   reset();
 }
 
