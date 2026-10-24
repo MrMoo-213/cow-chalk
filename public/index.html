@@ -17,8 +17,12 @@ button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:calc(30*var(--u))}
 
 /* ---------- sound options ---------- */
-.sounds{margin-top:calc(50*var(--u));height:auto;width:min(calc(1125*var(--u)),94vw);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:calc(18*var(--u)) calc(42*var(--u))}
-.opt{position:relative;display:flex;align-items:center;gap:calc(22*var(--u));font-size:calc(23*var(--u));font-weight:700;white-space:nowrap;cursor:pointer}
+.sounds{margin-top:calc(50*var(--u));width:min(calc(1125*var(--u)),94vw);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;justify-items:start;gap:calc(18*var(--u)) calc(18*var(--u))}
+.opt{position:relative;display:flex;align-items:center;gap:calc(12*var(--u));font-size:calc(20*var(--u));font-weight:700;white-space:nowrap;cursor:pointer;min-width:0}
+.opt.hidden-sound{display:none}
+.show-more{display:flex;align-items:center;justify-content:center;gap:calc(12*var(--u));min-height:calc(40*var(--u));padding:0;border:0;background:none;color:#fff;font:700 calc(20*var(--u)) Arial,Helvetica,sans-serif;cursor:pointer;white-space:nowrap}
+.show-more:focus-visible{outline:calc(3*var(--u)) solid #fff;outline-offset:calc(3*var(--u))}
+@media(max-width:700px){.sounds{grid-template-columns:repeat(2,minmax(0,1fr))}.opt{font-size:calc(19*var(--u))}}
 .opt input{position:absolute;opacity:0;pointer-events:none}
 .dot{position:relative;flex:none;width:calc(40*var(--u));height:calc(40*var(--u));border-radius:50%;border:calc(1.5*var(--u)) solid #0a8a97;
   background:radial-gradient(circle at 35% 30%,#46d3de 0 12%,#1aa3b0 36%,#087a87 70%,#056571 100%);
@@ -93,18 +97,20 @@ button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
     <label class="opt"><span>Fahhh</span><input type="radio" name="alarm" value="fahhh.mp3"><span class="dot"></span></label>
     <label class="opt"><span>Flash Bang</span><input type="radio" name="alarm" value="flash-bang.mp3"><span class="dot"></span></label>
     <label class="opt"><span>Get Out</span><input type="radio" name="alarm" value="get-out.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Halloween Call</span><input type="radio" name="alarm" value="halloween-call.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Huh Cat</span><input type="radio" name="alarm" value="huh-cat.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Metal Pipe</span><input type="radio" name="alarm" value="metal-pipe.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Noot Noot</span><input type="radio" name="alarm" value="noot-noot.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Nope</span><input type="radio" name="alarm" value="nope.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Normal Call</span><input type="radio" name="alarm" value="normal-call.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>School Bell</span><input type="radio" name="alarm" value="school-bell.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Teleport</span><input type="radio" name="alarm" value="teleport.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Train Whistle</span><input type="radio" name="alarm" value="train-wistle.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>Vine Boom</span><input type="radio" name="alarm" value="vine-boom.mp3"><span class="dot"></span></label>
     <label class="opt"><span>Violin Screech</span><input type="radio" name="alarm" value="violin-screech.mp3"><span class="dot"></span></label>
-    <label class="opt"><span>You Win</span><input type="radio" name="alarm" value="you-win.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Halloween Call</span><input type="radio" name="alarm" value="halloween-call.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Huh Cat</span><input type="radio" name="alarm" value="huh-cat.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Metal Pipe</span><input type="radio" name="alarm" value="metal-pipe.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Noot Noot</span><input type="radio" name="alarm" value="noot-noot.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Nope</span><input type="radio" name="alarm" value="nope.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Normal Call</span><input type="radio" name="alarm" value="normal-call.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>School Bell</span><input type="radio" name="alarm" value="school-bell.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Teleport</span><input type="radio" name="alarm" value="teleport.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Train Whistle</span><input type="radio" name="alarm" value="train-wistle.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Vine Boom</span><input type="radio" name="alarm" value="vine-boom.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>Violin Screech</span><input type="radio" name="alarm" value="violin-screech.mp3"><span class="dot"></span></label>
+    <label class="opt hidden-sound"><span>You Win</span><input type="radio" name="alarm" value="you-win.mp3"><span class="dot"></span></label>
+    <button class="show-more" id="showMore" type="button" aria-expanded="false">Show More</button>
   </section>
 
   <section class="timer-wrap" aria-label="Timer display">
@@ -254,6 +260,13 @@ function clearAlarm(){
 document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{
   clearAlarm();
 }));
+const showMoreButton=$("showMore");
+showMoreButton.addEventListener("click",()=>{
+  const expanded=showMoreButton.getAttribute("aria-expanded")==="true";
+  document.querySelectorAll(".hidden-sound").forEach(option=>option.classList.toggle("hidden-sound",expanded));
+  showMoreButton.setAttribute("aria-expanded",String(!expanded));
+  showMoreButton.textContent=expanded?"Show More":"Show Less";
+});
 
 
 startButton.addEventListener("click",startPause);
