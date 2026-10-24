@@ -220,7 +220,7 @@ function fallbackMoo(){
 function ringAlarm(){
   clearAlarm();
   const choice=chosen();if(choice==="none")return;
-  const audio=new Audio("/assets/sounds/"+choice+".MP3");audio.loop=true;alarmAudio=audio;
+  const audio=new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/clarabelle.MP3");audio.loop=true;alarmAudio=audio;
   audio.play().catch(fallbackMoo);
   alarmTimeout=setTimeout(clearAlarm,15000);
 }
@@ -231,13 +231,13 @@ function clearAlarm(){
 document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{
   clearAlarm();
   if(r.value==="none")return;
-  const preview=new Audio("/assets/sounds/"+r.value+".MP3");
+  const preview=new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/clarabelle.MP3");
   preview.play().then(()=>setTimeout(()=>preview.pause(),1500)).catch(fallbackMoo);
 }));
 
 startButton.addEventListener("click",startPause);
 resetButton.addEventListener("click",reset);
-modeButton.addEventListener("click",()=>{new Audio("/assets/sounds/click.MP3").play().catch(()=>{});toggleMode()});
+modeButton.addEventListener("click",()=>{new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/click.MP3").play().catch(()=>{});toggleMode()});
 render();
 })();
 </script>
