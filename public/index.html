@@ -262,7 +262,7 @@ document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("
 const showMoreButton=$("showMore");
 showMoreButton.addEventListener("click",()=>{
   const expanded=showMoreButton.getAttribute("aria-expanded")==="true";
-  document.querySelectorAll(".hidden-sound").forEach(option=>option.classList.toggle("hidden-sound",expanded));
+  document.querySelectorAll(".sounds .opt").forEach((option,index)=>{if(index>=11)option.classList.toggle("hidden-sound",expanded)});
   showMoreButton.setAttribute("aria-expanded",String(!expanded));
   showMoreButton.textContent=expanded?"Show More":"Show Less";
 });
