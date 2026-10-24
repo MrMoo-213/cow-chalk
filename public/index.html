@@ -220,7 +220,7 @@ function fallbackMoo(){
 function ringAlarm(){
   clearAlarm();
   const choice=chosen();if(choice==="none")return;
-  const audio=new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/clarabelle.MP3");audio.loop=true;alarmAudio=audio;
+  const audio=new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/clarabelle.MP3");audio.loop=false;alarmAudio=audio;
   audio.play().catch(fallbackMoo);
   alarmTimeout=setTimeout(clearAlarm,15000);
 }
