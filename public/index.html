@@ -82,7 +82,7 @@ button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 <div class="page" id="page">
   <section class="sounds" aria-label="Alarm sound">
     <label class="opt"><span>None</span><input type="radio" name="alarm" value="none"><span class="dot"></span></label>
-    <label class="opt"><span>Cow Moo</span><input type="radio" name="alarm" value="cow-moo" checked><span class="dot"></span></label>
+    <label class="opt"><span>Cow Moo</span><input type="radio" name="alarm" value="clarabelle" checked><span class="dot"></span></label>
   </section>
 
   <section class="timer-wrap" aria-label="Timer display">
@@ -220,7 +220,7 @@ function fallbackMoo(){
 function ringAlarm(){
   clearAlarm();
   const choice=chosen();if(choice==="none")return;
-  const audio=new Audio("/assets/sounds/"+choice+".mp3");audio.loop=true;alarmAudio=audio;
+  const audio=new Audio("/assets/sounds/"+choice+".MP3");audio.loop=true;alarmAudio=audio;
   audio.play().catch(fallbackMoo);
   alarmTimeout=setTimeout(clearAlarm,15000);
 }
@@ -231,13 +231,13 @@ function clearAlarm(){
 document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{
   clearAlarm();
   if(r.value==="none")return;
-  const preview=new Audio("/assets/sounds/"+r.value+".mp3");
+  const preview=new Audio("/assets/sounds/"+r.value+".MP3");
   preview.play().then(()=>setTimeout(()=>preview.pause(),1500)).catch(fallbackMoo);
 }));
 
 startButton.addEventListener("click",startPause);
 resetButton.addEventListener("click",reset);
-modeButton.addEventListener("click",toggleMode);
+modeButton.addEventListener("click",()=>{new Audio("/assets/sounds/click.MP3").play().catch(()=>{});toggleMode()});
 render();
 })();
 </script>
