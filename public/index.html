@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#00343d">
-<title>Cow Chalk Timer</title>
+<title id="pageTitle">Cow Chalk Timer</title>
 <link rel="icon" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/pictures/favicon1.png">
 <style>
 /* --u = one "design pixel". The page is drawn on a 1200 x 800 grid and
@@ -87,52 +87,71 @@ body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:cent
 
 
 /* ---------- Pirate Game ---------- */
-#pirateGame{display:none;position:fixed;inset:0;z-index:15;overflow:auto;background:radial-gradient(ellipse at top,#07505a 0,#00343d 62%);padding:clamp(16px,3vw,34px);color:#fff}
+#pirateGame{display:none;position:fixed;inset:0;z-index:15;background:#fff;color:#111;overflow:hidden;padding:clamp(8px,2vh,20px) clamp(10px,2vw,28px);font-family:Arial,Helvetica,sans-serif}
 body.pirate-on #page,body.pirate-on #moreMenu{display:none}
-body.pirate-on #pirateGame{display:block}
-.pirate-layout{width:min(1180px,100%);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,300px);gap:clamp(22px,4vw,54px);align-items:start}
-.pirate-heading{font-family:"Comic Sans MS","Segoe Print",cursive;font-size:clamp(34px,5vw,54px);font-weight:700;letter-spacing:-2px;margin:0 0 20px;text-shadow:0 3px 0 #001f25}
-.pirate-board-wrap{width:100%;max-width:720px;margin:auto}
-.pirate-board{display:grid;grid-template-columns:30px repeat(7,minmax(0,1fr));grid-template-rows:30px repeat(7,minmax(0,1fr));width:100%;aspect-ratio:1/1}
-.pirate-axis{display:grid;place-items:center;font-size:clamp(13px,2vw,19px);font-weight:800;color:#eafcff}
-.pirate-square{position:relative;min-width:0;min-height:0;border:1px solid #18343a;background:linear-gradient(145deg,#fff 0%,#eef7f8 100%);padding:0;overflow:hidden;transition:background .18s,transform .18s,box-shadow .18s}
-.pirate-square:hover:not(.marked){z-index:1;background:#ffe6f0;transform:scale(.96);box-shadow:0 0 0 3px #ff70a9}
-.pirate-square:focus-visible{outline:3px solid #ff72aa;outline-offset:-4px;z-index:2}
-.pirate-square.marked{background:#fff0f3;cursor:default}
-.pirate-cross{position:absolute;inset:13%;width:74%;height:74%;overflow:visible}
-.pirate-cross path{fill:none;stroke:#ed244f;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:110;stroke-dashoffset:110;filter:drop-shadow(0 2px 1px #7e0c27)}
-.pirate-square.marked .pirate-cross path{animation:drawPirateCross .42s cubic-bezier(.2,.8,.2,1) forwards}
+body.pirate-on #pirateGame{display:flex}
+.pirate-layout{width:min(1180px,100%);height:100%;min-height:0;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,260px);gap:clamp(14px,3vw,38px);align-items:center}
+.pirate-board-wrap{width:100%;min-width:0;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.pirate-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 clamp(5px,1.5vh,14px)}
+.pirate-heading{font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(25px,4.3vh,43px);font-weight:500;letter-spacing:-2px;margin:0;color:#111;white-space:nowrap}
+.pirate-tools{display:flex;gap:7px;align-items:center}
+.pirate-icon{width:clamp(30px,4vh,39px);height:clamp(30px,4vh,39px);display:grid;place-items:center;border:1.5px solid #222;border-radius:50%;background:#fff;color:#111;font-size:clamp(17px,2.5vh,24px);line-height:1;padding:0;transition:background .15s,transform .15s}
+.pirate-icon:hover{background:#ffe7ef;transform:translateY(-1px)}
+.pirate-icon:disabled{opacity:.3;cursor:default;transform:none}
+.pirate-board{display:grid;grid-template-columns:clamp(18px,3.4vh,30px) repeat(7,minmax(0,1fr));grid-template-rows:clamp(18px,3.4vh,30px) repeat(7,minmax(0,1fr));width:min(100%,calc(100dvh - 105px));aspect-ratio:1/1;max-height:calc(100dvh - 105px);margin:0 auto}
+.pirate-axis{display:grid;place-items:center;font-size:clamp(12px,2.3vh,18px);font-weight:400;color:#111}
+.pirate-square{position:relative;min-width:0;min-height:0;border:1px solid #222;border-radius:0;background:#fff;padding:0;overflow:hidden}
+.pirate-square:hover:not(.marked){background:#fff6f8}
+.pirate-square:focus-visible{outline:3px solid #ed244f;outline-offset:-3px;z-index:1}
+.pirate-square.marked{cursor:default}
+.pirate-cross{position:absolute;inset:8%;width:84%;height:84%;overflow:visible}
+.pirate-cross path{fill:none;stroke:#e32636;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:120;filter:none}
+.pirate-square.just-marked .pirate-cross path{animation:drawPirateCross .42s ease-out forwards}
 @keyframes drawPirateCross{to{stroke-dashoffset:0}}
-.pirate-side{position:sticky;top:20px;padding-top:8px}
-.pirate-next-label{font-family:"Comic Sans MS","Segoe Print",cursive;color:#ff9abd;font-size:clamp(21px,2.5vw,29px);font-weight:800;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px;margin:0 0 16px}
-.pirate-turn{font-size:clamp(18px,2.2vw,23px);font-weight:800;line-height:1.35;margin:0 0 16px;min-height:58px}
-.pirate-players{display:grid;gap:9px;margin:0 0 16px;padding:0;list-style:none}
-.pirate-player{padding:11px 14px;border:1px solid #ff83b2;border-radius:10px;background:linear-gradient(135deg,#ff82b8,#f33e83);font-weight:800;box-shadow:0 4px 0 #9f2353,0 8px 18px #001a2080;animation:playerIn .25s ease both}
-.pirate-player:first-child{outline:2px solid #fff;outline-offset:2px}
-@keyframes playerIn{from{opacity:0;transform:translateX(15px)}to{opacity:1;transform:translateX(0)}}
-.pirate-add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:22px}
-.pirate-add input{min-width:0;width:100%;height:43px;border:2px solid #68c8d8;border-radius:8px;background:#fff;color:#12343a;padding:0 12px;font-size:16px}
-.pirate-btn{border:2px solid #c42c68;border-radius:8px;background:linear-gradient(#ff82b8,#ff3c82);color:#fff;font-weight:900;padding:9px 15px;box-shadow:inset 0 2px #ffffff55,0 3px 0 #8f204d;text-shadow:0 1px 2px #a91e55;transition:transform .15s,filter .15s}
-.pirate-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
-.pirate-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #8f204d}
-.pirate-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-.pirate-actions .pirate-btn{flex:1;min-width:82px}
-.pirate-actions .pirate-btn:disabled{opacity:.38;filter:grayscale(.6);cursor:not-allowed;transform:none}
-.pirate-reset{width:100%}
-.pirate-back{margin-top:18px;width:100%}
-.pirate-toast{position:fixed;left:50%;bottom:22px;z-index:30;transform:translateX(-50%);display:flex;align-items:center;gap:14px;max-width:calc(100vw - 28px);padding:12px 16px;border:1px solid #ff9abd;border-radius:12px;background:#062e36;box-shadow:0 8px 30px #0008;font-weight:700;animation:toastIn .25s ease both}
+.pirate-side{width:100%;align-self:center;min-width:0}
+.pirate-next-label{font-family:Arial,Helvetica,sans-serif;color:#e32636;font-size:clamp(16px,2.6vh,22px);font-weight:500;text-decoration:underline;text-underline-offset:3px;margin:0 0 clamp(12px,2.5vh,24px);white-space:nowrap}
+.pirate-turn{font-size:clamp(15px,2.2vh,19px);font-weight:600;line-height:1.3;margin:0 0 12px;min-height:2.6em;color:#222}
+.pirate-players{display:grid;gap:6px;margin:0 0 12px;padding:0;list-style:none;max-height:30vh;overflow:auto}
+.pirate-player{font-size:clamp(13px,1.9vh,16px);padding:5px 0;border-bottom:1px solid #ddd;color:#222;font-weight:500}
+.pirate-player:first-child{font-weight:800}
+.pirate-add{display:none;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin:0 0 10px}
+.pirate-add.open{display:grid}
+.pirate-add input{min-width:0;width:100%;height:34px;border:1px solid #888;border-radius:4px;background:#fff;color:#111;padding:0 8px;font-size:15px}
+.pirate-add button{height:34px;padding:0 11px;border:1px solid #222;border-radius:4px;background:#fff;color:#111;font-weight:600}
+.pirate-toast{position:fixed;left:50%;bottom:12px;z-index:30;transform:translateX(-50%);display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);padding:8px 12px;border:1px solid #bbb;border-radius:5px;background:#fff;color:#111;box-shadow:0 3px 14px #0002;font-size:14px}
 .pirate-toast[hidden]{display:none}
-@keyframes toastIn{from{opacity:0;transform:translate(-50%,18px)}to{opacity:1;transform:translate(-50%,0)}}
-.pirate-big-pop{position:fixed;inset:0;z-index:25;display:grid;place-items:center;pointer-events:none;background:#001c2440;animation:popBackdrop .35s ease both}
+.pirate-toast button{border:0;background:none;color:#e32636;text-decoration:underline;font-weight:700;padding:3px 5px}
+.pirate-big-pop{position:fixed;inset:0;z-index:25;display:grid;place-items:center;pointer-events:none;background:#000b;animation:pirateDim .18s ease-out both}
 .pirate-big-pop[hidden]{display:none}
-.pirate-big-card{position:relative;padding:clamp(22px,5vw,55px) clamp(38px,9vw,100px);border:5px solid #ff79ad;border-radius:22px;background:linear-gradient(145deg,#fff,#ffeaf2);color:#bd174d;font-family:"Comic Sans MS","Segoe Print",cursive;font-size:clamp(90px,20vw,190px);font-weight:900;line-height:1;text-shadow:0 5px 0 #ffc2d8,0 10px 20px #8e164655;box-shadow:0 22px 65px #0009;animation:bigCoordinate .55s cubic-bezier(.15,1.5,.35,1) both}
-.pirate-faller{position:absolute;top:-22px;left:50%;font-family:"Comic Sans MS","Segoe Print",cursive;font-size:clamp(18px,4vw,30px);font-weight:900;color:#ff75a9;text-shadow:0 2px 0 #8e1646;animation:fallCoordinate 1.15s ease-in forwards;white-space:nowrap}
-.pirate-faller:nth-child(2){left:12%;animation-delay:.08s}.pirate-faller:nth-child(3){left:82%;animation-delay:.16s}.pirate-faller:nth-child(4){left:34%;animation-delay:.22s}
-@keyframes bigCoordinate{0%{opacity:0;transform:scale(.25) rotate(-12deg)}65%{opacity:1;transform:scale(1.12) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
-@keyframes fallCoordinate{0%{opacity:0;transform:translateY(-30px) rotate(-15deg)}15%{opacity:1}100%{opacity:0;transform:translateY(230px) rotate(35deg)}}
-@keyframes popBackdrop{from{opacity:0}to{opacity:1}}
-@media(max-width:760px){#pirateGame{padding:14px}.pirate-layout{grid-template-columns:1fr;gap:20px}.pirate-heading{text-align:center;margin-bottom:12px}.pirate-board-wrap{max-width:620px}.pirate-side{position:static;padding:0;max-width:620px;width:100%;margin:auto}.pirate-turn{min-height:0}.pirate-players{grid-template-columns:repeat(2,minmax(0,1fr))}.pirate-next-label{text-align:center}.pirate-add{margin-bottom:14px}}
-@media(prefers-reduced-motion:reduce){.pirate-square,.pirate-player,.pirate-btn,.pirate-cross path,.pirate-big-card,.pirate-faller,.pirate-toast{animation:none!important;transition:none!important}.pirate-cross path{stroke-dashoffset:0}}
+.pirate-big-card{color:#fff;font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(110px,27vw, min(36vh,300px));font-weight:700;line-height:1;text-shadow:0 5px 24px #000;animation:pirateCoordinate .38s cubic-bezier(.2,.8,.2,1) both}
+@keyframes pirateDim{from{opacity:0}to{opacity:1}}
+@keyframes pirateCoordinate{from{opacity:0;transform:scale(.55) rotate(-7deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@media(max-width:620px){
+ #pirateGame{padding:7px}
+ .pirate-layout{grid-template-columns:minmax(0,1fr) minmax(112px,34vw);gap:8px}
+ .pirate-header{align-items:flex-start;flex-direction:column;gap:3px;margin-bottom:2px}
+ .pirate-heading{font-size:clamp(20px,4vw,30px)}
+ .pirate-tools{gap:4px}
+ .pirate-icon{width:27px;height:27px;font-size:16px}
+ .pirate-board{width:min(100%,calc(100dvh - 50px));max-height:calc(100dvh - 50px);grid-template-columns:18px repeat(7,minmax(0,1fr));grid-template-rows:20px repeat(7,minmax(0,1fr))}
+ .pirate-axis{font-size:11px}
+ .pirate-next-label{font-size:clamp(13px,3.5vw,17px);white-space:normal;margin-bottom:9px}
+ .pirate-turn{font-size:clamp(12px,3vw,15px);margin-bottom:7px}
+ .pirate-players{max-height:32vh;gap:3px}
+ .pirate-player{font-size:12px;padding:4px 0}
+ .pirate-add input{font-size:13px;padding:0 5px}
+ .pirate-add button{padding:0 7px}
+}
+@media(max-height:520px){
+ #pirateGame{padding:4px 10px}
+ .pirate-heading{font-size:24px}
+ .pirate-header{margin-bottom:2px}
+ .pirate-board{width:min(100%,calc(100dvh - 48px));max-height:calc(100dvh - 48px)}
+ .pirate-side{font-size:12px}
+ .pirate-players{max-height:24vh}
+}
+@media(prefers-reduced-motion:reduce){.pirate-square,.pirate-cross path,.pirate-big-card,.pirate-icon{animation:none!important;transition:none!important}.pirate-cross path{stroke-dashoffset:0}}
+
 
 </style>
 </head>
@@ -203,26 +222,29 @@ body.pirate-on #pirateGame{display:block}
 <div id="pirateGame" aria-label="The Pirate Game">
   <div class="pirate-layout">
     <main class="pirate-board-wrap">
-      <h1 class="pirate-heading">The Pirate Game</h1>
+      <header class="pirate-header">
+        <h1 class="pirate-heading">The Pirate Game</h1>
+        <div class="pirate-tools">
+          <button class="pirate-icon" id="pirateUndo" type="button" aria-label="Undo" title="Undo" disabled>↶</button>
+          <button class="pirate-icon" id="pirateRedo" type="button" aria-label="Redo" title="Redo" disabled>↷</button>
+          <button class="pirate-icon" id="pirateReset" type="button" aria-label="Reset board" title="Reset board">⟲</button>
+          <button class="pirate-icon" id="pirateBack" type="button" aria-label="Back to timer" title="Back to timer">×</button>
+        </div>
+      </header>
       <div class="pirate-board" id="pirateBoard" role="grid" aria-label="Pirate game board"></div>
     </main>
     <aside class="pirate-side">
       <h2 class="pirate-next-label">Choose Next Square:</h2>
       <p class="pirate-turn" id="pirateTurn">Add players to begin</p>
       <ul class="pirate-players" id="piratePlayers" aria-label="Players waiting"></ul>
+      <button class="pirate-icon" id="pirateAddToggle" type="button" aria-label="Add player" title="Add player">+</button>
       <form class="pirate-add" id="pirateAddForm">
-        <input id="pirateName" maxlength="24" placeholder="Player name" aria-label="Player name" autocomplete="off">
-        <button class="pirate-btn" type="submit">Add</button>
+        <input id="pirateName" maxlength="24" placeholder="Name" aria-label="Player name" autocomplete="off">
+        <button type="submit">Add</button>
       </form>
-      <div class="pirate-actions">
-        <button class="pirate-btn" id="pirateUndo" type="button" disabled>Undo</button>
-        <button class="pirate-btn" id="pirateRedo" type="button" disabled>Redo</button>
-      </div>
-      <button class="pirate-btn pirate-reset" id="pirateReset" type="button">Reset Board</button>
-      <button class="pirate-btn pirate-back" id="pirateBack" type="button">Back to Timer</button>
     </aside>
   </div>
-  <div class="pirate-toast" id="pirateToast" hidden><span id="pirateToastText"></span><button class="pirate-btn" id="pirateToastUndo" type="button">Undo</button></div>
+  <div class="pirate-toast" id="pirateToast" hidden><span id="pirateToastText"></span><button id="pirateToastUndo" type="button">Undo</button></div>
   <div class="pirate-big-pop" id="pirateBigPop" hidden><div class="pirate-big-card" id="pirateBigCard"></div></div>
 </div>
 
@@ -414,95 +436,128 @@ moreMenu.querySelectorAll("[data-choice]").forEach(button=>button.addEventListen
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!moreMenu.hidden)hideMenu();});
 
 const pirateBoard=$("pirateBoard"),piratePlayers=$("piratePlayers"),pirateTurn=$("pirateTurn"),pirateToast=$("pirateToast"),pirateBigPop=$("pirateBigPop");
-let pirateNames=[],pirateMoves=[],pirateRedoMoves=[],pirateMarks={},pirateLastRemoved=null,pirateToastTimer=0,piratePopTimer=0;
-const pirateLetters="ABCDEFG";
-function pirateSnapshot(){return{marks:{...pirateMarks},players:[...pirateNames],last:pirateMoves.length?pirateMoves[pirateMoves.length-1].coordinate:null}}
-function renderPirate(){
+let pirateNames=[],pirateMoves=[],pirateRedoMoves=[],pirateMarks={},pirateLastRemoved=null,piratePopTimer=0;
+const pirateLetters="ABCDEFG",pirateStorageKey="cowChalkPirateGame";
+function savePirateState(){
+  try{localStorage.setItem(pirateStorageKey,JSON.stringify({names:pirateNames,moves:pirateMoves,redo:pirateRedoMoves,marks:pirateMarks}))}catch(e){}
+}
+function loadPirateState(){
+  try{
+    const data=JSON.parse(localStorage.getItem(pirateStorageKey)||"{}");
+    pirateNames=Array.isArray(data.names)?data.names.filter(n=>typeof n==="string").slice(0,50):[];
+    pirateMoves=Array.isArray(data.moves)?data.moves.slice(-5):[];
+    pirateRedoMoves=Array.isArray(data.redo)?data.redo.slice(-5):[];
+    pirateMarks=data.marks&&typeof data.marks==="object"?data.marks:{};
+  }catch(e){pirateNames=[];pirateMoves=[];pirateRedoMoves=[];pirateMarks={}}
+}
+function buildPirateBoard(){
   pirateBoard.innerHTML="";
-  const corner=document.createElement("div");pirateBoard.append(corner);
+  pirateBoard.append(document.createElement("div"));
   pirateLetters.split("").forEach(letter=>{const axis=document.createElement("div");axis.className="pirate-axis";axis.textContent=letter;pirateBoard.append(axis)});
   for(let row=1;row<=7;row++){
     const axis=document.createElement("div");axis.className="pirate-axis";axis.textContent=row;pirateBoard.append(axis);
     for(let col=0;col<7;col++){
       const coordinate=pirateLetters[col]+row,button=document.createElement("button");
-      button.type="button";button.className="pirate-square"+(pirateMarks[coordinate]?" marked":"");
-      button.setAttribute("role","gridcell");button.setAttribute("aria-label",coordinate+(pirateMarks[coordinate]?", selected":""));button.disabled=!!pirateMarks[coordinate];
-      if(pirateMarks[coordinate])button.innerHTML='<svg class="pirate-cross" viewBox="0 0 100 100" aria-hidden="true"><path d="M14 14 C34 31 66 69 86 86 M86 14 C65 34 35 67 14 86"/></svg>';
+      button.type="button";button.className="pirate-square";button.dataset.coordinate=coordinate;
+      button.setAttribute("role","gridcell");button.setAttribute("aria-label",coordinate);
       button.addEventListener("click",()=>choosePirateSquare(coordinate));
       pirateBoard.append(button);
     }
   }
+}
+function updatePirateBoard(animateCoordinate=null){
+  pirateBoard.querySelectorAll(".pirate-square").forEach(button=>{
+    const coordinate=button.dataset.coordinate,marked=!!pirateMarks[coordinate],wasMarked=button.classList.contains("marked");
+    button.classList.toggle("marked",marked);button.disabled=marked;
+    button.setAttribute("aria-label",coordinate+(marked?", selected":""));
+    if(marked&&!wasMarked){
+      button.innerHTML='<svg class="pirate-cross" viewBox="0 0 100 100" aria-hidden="true"><path d="M13 13 L87 87 M87 13 L13 87"/></svg>';
+      if(coordinate===animateCoordinate){button.classList.remove("just-marked");void button.offsetWidth;button.classList.add("just-marked")}
+    }else if(!marked&&wasMarked){button.innerHTML="";button.classList.remove("just-marked")}
+  });
+}
+function renderPirate(){
+  updatePirateBoard();
   piratePlayers.innerHTML="";
   pirateNames.forEach((name,index)=>{const li=document.createElement("li");li.className="pirate-player";li.textContent=(index===0?"▶ ":"")+name;piratePlayers.append(li)});
-  pirateTurn.textContent=pirateNames.length?pirateNames[0]+" is choosing the next square": "Add players to begin";
+  pirateTurn.textContent=pirateNames.length?pirateNames[0]+" is choosing the next square":"Add players to begin";
   $("pirateUndo").disabled=pirateMoves.length===0;
   $("pirateRedo").disabled=pirateRedoMoves.length===0;
 }
 function openPirateGame(){
   stopLoop();clearInterval(clockId);clearAlarm();
+  try{localStorage.setItem("cowChalkScreen","pirate")}catch(e){}
   document.body.classList.remove("realtime-on");document.body.classList.add("pirate-on");
+  $("pageTitle").textContent="The Pirate Game";
   hideMenu();renderPirate();
 }
 function closePirateGame(){
   document.body.classList.remove("pirate-on");
+  $("pageTitle").textContent="Cow Chalk Timer";
   try{localStorage.setItem("cowChalkScreen","timer")}catch(e){}
-  stopwatchMode=false;page.classList.remove("stopwatch-on");
-  reset();
+  stopwatchMode=false;page.classList.remove("stopwatch-on");reset();
 }
-function hidePirateToast(){pirateToast.hidden=true;pirateLastRemoved=null;clearTimeout(pirateToastTimer)}
+function hidePirateToast(){pirateToast.hidden=true;pirateLastRemoved=null}
 function showPirateToast(name){
   $("pirateToastText").textContent=name+" was removed";
-  pirateToast.hidden=false;
-  pirateLastRemoved=name;
+  pirateToast.hidden=false;pirateLastRemoved=name;
 }
 function showPiratePop(coordinate){
   clearTimeout(piratePopTimer);
-  $("pirateBigCard").innerHTML='<span class="pirate-faller">'+coordinate+'</span><span class="pirate-faller">'+coordinate+'</span><span class="pirate-faller">'+coordinate+'</span><span class="pirate-faller">'+coordinate+'</span>'+coordinate;
+  $("pirateBigCard").textContent=coordinate;
   pirateBigPop.hidden=false;
+  pirateBigPop.style.animation="none";void pirateBigPop.offsetWidth;pirateBigPop.style.animation="";
+  $("pirateBigCard").style.animation="none";void $("pirateBigCard").offsetWidth;$("pirateBigCard").style.animation="";
   piratePopTimer=setTimeout(()=>{pirateBigPop.hidden=true},3000);
 }
 function choosePirateSquare(coordinate){
+  if(pirateMarks[coordinate])return;
   hidePirateToast();
-  const before=pirateSnapshot(),player=pirateNames.shift()||null;
+  const before={marks:{...pirateMarks},players:[...pirateNames]},player=pirateNames.shift()||null;
   pirateMarks[coordinate]=true;
-  pirateMoves.push({coordinate,player,before,after:null});
+  pirateMoves.push({coordinate,player,before,after:{marks:{...pirateMarks},players:[...pirateNames]}});
   if(pirateMoves.length>5)pirateMoves.shift();
   pirateRedoMoves=[];
-  pirateMoves[pirateMoves.length-1].after=pirateSnapshot();
-  renderPirate();
+  updatePirateBoard(coordinate);renderPirate();
   if(player)showPirateToast(player);
-  showPiratePop(coordinate);
+  savePirateState();showPiratePop(coordinate);
 }
 function addPiratePlayer(name){
   name=name.trim().replace(/\s+/g," ");
   if(!name)return;
-  pirateNames.push(name);$("pirateName").value="";renderPirate();
+  pirateNames.push(name);$("pirateName").value="";$("pirateAddForm").classList.remove("open");
+  renderPirate();savePirateState();
 }
 function undoPirateMove(){
   if(!pirateMoves.length)return;
   hidePirateToast();clearTimeout(piratePopTimer);pirateBigPop.hidden=true;
   const move=pirateMoves.pop();pirateRedoMoves.push(move);
   pirateMarks={...move.before.marks};pirateNames=[...move.before.players];
-  renderPirate();
+  renderPirate();savePirateState();
 }
 function redoPirateMove(){
   if(!pirateRedoMoves.length)return;
   hidePirateToast();const move=pirateRedoMoves.pop();pirateMoves.push(move);
   pirateMarks={...move.after.marks};pirateNames=[...move.after.players];
-  renderPirate();showPiratePop(move.coordinate);
+  renderPirate();savePirateState();showPiratePop(move.coordinate);
 }
+$("pirateAddToggle").addEventListener("click",()=>{
+  const form=$("pirateAddForm");form.classList.toggle("open");
+  if(form.classList.contains("open"))$("pirateName").focus();
+});
 $("pirateAddForm").addEventListener("submit",event=>{event.preventDefault();addPiratePlayer($("pirateName").value)});
 $("pirateToastUndo").addEventListener("click",()=>{
   if(!pirateLastRemoved)return;
-  pirateNames.unshift(pirateLastRemoved);hidePirateToast();renderPirate();
+  pirateNames.unshift(pirateLastRemoved);hidePirateToast();renderPirate();savePirateState();
 });
 $("pirateUndo").addEventListener("click",undoPirateMove);
 $("pirateRedo").addEventListener("click",redoPirateMove);
 $("pirateReset").addEventListener("click",()=>{
-  pirateMarks={};pirateMoves=[];pirateRedoMoves=[];hidePirateToast();clearTimeout(piratePopTimer);pirateBigPop.hidden=true;renderPirate();
+  pirateMarks={};pirateMoves=[];pirateRedoMoves=[];hidePirateToast();clearTimeout(piratePopTimer);pirateBigPop.hidden=true;renderPirate();savePirateState();
 });
 $("pirateBack").addEventListener("click",closePirateGame);
-
+loadPirateState();
+buildPirateBoard();
 renderPirate();
 render();
 try{
@@ -512,7 +567,8 @@ try{
     if(soundOption)soundOption.checked=true;
   }
   const savedScreen=localStorage.getItem("cowChalkScreen");
-  if(savedScreen==="realtime")showRealTime();
+  if(savedScreen==="pirate"){openPirateGame();}
+  else if(savedScreen==="realtime")showRealTime();
   else if(savedScreen==="stopwatch"){
     stopwatchMode=true;
     page.classList.add("stopwatch-on");
