@@ -8,7 +8,7 @@
 <link rel="icon" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/pictures/favicon1.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Rye&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 /* --u = one "design pixel". The page is drawn on a 1200 x 800 grid and
    scaled to fit the window, so proportions stay identical at any size. */
@@ -869,7 +869,7 @@ $("pirateReset").addEventListener("click",()=>{
 $("pirateBack").addEventListener("click",returnToPirateIntro);
 $("pirateNewGame").addEventListener("click",startNewPirateGame);
 $("pirateLoadGame").addEventListener("click",openPirateSaveList);
-$("pirateLoadBack").addEventListener("click",showPirateIntro);
+$("pirateLoadBack").addEventListener("click",()=>showPirateIntro(true));
 $("pirateIntroMore").addEventListener("click",()=>{showMenu()});
 loadPirateState();
 window.addEventListener("pagehide",savePirateState);
