@@ -265,7 +265,30 @@ body.pirate-on #pirateGame{display:flex}
 @keyframes pirateReferenceTitleExit{to{transform:translateY(-120vh) rotate(-8deg) scale(.8);opacity:0}}
 @keyframes pirateReferenceButtonsExit{to{transform:translateY(120vh) rotate(8deg);opacity:0}}
 @media(max-width:520px){#pirateGame .pirate-play-button{font-size:1.15rem;padding:15px 28px;min-width:min(230px,82vw)}}
-</style></head>
+
+<style id="pirate-grid-centering-fix">
+#pirateGame>.pirate-grid-backdrop{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:min(700px,90vw);
+  height:min(700px,90vw);
+  margin:0;
+  padding:0;
+  background:transparent!important;
+  transform:translate(-50%,-50%) rotateX(60deg) rotateZ(-30deg) translateZ(-100px);
+  transform-origin:center center;
+}
+@keyframes pirateReferenceGrid{
+  0%{transform:translate(-50%,-50%) rotateX(60deg) rotateZ(-30deg) translateZ(-100px)}
+  100%{transform:translate(-50%,-50%) rotateX(60deg) rotateZ(-390deg) translateZ(-100px)}
+}
+#pirateGame>.pirate-grid-backdrop span{background:transparent!important}
+.pirate-board{background:transparent}
+.pirate-square{background:rgba(10,17,24,.18)}
+.pirate-square:hover:not(.marked){background:rgba(74,105,132,.2)}
+.pirate-square.marked{background:rgba(10,17,24,.28)}
+</style></style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
