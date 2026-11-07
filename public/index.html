@@ -99,9 +99,9 @@ body.pirate-on #pirateGame{display:flex}
 .pirate-icon:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .pirate-icon:active{transform:translateY(1px)}
 .pirate-icon:disabled{opacity:.38;filter:grayscale(.5);cursor:default;transform:none}
-.pirate-board{display:grid;grid-template-columns:clamp(18px,3.4vh,30px) repeat(7,minmax(0,1fr));grid-template-rows:clamp(18px,3.4vh,30px) repeat(7,minmax(0,1fr));width:min(100%,calc(100dvh - 105px));aspect-ratio:1/1;max-height:calc(100dvh - 105px);margin:0 auto;background:#fff}
+.pirate-board{display:grid;grid-template-columns:clamp(22px,3.4vh,30px) repeat(7,minmax(0,1fr));grid-template-rows:clamp(22px,3.4vh,30px) repeat(7,minmax(0,1fr));width:min(100%,calc(100dvh - 105px));height:min(100%,calc(100dvh - 105px));aspect-ratio:1/1;max-height:calc(100dvh - 105px);margin:0 auto;background:#fff;flex:none;touch-action:manipulation}
 .pirate-axis{display:grid;place-items:center;font-size:clamp(12px,2.3vh,18px);font-weight:400;color:#111}
-.pirate-square{position:relative;min-width:0;min-height:0;border:1px solid #222;border-radius:0;background:#fff;padding:0;overflow:hidden}
+.pirate-square{position:relative;display:block;min-width:0;min-height:0;width:100%;height:100%;border:1px solid #222;border-radius:0;background:#fff;padding:0;overflow:hidden;appearance:none;-webkit-appearance:none;touch-action:manipulation}
 .pirate-square:hover:not(.marked){background:#fff6f8}
 .pirate-square:focus-visible{outline:3px solid #ed244f;outline-offset:-3px;z-index:1}
 .pirate-square.marked{cursor:default}
@@ -109,11 +109,12 @@ body.pirate-on #pirateGame{display:flex}
 .pirate-cross path{fill:none;stroke:#e32636;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:120;filter:none}
 .pirate-square.just-marked .pirate-cross path{animation:drawPirateCross .42s ease-out forwards}
 @keyframes drawPirateCross{to{stroke-dashoffset:0}}
+@keyframes piratePlayerIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 .pirate-side{width:100%;align-self:center;min-width:0}
 .pirate-next-label{font-family:Arial,Helvetica,sans-serif;color:#ff3030;font-size:clamp(15px,2.2vh,20px);font-weight:400;text-decoration:underline;text-underline-offset:2px;margin:0 0 clamp(12px,2.5vh,24px);white-space:nowrap}
 .pirate-turn{font-size:clamp(15px,2.2vh,19px);font-weight:700;line-height:1.3;margin:0 0 12px;min-height:2.6em;color:#fff}
 .pirate-players{display:grid;gap:6px;margin:0 0 12px;padding:0;list-style:none;max-height:30vh;overflow:auto}
-.pirate-player{font-size:clamp(13px,1.9vh,16px);padding:5px 0;border-bottom:1px solid #ffffff40;color:#fff;font-weight:500}
+.pirate-player{font-size:clamp(13px,1.9vh,16px);padding:5px 0;border-bottom:1px solid #ffffff40;color:#fff;font-weight:500;animation:piratePlayerIn .32s cubic-bezier(.2,.8,.2,1) both}
 .pirate-player:first-child{font-weight:800}
 .pirate-add{display:none;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin:0 0 10px}
 .pirate-add.open{display:grid}
@@ -529,7 +530,7 @@ function choosePirateSquare(coordinate){
   savePirateState();showPiratePop(coordinate);
 }
 function addPiratePlayer(name){
-  name=name.trim().replace(/\s+/g," ");
+  name=name.trim().replace(/\s+/g," ").toLocaleLowerCase().replace(/(^|[\s-\'])\p{L}/gu,letter=>letter.toLocaleUpperCase());
   if(!name)return;
   pirateNames.push(name);$("pirateName").value="";$("pirateAddForm").classList.remove("open");
   renderPirate();savePirateState();
@@ -559,10 +560,12 @@ $("pirateToastUndo").addEventListener("click",()=>{
 $("pirateUndo").addEventListener("click",undoPirateMove);
 $("pirateRedo").addEventListener("click",redoPirateMove);
 $("pirateReset").addEventListener("click",()=>{
-  pirateMarks={};pirateMoves=[];pirateRedoMoves=[];hidePirateToast();clearTimeout(piratePopTimer);pirateBigPop.hidden=true;renderPirate();savePirateState();
+  pirateMarks={};pirateMoves=[];pirateRedoMoves=[];pirateNames=[];pirateLastRemoved=null;hidePirateToast();clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);pirateBigPop.hidden=true;pirateBigPop.classList.remove("fading");renderPirate();savePirateState();
 });
 $("pirateBack").addEventListener("click",closePirateGame);
 loadPirateState();
+window.addEventListener("pagehide",savePirateState);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")savePirateState()});
 buildPirateBoard();
 renderPirate();
 if(pirateLastRemoved){$("pirateToastText").textContent=pirateLastRemoved+" was removed";pirateToast.hidden=false;}
