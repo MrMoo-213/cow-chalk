@@ -8,7 +8,7 @@
 <link rel="icon" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/pictures/favicon1.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Rye&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 /* --u = one "design pixel". The page is drawn on a 1200 x 800 grid and
    scaled to fit the window, so proportions stay identical at any size. */
@@ -104,7 +104,7 @@ body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:cent
 .pirate-floats span:nth-child(3){top:40%;left:80%;animation-delay:1.5s}
 .pirate-floats span:nth-child(4){top:80%;left:75%;animation-delay:4.5s}
 .pirate-floats span:nth-child(5){top:15%;left:60%;animation-delay:6s}
-.pirate-intro-content{position:relative;z-index:10;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:800px;padding:20px;max-height:100%;overflow:hidden}
+.pirate-intro-content{position:relative;z-index:10;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:800px;padding:20px;max-height:100%;overflow:visible}
 .pirate-credits{font-size:.9rem;text-transform:uppercase;letter-spacing:4px;color:#4a6984;opacity:0;transform:translateY(-20px);animation:pirateFadeDown 1s .5s cubic-bezier(.19,1,.22,1) forwards;margin-bottom:10px}
 .pirate-credits span{color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.3)}
 .pirate-intro-title-wrap{position:relative;margin-bottom:40px}
@@ -361,6 +361,7 @@ body.pirate-on #pirateGame{display:flex}
       <div class="pirate-intro-actions" id="pirateIntroActions">
         <button class="pirate-play-button" id="pirateNewGame" type="button">New Game</button>
         <button class="pirate-play-button" id="pirateLoadGame" type="button">Load Game</button>
+        <button class="pirate-play-button pirate-more-button" id="pirateIntroMore" type="button">More</button>
       </div>
       <div class="pirate-save-panel" id="pirateSavePanel" hidden>
         <h2>Saved Games</h2>
@@ -374,9 +375,10 @@ body.pirate-on #pirateGame{display:flex}
       <header class="pirate-header">
         <h1 class="pirate-heading">The Pirate Game</h1>
         <div class="pirate-tools">
-          <button class="pirate-icon" id="pirateUndo" type="button" aria-label="Undo" disabled>↶</button>
-          <button class="pirate-icon" id="pirateRedo" type="button" aria-label="Redo" disabled>↷</button>
-          <button class="pirate-icon" id="pirateReset" type="button" aria-label="Reset board">⟲</button>
+          <button class="pirate-icon pirate-conditional-control" id="pirateUndo" type="button" aria-label="Undo">↶</button>
+          <button class="pirate-random-button" id="pirateRandom" type="button" aria-label="Random square"><span aria-hidden="true">🎲</span><span>Random Square</span></button>
+          <button class="pirate-icon pirate-conditional-control" id="pirateRedo" type="button" aria-label="Redo">↷</button>
+          <button class="pirate-icon pirate-conditional-control" id="pirateReset" type="button" aria-label="Reset board">⟲</button>
           <button class="pirate-icon" id="pirateBack" type="button" aria-label="Back to timer">×</button>
         </div>
       </header>
@@ -661,7 +663,10 @@ function renderPirateSaves(){
     button.append(label,detail);button.addEventListener("click",()=>startPirateSave(save.id));list.append(button);
   });
 }
+let pirateIntroReadyTimer=0;
+function setPirateIntroReady(){clearTimeout(pirateIntroReadyTimer);$("pirateGame").classList.remove("pirate-intro-ready");pirateIntroReadyTimer=setTimeout(()=>$("pirateGame").classList.add("pirate-intro-ready"),3500)}
 function showPirateIntro(){
+  setPirateIntroReady();
   $("pirateGame").classList.add("pirate-intro-active");
   $("pirateGame").classList.remove("pirate-launching","pirate-returning");
   $("pirateSavePanel").hidden=true;$("pirateIntroActions").hidden=false;
@@ -733,10 +738,12 @@ function renderPirate(){
   piratePlayers.innerHTML="";
   pirateNames.forEach((name,index)=>{const li=document.createElement("li");li.className="pirate-player";li.textContent=(index===0?"▶ ":"")+name;piratePlayers.append(li)});
   pirateTurn.textContent=pirateNames.length?pirateNames[0]+" is choosing the next square":"";
-  $("pirateUndo").disabled=pirateMoves.length===0;
-  $("pirateRedo").disabled=pirateRedoMoves.length===0;
+  $("pirateUndo").classList.toggle("is-visible",pirateMoves.length>0);
+  $("pirateRedo").classList.toggle("is-visible",pirateRedoMoves.length>0);
+  $("pirateReset").classList.toggle("is-visible",pirateMoves.length>0||pirateNames.length>0);
 }
 function openPirateGame(){
+  setPirateIntroReady();
   stopLoop();clearInterval(clockId);clearAlarm();
   try{localStorage.setItem("cowChalkScreen","pirate")}catch(e){}
   document.body.classList.remove("realtime-on");document.body.classList.add("pirate-on");
@@ -748,17 +755,20 @@ function closePirateGame(){
   $("pageTitle").textContent="Cow Chalk Timer";
   showMenu();
 }
-function hidePirateToast(){pirateToast.hidden=true;pirateLastRemoved=null;savePirateState()}
+let pirateToastTimer=0;
+function hidePirateToast(){clearTimeout(pirateToastTimer);pirateToast.hidden=true;pirateLastRemoved=null;savePirateState()}
 function showPirateToast(name){
+  clearTimeout(pirateToastTimer);
   $("pirateToastText").textContent=name+" was removed";
   pirateToast.hidden=false;pirateLastRemoved=name;savePirateState();
+  pirateToastTimer=setTimeout(()=>hidePirateToast(),5000);
 }
 function showPiratePop(coordinate,duration=3000){
   clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);
   $("pirateBigCard").textContent=coordinate;
   pirateBigPop.hidden=false;pirateBigPop.classList.remove("fading");
   $("pirateBigCard").style.animation="none";void $("pirateBigCard").offsetWidth;$("pirateBigCard").style.animation="";
-  piratePopTimer=setTimeout(()=>{pirateBigPop.classList.add("fading");piratePopFadeTimer=setTimeout(()=>{pirateBigPop.hidden=true;pirateBigPop.classList.remove("fading")},450)},duration);
+  piratePopTimer=setTimeout(()=>{pirateBigPop.classList.add("fading");piratePopFadeTimer=setTimeout(()=>{pirateBigPop.hidden=true;pirateBigPop.classList.remove("fading")},450)},duration+380);
 }
 function choosePirateSquare(coordinate){
   if(pirateMarks[coordinate])return;
@@ -836,6 +846,7 @@ $("pirateToastUndo").addEventListener("click",()=>{
   pirateNames.unshift(pirateLastRemoved);hidePirateToast();renderPirate();savePirateState();
 });
 $("pirateUndo").addEventListener("click",undoPirateMove);
+$("pirateRandom").addEventListener("click",()=>{const available=[];for(let row=1;row<=7;row++)for(const letter of pirateLetters){const coordinate=letter+row;if(!pirateMarks[coordinate])available.push(coordinate)}if(available.length)choosePirateSquare(available[Math.floor(Math.random()*available.length)])});
 $("pirateRedo").addEventListener("click",redoPirateMove);
 $("pirateReset").addEventListener("click",()=>{
   pirateMarks={};pirateMoves=[];pirateRedoMoves=[];pirateNames=[];pirateLastRemoved=null;hidePirateToast();clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);pirateBigPop.hidden=true;pirateBigPop.classList.remove("fading");renderPirate();savePirateState();
@@ -844,6 +855,7 @@ $("pirateBack").addEventListener("click",returnToPirateIntro);
 $("pirateNewGame").addEventListener("click",startNewPirateGame);
 $("pirateLoadGame").addEventListener("click",openPirateSaveList);
 $("pirateLoadBack").addEventListener("click",showPirateIntro);
+$("pirateIntroMore").addEventListener("click",()=>{try{localStorage.setItem("cowChalkScreen","menu")}catch(e){}showMenu()});
 loadPirateState();
 window.addEventListener("pagehide",savePirateState);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")savePirateState()});
@@ -921,6 +933,30 @@ body.pirate-on{overflow:hidden!important}
 #pirateGame .pirate-intro{overflow:hidden!important}
 @media(max-width:700px){
   #pirateGame>.pirate-grid-backdrop{width:90vw!important;height:90vw!important}
+}
+</style>
+<style id="pirate-requested-polish">
+#pirateGame,#pirateGame *{-webkit-user-select:none!important;user-select:none!important}
+#pirateGame input{user-select:text!important;-webkit-user-select:text!important}
+#pirateGame .pirate-intro-content{overflow:visible!important}
+#pirateGame .pirate-intro{overflow:visible!important}
+#pirateGame .pirate-intro-actions{pointer-events:none}
+#pirateGame.pirate-intro-ready .pirate-intro-actions{pointer-events:auto}
+#pirateGame .pirate-play-button{pointer-events:none}
+#pirateGame.pirate-intro-ready .pirate-play-button{pointer-events:auto}
+#pirateGame .pirate-more-button{animation-delay:3s}
+#pirateGame .pirate-conditional-control{flex:0 0 auto;width:0;height:0;padding:0;margin:0;border:0;opacity:0;overflow:hidden;transform:scale(.65);pointer-events:none;transition:width .28s ease,height .28s ease,opacity .22s ease,transform .28s ease,margin .28s ease}
+#pirateGame .pirate-conditional-control.is-visible{width:clamp(32px,4vh,42px);height:clamp(32px,4vh,42px);margin:0 2px;padding:0;border:1px solid #ffd700;opacity:1;overflow:visible;transform:scale(1);pointer-events:auto}
+#pirateGame .pirate-random-button{display:flex;align-items:center;gap:7px;white-space:nowrap;height:clamp(32px,4vh,42px);padding:0 9px;border:1px solid #ffd700;border-radius:3px;background:linear-gradient(135deg,#8b0000,#500);color:#ffd700;font:700 clamp(10px,1.55vh,14px) "Share Tech Mono",monospace;box-shadow:0 0 12px #8b000077,inset 0 0 8px #ffd70022;cursor:pointer}
+#pirateGame .pirate-random-button span:first-child{font-size:1.35em}
+#pirateGame .pirate-random-button:active{transform:translateY(1px)}
+#pirateGame .pirate-toast{z-index:39}
+#pirateGame .pirate-big-pop{z-index:40}
+#pirateGame .pirate-big-card{font-family:"Rye","Pirata One",Georgia,serif;letter-spacing:.04em}
+#pirateGame:not(.pirate-intro-active)>.pirate-grid-backdrop{opacity:.055!important}
+@media(max-width:620px){
+ #pirateGame .pirate-random-button{height:27px;padding:0 5px;gap:3px;font-size:9px}
+ #pirateGame .pirate-conditional-control.is-visible{width:27px;height:27px;margin:0 1px}
 }
 </style>
 <script id="pirate-grid-cell-builder">
