@@ -673,7 +673,7 @@ function renderPirateSaves(){
 let pirateIntroReadyTimer=0;
 function setPirateIntroReady(delay=3900){clearTimeout(pirateIntroReadyTimer);$("pirateGame").classList.remove("pirate-intro-ready");pirateIntroReadyTimer=setTimeout(()=>$("pirateGame").classList.add("pirate-intro-ready"),delay)}
 function showPirateIntro(quick=false){
-  setPirateIntroReady(quick?850:3900);
+  setPirateIntroReady(quick?450:3900);
   $("pirateGame").classList.add("pirate-intro-active");
   $("pirateGame").classList.remove("pirate-launching","pirate-returning");
   $("pirateSavePanel").hidden=true;$("pirateIntroActions").hidden=false;
@@ -691,7 +691,7 @@ function returnToPirateIntro(){
     showPirateIntro(true);
     try{localStorage.setItem("cowChalkScreen","pirate")}catch(e){}
     const animated=[$("pirateIntroContent").querySelector(".pirate-credits"),$("pirateIntroContent").querySelector(".pirate-intro-title"),$("pirateIntroContent").querySelector(".pirate-intro-subtitle"),$("pirateNewGame"),$("pirateLoadGame"),$("pirateIntroMore")];
-    animated.forEach((element,index)=>{if(!element)return;element.style.animation="none";void element.offsetWidth;element.style.animation="";element.style.animationDelay=["0s",".18s",".38s",".65s","1s","1.35s"][index]});
+    animated.forEach((element,index)=>{if(!element)return;element.style.animation="none";void element.offsetWidth;element.style.animation="";element.style.setProperty("animation-delay",["0s",".08s",".16s",".24s",".38s",".52s"][index],"important")});
   },680);
 }
 function startPirateSave(saveId){
@@ -730,9 +730,10 @@ function buildPirateBoard(){
   }
 }
 function updatePirateBoard(animateCoordinate=null){
+  const latestCoordinate=pirateMoves.length?pirateMoves[pirateMoves.length-1].coordinate:null;
   pirateBoard.querySelectorAll(".pirate-square").forEach(button=>{
     const coordinate=button.dataset.coordinate,marked=!!pirateMarks[coordinate],wasMarked=button.classList.contains("marked");
-    button.classList.toggle("marked",marked);button.disabled=marked;
+    button.classList.toggle("marked",marked);button.classList.toggle("last-selected",coordinate===latestCoordinate);button.disabled=marked;
     button.setAttribute("aria-label",coordinate+(marked?", selected":""));
     if(marked&&!wasMarked){
       button.innerHTML='<svg class="pirate-cross" viewBox="0 0 100 100" aria-hidden="true"><path d="M13 13 L87 87 M87 13 L13 87"/></svg>';
@@ -1020,6 +1021,13 @@ body.pirate-on #moreMenu[hidden]{display:none!important}
 <script id="pirate-grid-cell-builder">
 (()=>{const grid=document.querySelector("#pirateGame>.pirate-grid-backdrop");if(grid&&!grid.children.length){const fragment=document.createDocumentFragment();for(let i=0;i<49;i++){const cell=document.createElement("div");cell.className="pirate-grid-cell";fragment.appendChild(cell)}grid.appendChild(fragment)}})();
 </script>
+<style id="pirate-exit-glow-and-selection-fix">
+body,body *{-webkit-user-select:none!important;user-select:none!important}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;user-select:text!important}
+#pirateGame .pirate-square.last-selected{border:2px solid #ffd700!important;box-shadow:inset 0 0 13px #ffd70088,0 0 14px #ffd700aa!important;z-index:2}
+#pirateGame .pirate-play-button{animation-duration:.55s!important}
+#pirateGame .pirate-more-button{animation-duration:.55s!important}
+</style>
 <style id="pirate-intro-button-order-fix">
 #pirateGame .pirate-intro-actions>#pirateNewGame{animation-delay:2.3s!important}
 #pirateGame .pirate-intro-actions>#pirateLoadGame{animation-delay:2.85s!important}
