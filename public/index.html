@@ -86,6 +86,60 @@ body.realtime-on #realDate{display:block}
 body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:center}
 
 
+/* ---------- Pirate Game Intro ---------- */
+#pirateGame{background:#0a1118}
+.pirate-intro{position:absolute;inset:0;z-index:30;display:none;overflow:hidden;align-items:center;justify-content:center;background:#0a1118;color:#eee;font-family:"Share Tech Mono","Courier New",monospace;perspective:1000px}
+#pirateGame.pirate-intro-active .pirate-intro{display:flex}
+#pirateGame.pirate-intro-active .pirate-layout{display:none}
+.pirate-ambient{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(26,47,68,.55),#0a1118 80%),linear-gradient(0deg,rgba(139,0,0,.2),transparent);animation:pirateOceanPulse 8s ease-in-out infinite alternate}
+.pirate-grid-backdrop{position:absolute;width:min(700px,90vw);height:min(700px,90vw);display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);border:2px solid #4a6984;opacity:.14;transform:rotateX(65deg) rotateZ(0deg) translateZ(-100px);animation:pirateGridFloat 24s linear infinite}
+.pirate-grid-backdrop span{border:1px dashed #4a6984}
+.pirate-floats{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pirate-floats span{position:absolute;color:#4a6984;font-size:clamp(24px,4vw,48px);font-weight:800;opacity:0;animation:pirateSymbolFly 12s linear infinite}
+.pirate-floats span:nth-child(1){left:10%;top:20%}
+.pirate-floats span:nth-child(2){left:15%;top:70%;color:#ffd700;animation-delay:3s}
+.pirate-floats span:nth-child(3){left:80%;top:40%;animation-delay:1.5s}
+.pirate-floats span:nth-child(4){left:75%;top:80%;animation-delay:4.5s}
+.pirate-floats span:nth-child(5){left:60%;top:15%;animation-delay:6s;color:#ffd700}
+.pirate-intro-content{position:relative;z-index:2;width:min(800px,100%);padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.pirate-credits{color:#7892a8;font-size:clamp(11px,1.5vw,15px);letter-spacing:4px;margin-bottom:10px;opacity:0;animation:pirateFadeDown .9s .25s cubic-bezier(.19,1,.22,1) forwards}
+.pirate-credits span{color:#ffd700;text-shadow:0 0 10px #ffd70055}
+.pirate-intro-title-wrap{margin-bottom:38px}
+.pirate-intro-title{font-family:"Pirata One","Old English Text MT",Georgia,serif;font-size:clamp(48px,10vw,104px);line-height:1;color:#eee;letter-spacing:2px;text-transform:uppercase;filter:drop-shadow(0 15px 20px #000b);opacity:0;transform:scale(2.5) translateZ(300px);animation:pirateTitleSlam .8s 0.7s cubic-bezier(.175,.885,.32,1.275) forwards}
+.pirate-intro-subtitle{color:#c0c0c0;font-size:clamp(11px,2vw,21px);letter-spacing:clamp(3px,.7vw,7px);margin-top:15px;opacity:0;transform:translateY(20px);animation:pirateFadeUp .8s 1.45s ease-out forwards}
+.pirate-intro-actions{display:flex;justify-content:center;gap:clamp(12px,3vw,28px);flex-wrap:wrap}
+.pirate-play-button{position:relative;min-width:190px;padding:16px 30px;border:2px solid #ffd700;border-radius:4px;overflow:hidden;background:linear-gradient(135deg,#8b0000,#500);color:#ffd700;font:700 clamp(15px,2vw,22px) "Share Tech Mono","Courier New",monospace;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px #8b000099,inset 0 0 15px #ffd70033;opacity:0;transform:translateY(30px);animation:pirateFadeUp .8s 2s ease-out forwards;transition:transform .3s,box-shadow .3s,color .3s,border-color .3s}
+.pirate-play-button:before{content:"";position:absolute;inset:0;left:-120%;width:100%;background:linear-gradient(90deg,transparent,#ffd70066,transparent);transition:left .65s}
+.pirate-play-button:hover:before{left:120%}
+.pirate-play-button:hover{transform:scale(1.06) translateY(-3px);box-shadow:0 0 35px #ffd700,inset 0 0 10px #ffd70066;color:#fff;border-color:#fff}
+.pirate-play-button:active{transform:scale(.97) translateY(1px)}
+.pirate-save-panel{width:min(560px,92vw);margin-top:10px;text-align:center;animation:pirateSavePanelIn .55s cubic-bezier(.2,.8,.2,1) both}
+.pirate-save-panel[hidden]{display:none}
+.pirate-save-panel h2{color:#ffd700;font:clamp(22px,3vw,30px) Georgia,serif;letter-spacing:2px;margin:0 0 15px}
+.pirate-save-list{display:grid;gap:9px;max-height:42vh;overflow:auto;padding:4px}
+.pirate-save-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border:1px solid #4a6984;background:linear-gradient(110deg,#142433,#0b151e);color:#eee;text-align:left;font:14px "Share Tech Mono","Courier New",monospace;cursor:pointer;transition:transform .25s,border-color .25s,background .25s;animation:pirateSaveItemIn .4s both}
+.pirate-save-item:hover{transform:translateX(7px);border-color:#ffd700;background:#251c18}
+.pirate-save-item strong{color:#ffd700;font-weight:700}
+.pirate-save-item small{color:#8ca4b8;white-space:nowrap}
+.pirate-save-empty{padding:18px;color:#8ca4b8;border:1px dashed #4a6984}
+.pirate-play-button.pirate-back-intro{margin-top:13px;animation-delay:0s}
+@keyframes pirateOceanPulse{to{filter:hue-rotate(15deg);background-position:0 100%}}
+@keyframes pirateGridFloat{to{transform:rotateX(65deg) rotateZ(-360deg) translateZ(-100px)}}
+@keyframes pirateSymbolFly{0%{transform:translateY(100vh) rotate(0) scale(.5);opacity:0}10%,90%{opacity:.4}100%{transform:translateY(-20vh) rotate(720deg) scale(1.2);opacity:0}}
+@keyframes pirateFadeDown{to{opacity:1;transform:translateY(0)}}
+@keyframes pirateFadeUp{to{opacity:1;transform:translateY(0)}}
+@keyframes pirateTitleSlam{0%{opacity:0;transform:scale(3) translateZ(300px);filter:blur(10px)}70%{opacity:1;transform:scale(.95) translateZ(0);filter:blur(0)}100%{opacity:1;transform:scale(1) translateZ(0);filter:drop-shadow(0 8px 4px #000c)}}
+@keyframes pirateSavePanelIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes pirateSaveItemIn{from{opacity:0;transform:translateX(-25px)}to{opacity:1;transform:none}}
+#pirateGame.pirate-launching .pirate-intro-title-wrap{animation:pirateTitleFly .75s cubic-bezier(.6,0,.8,.2) both}
+#pirateGame.pirate-launching .pirate-credits{animation:pirateTitleFly .55s ease-in both}
+#pirateGame.pirate-launching .pirate-intro-actions{animation:pirateButtonsScatter .8s cubic-bezier(.7,0,.9,.2) both}
+#pirateGame.pirate-launching .pirate-ambient{animation:pirateSeaFlash .8s ease-in both}
+@keyframes pirateTitleFly{to{opacity:0;transform:translateY(-120vh) rotateX(70deg) scale(.4);filter:blur(12px)}}
+@keyframes pirateButtonsScatter{0%{opacity:1;transform:translateY(0) scale(1)}45%{opacity:1;transform:translateY(15px) scale(.9)}100%{opacity:0;transform:translate(120vw,-30vh) rotate(35deg) scale(.5)}}
+@keyframes pirateSeaFlash{50%{filter:brightness(2.2)}100%{opacity:0}}
+@media(max-width:520px){.pirate-play-button{min-width:min(190px,78vw)}.pirate-intro-title-wrap{margin-bottom:28px}.pirate-save-item{padding:11px 10px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){.pirate-intro *,.pirate-intro *:before{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 /* ---------- Pirate Game ---------- */
 #pirateGame{display:none;position:fixed;inset:0;z-index:15;background:var(--bg);color:#fff;overflow:hidden;padding:clamp(8px,1.5vh,18px) clamp(10px,2vw,26px);font-family:Arial,Helvetica,sans-serif}
 body.pirate-on #page,body.pirate-on #moreMenu{display:none}
@@ -231,7 +285,28 @@ body.pirate-on #pirateGame{display:flex}
   </div>
 </div>
 
-<div id="pirateGame" aria-label="The Pirate Game">
+<div id="pirateGame" aria-label="The Pirate Game" class="pirate-intro-active">
+  <section class="pirate-intro" id="pirateIntro">
+    <div class="pirate-ambient"></div>
+    <div class="pirate-grid-backdrop" aria-hidden="true"></div>
+    <div class="pirate-floats" aria-hidden="true"><span>A7</span><span>⚡</span><span>F4</span><span>×2</span><span>⚓</span></div>
+    <div class="pirate-intro-content" id="pirateIntroContent">
+      <div class="pirate-credits">IT'S TIME <span>TO PLAY</span></div>
+      <div class="pirate-intro-title-wrap">
+        <h1 class="pirate-intro-title">The Pirate Game</h1>
+        <p class="pirate-intro-subtitle">DOMINATE THE GRID</p>
+      </div>
+      <div class="pirate-intro-actions" id="pirateIntroActions">
+        <button class="pirate-play-button" id="pirateNewGame" type="button">New Game</button>
+        <button class="pirate-play-button" id="pirateLoadGame" type="button">Load Game</button>
+      </div>
+      <div class="pirate-save-panel" id="pirateSavePanel" hidden>
+        <h2>Saved Games</h2>
+        <div class="pirate-save-list" id="pirateSaveList"></div>
+        <button class="pirate-play-button pirate-back-intro" id="pirateLoadBack" type="button">Back</button>
+      </div>
+    </div>
+  </section>
   <div class="pirate-layout">
     <main class="pirate-board-wrap">
       <header class="pirate-header">
@@ -461,19 +536,85 @@ moreMenu.querySelectorAll("[data-choice]").forEach(button=>button.addEventListen
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!moreMenu.hidden)hideMenu();});
 
 const pirateBoard=$("pirateBoard"),piratePlayers=$("piratePlayers"),pirateTurn=$("pirateTurn"),pirateToast=$("pirateToast"),pirateBigPop=$("pirateBigPop");
-let pirateNames=[],pirateMoves=[],pirateRedoMoves=[],pirateMarks={},pirateLastRemoved=null,piratePopTimer=0,piratePopFadeTimer=0;
+let pirateNames=[],pirateMoves=[],pirateRedoMoves=[],pirateMarks={},pirateLastRemoved=null,piratePopTimer=0,piratePopFadeTimer=0,pirateSaves=[],activePirateSaveId=null;
 const pirateLetters="ABCDEFG",pirateStorageKey="cowChalkPirateGame";
-function savePirateState(){
-  try{localStorage.setItem(pirateStorageKey,JSON.stringify({names:pirateNames,moves:pirateMoves,redo:pirateRedoMoves,marks:pirateMarks,lastRemoved:pirateLastRemoved}))}catch(e){}
+function pirateSnapshot(){return {names:[...pirateNames],moves:[...pirateMoves],redo:[...pirateRedoMoves],marks:{...pirateMarks},lastRemoved:pirateLastRemoved}}
+function applyPirateSnapshot(data){
+  pirateNames=Array.isArray(data.names)?data.names.filter(n=>typeof n==="string").slice(0,50):[];
+  pirateMoves=Array.isArray(data.moves)?data.moves.slice(-5):[];
+  pirateRedoMoves=Array.isArray(data.redo)?data.redo.slice(-5):[];
+  pirateMarks=data.marks&&typeof data.marks==="object"?data.marks:{};
+  pirateLastRemoved=typeof data.lastRemoved==="string"?data.lastRemoved:null;
 }
-function loadPirateState(){
+function savePirateState(){
+  if(!activePirateSaveId)return;
+  try{
+    const save=pirateSaves.find(item=>item.id===activePirateSaveId);
+    if(!save)return;
+    save.updatedAt=Date.now();save.state=pirateSnapshot();
+    localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:activePirateSaveId}));
+  }catch(e){}
+}
+function loadPirateState(saveId){
   try{
     const data=JSON.parse(localStorage.getItem(pirateStorageKey)||"{}");
-    pirateNames=Array.isArray(data.names)?data.names.filter(n=>typeof n==="string").slice(0,50):[];
-    pirateMoves=Array.isArray(data.moves)?data.moves.slice(-5):[];
-    pirateRedoMoves=Array.isArray(data.redo)?data.redo.slice(-5):[];
-    pirateMarks=data.marks&&typeof data.marks==="object"?data.marks:{};pirateLastRemoved=typeof data.lastRemoved==="string"?data.lastRemoved:null;
-  }catch(e){pirateNames=[];pirateMoves=[];pirateRedoMoves=[];pirateMarks={}}
+    if(Array.isArray(data.saves)){
+      pirateSaves=data.saves.filter(item=>item&&typeof item.id==="string"&&item.state).sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
+    }else if(Array.isArray(data.names)||data.marks){
+      const now=Date.now(),id="save-"+now;
+      pirateSaves=[{id,createdAt:now,updatedAt:now,state:{names:data.names||[],moves:data.moves||[],redo:data.redo||[],marks:data.marks||{},lastRemoved:data.lastRemoved||null}}];
+      localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:null}));
+    }else pirateSaves=[];
+    const selected=pirateSaves.find(item=>item.id===saveId);
+    if(selected){activePirateSaveId=selected.id;applyPirateSnapshot(selected.state)}
+    else{activePirateSaveId=null;applyPirateSnapshot({})}
+  }catch(e){pirateSaves=[];activePirateSaveId=null;applyPirateSnapshot({})}
+}
+function createPirateSave(){
+  const now=Date.now(),id="save-"+now+"-"+Math.random().toString(36).slice(2,7);
+  const save={id,createdAt:now,updatedAt:now,state:pirateSnapshot()};
+  pirateSaves.unshift(save);activePirateSaveId=id;
+  try{localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:activePirateSaveId}))}catch(e){}
+}
+function formatPirateSaveDate(timestamp){
+  return new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(timestamp));
+}
+function renderPirateSaves(){
+  const list=$("pirateSaveList");list.innerHTML="";
+  const sorted=[...pirateSaves].sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));
+  if(!sorted.length){const empty=document.createElement("div");empty.className="pirate-save-empty";empty.textContent="No autosaves yet";list.append(empty);return}
+  sorted.forEach((save,index)=>{
+    const button=document.createElement("button");button.type="button";button.className="pirate-save-item";button.style.animationDelay=Math.min(index*.045,.4)+"s";
+    const label=document.createElement("strong");label.textContent="Autosave: "+formatPirateSaveDate(save.updatedAt||save.createdAt);
+    const detail=document.createElement("small");detail.textContent=(save.state.names||[]).length+" players · "+Object.keys(save.state.marks||{}).length+" squares";
+    button.append(label,detail);button.addEventListener("click",()=>startPirateSave(save.id));list.append(button);
+  });
+}
+function showPirateIntro(){
+  $("pirateGame").classList.add("pirate-intro-active");
+  $("pirateGame").classList.remove("pirate-launching");
+  $("pirateSavePanel").hidden=true;$("pirateIntroActions").hidden=false;
+  $("pirateIntroContent").classList.remove("pirate-load-view");
+  renderPirateSaves();
+}
+function startPirateSave(saveId){
+  loadPirateState(saveId);
+  $("pirateGame").classList.add("pirate-launching");
+  $("pirateIntroActions").hidden=true;$("pirateSavePanel").hidden=true;
+  setTimeout(()=>{
+    $("pirateGame").classList.remove("pirate-intro-active","pirate-launching");
+    try{localStorage.setItem("cowChalkScreen","pirate")}catch(e){}
+    renderPirate();if(pirateLastRemoved){$("pirateToastText").textContent=pirateLastRemoved+" was removed";pirateToast.hidden=false}
+  },780);
+}
+function startNewPirateGame(){
+  pirateNames=[];pirateMoves=[];pirateRedoMoves=[];pirateMarks={};pirateLastRemoved=null;
+  hidePirateToast();clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);pirateBigPop.hidden=true;
+  createPirateSave();startPirateSave(activePirateSaveId);
+}
+function openPirateSaveList(){
+  $("pirateIntroActions").hidden=true;$("pirateSavePanel").hidden=false;
+  $("pirateIntroContent").classList.add("pirate-load-view");renderPirateSaves();
 }
 function buildPirateBoard(){
   pirateBoard.innerHTML="";
@@ -514,7 +655,7 @@ function openPirateGame(){
   try{localStorage.setItem("cowChalkScreen","pirate")}catch(e){}
   document.body.classList.remove("realtime-on");document.body.classList.add("pirate-on");
   $("pageTitle").textContent="The Pirate Game";
-  hideMenu();renderPirate();
+  hideMenu();showPirateIntro();
 }
 function closePirateGame(){
   document.body.classList.remove("pirate-on");
@@ -614,6 +755,9 @@ $("pirateReset").addEventListener("click",()=>{
   pirateMarks={};pirateMoves=[];pirateRedoMoves=[];pirateNames=[];pirateLastRemoved=null;hidePirateToast();clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);pirateBigPop.hidden=true;pirateBigPop.classList.remove("fading");renderPirate();savePirateState();
 });
 $("pirateBack").addEventListener("click",closePirateGame);
+$("pirateNewGame").addEventListener("click",startNewPirateGame);
+$("pirateLoadGame").addEventListener("click",openPirateSaveList);
+$("pirateLoadBack").addEventListener("click",showPirateIntro);
 loadPirateState();
 window.addEventListener("pagehide",savePirateState);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")savePirateState()});
