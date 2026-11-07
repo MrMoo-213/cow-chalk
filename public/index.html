@@ -875,7 +875,7 @@ function pirateOpenGridSetup(){clearInterval(pirateRevealTimer);pirateOnlineGrid
 function pirateBuildRandomGrid(){const tiles=pirateCreateTiles();for(let i=tiles.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[tiles[i],tiles[j]]=[tiles[j],tiles[i]]}pirateOnlineGrid=tiles.concat([null]);pirateOnlineTray=[];pirateRenderGridSetup()}
 function pirateRenderGameBoard(){const board=$("pirateLiveGrid");board.replaceChildren();for(let i=0;i<49;i++){const tile=pirateOnlineGrid[i],cell=document.createElement("button");cell.type="button";cell.className="pirate-live-cell";cell.dataset.cell=String(i);if(tile){if(tile.type==="money")cell.textContent=String(tile.value);else cell.innerHTML=pirateSvgIcon(tile.icon)}cell.title=tile?tile.label||String(tile.value||""):"Empty";cell.addEventListener("click",()=>{if(pirateOnlineChosen[i])return;pirateOnlineChosen[i]=true;cell.classList.add("chosen");cell.disabled=true;if(tile&&tile.type==="money")pirateOnlineScore+=tile.value;else if(tile&&tile.id==="double")pirateOnlineScore*=2;else if(tile&&tile.id==="bomb")pirateOnlineScore=0;else if(tile&&tile.id==="bank"){pirateOnlineBank+=pirateOnlineScore;pirateOnlineScore=0}pirateUpdateOnlineScores()});board.append(cell)}}
 function pirateUpdateOnlineScores(){$("pirateOnlineScore").textContent="£"+pirateOnlineScore.toLocaleString("en-GB");$("pirateOnlineBank").textContent="Bank: £"+pirateOnlineBank.toLocaleString("en-GB")}
-function pirateStartOnlineGame(){if(pirateOnlineTray.length){$("pirateSetupCount").textContent="Place every tile before starting.";return}pirateShowStage("game");$("pirateOnlineGameTitle").textContent=pirateOnlineCurrentLobby.name||"The Pirate Game";pirateRenderGameBoard();pirateUpdateOnlineScores();$("pirateOnlineHostNext").hidden=!pirateOnlineIsHost; $("pirateOnlineHostNext").onclick=()=>{const cells=[...$("pirateLiveGrid").querySelectorAll(".pirate-live-cell:not(.chosen)")];if(!cells.length)return;cells[Math.floor(Math.random()*cells.length)].click()};}
+function pirateStartOnlineGame(){if(pirateOnlineTray.length){$("pirateSetupCount").textContent="Place every tile before starting.";return}pirateOnlineScore=0;pirateOnlineBank=0;pirateOnlineChosen={};pirateShowStage("game");$("pirateOnlineGameTitle").textContent=pirateOnlineCurrentLobby.name||"The Pirate Game";pirateRenderGameBoard();pirateUpdateOnlineScores();$("pirateOnlineHostNext").hidden=!pirateOnlineIsHost; $("pirateOnlineHostNext").onclick=()=>{const cells=[...$("pirateLiveGrid").querySelectorAll(".pirate-live-cell:not(.chosen)")];if(!cells.length)return;cells[Math.floor(Math.random()*cells.length)].click()};}
 function pirateOpenMap(){const map=$("pirateStageMap");map.hidden=false;pirateRenderBoats("pirateMapBoats");const layer=$("pirateMapTargets");layer.replaceChildren();pirateOnlineTargets.forEach((target,index)=>{const dot=document.createElement("button");dot.type="button";dot.className="pirate-map-target";dot.style.left=target.x+"%";dot.style.top=target.y+"%";dot.setAttribute("aria-label","Remove target "+(index+1));dot.addEventListener("click",event=>{event.stopPropagation();pirateOnlineTargets.splice(index,1);pirateOpenMap()});layer.append(dot)});$("pirateMapCanvas").onclick=event=>{if(pirateOnlineTargets.length>=3)return;const rect=event.currentTarget.getBoundingClientRect();pirateOnlineTargets.push({x:(event.clientX-rect.left)/rect.width*100,y:(event.clientY-rect.top)/rect.height*100});pirateOpenMap()}}
 $("pirateWaitingNameForm").addEventListener("submit",event=>{event.preventDefault();const name=$("pirateWaitingName").value.trim().replace(/\s+/g," ").slice(0,24);if(!name)return;localStorage.setItem("pirateOnlinePlayerName",name);let playerId=localStorage.getItem("pirateOnlinePlayerId");if(!playerId){playerId="player-"+Date.now()+"-"+Math.random().toString(36).slice(2,8);localStorage.setItem("pirateOnlinePlayerId",playerId)}pirateOnlineHostPlaying=pirateOnlineIsHost?pirateOnlineHostPlaying:true;pirateOnlinePlayers=pirateOnlineHostPlaying||!pirateOnlineIsHost?[{id:playerId,name,host:pirateOnlineIsHost,seat:null}]:[];$("pirateWaitingNameForm").hidden=true;$("pirateWaitingContent").hidden=true;pirateShowStage("seats");pirateRenderWaiting();});
 $("pirateWaitingDelete").addEventListener("click",()=>{pirateOnlineCurrentLobby=null;pirateOnlinePlayers=[];$("pirateOnlineStage").hidden=true;pirateShowOnlinePanel("pirateOnlinePanel");refreshPirateLobbies()});
@@ -1272,18 +1272,18 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;user-
 .pirate-tile-piece.money-tile{font:700 clamp(9px,1.8vh,17px) "Share Tech Mono",monospace;color:#ffd700}
 .pirate-tile-tray-wrap{height:100%;min-height:0;display:flex;flex-direction:column;border:1px solid #344e61;background:#0b1721;padding:8px;border-radius:5px}
 .pirate-tile-tray-wrap h3{margin:0 0 7px;color:#d6b86d;font-size:13px;letter-spacing:2px}
-.pirate-tile-tray{min-height:0;overflow:hidden;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(30px,1fr);gap:5px}
-.pirate-tile-tray .pirate-tile-piece{width:100%;height:100%;max-height:56px}
+.pirate-tile-tray{min-height:0;overflow:hidden;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:4px}
+.pirate-tile-tray .pirate-tile-piece{width:100%;height:100%;min-height:0;max-height:none}
 .pirate-tile-tray .money-tile{font-size:clamp(8px,1.4vh,13px)}
 .pirate-setup-footer{width:min(100%,1250px);height:34px;flex:none;display:flex;align-items:center;justify-content:space-between;color:#b6c4ce;font-size:12px}
 .pirate-setup-footer button:disabled{opacity:.35;cursor:not-allowed}
 .pirate-live-view{justify-content:space-between;padding-top:4px}
-.pirate-live-main{width:100%;flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 86px;gap:12px;align-items:center;justify-items:center}
-.pirate-live-grid{width:min(100%,calc(100dvh - 112px));height:min(100%,calc(100dvh - 112px));aspect-ratio:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(7,minmax(0,1fr));gap:3px}
+.pirate-live-main{position:relative;width:100%;flex:1;min-height:0;display:block}
+.pirate-live-grid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100%,calc(100dvh - 112px),calc(100vw - 100px));height:min(100%,calc(100dvh - 112px),calc(100vw - 100px));aspect-ratio:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(7,minmax(0,1fr));gap:3px}
 .pirate-live-cell{font:700 clamp(10px,2vh,18px) "Share Tech Mono",monospace;cursor:pointer;transition:border-color .15s,box-shadow .15s}
 .pirate-live-cell:hover:not(:disabled){border-color:#ffd700}.pirate-live-cell.chosen{border-color:#ffd700;box-shadow:inset 0 0 0 2px #ffd70055;background:#382c16;cursor:default}
 .pirate-live-cell:disabled{opacity:1}
-.pirate-live-tools{display:grid;gap:10px;width:100%}
+.pirate-live-tools{position:absolute;right:0;top:50%;transform:translateY(-50%);display:grid;gap:10px;width:76px}
 .pirate-defence-box{min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #8a6b39;border-radius:5px;background:linear-gradient(145deg,#172c3b,#0b1721);color:#e5c77e;font-size:12px}
 .pirate-defence-icon svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .pirate-defence-box strong{font-size:16px;color:#ffd700}
@@ -1312,7 +1312,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;user-
 }
 @media(max-height:540px){
  .pirate-stage-top{height:30px}.pirate-setup-grid{width:min(100%,calc(100dvh - 100px));height:min(100%,calc(100dvh - 100px))}
- .pirate-live-grid{width:min(100%,calc(100dvh - 82px));height:min(100%,calc(100dvh - 82px))}
+ .pirate-live-grid{width:min(100%,calc(100dvh - 82px),calc(100vw - 78px));height:min(100%,calc(100dvh - 82px),calc(100vw - 78px))}
  .pirate-boat-seat{height:42px}.pirate-boat-hull{padding:8px 10px 14px}
 }
 @media(max-width:430px){.pirate-setup-heading p{max-width:220px}.pirate-stage-leave{padding:6px 9px}.pirate-live-footer{height:40px}.pirate-live-footer-actions button{height:32px;min-width:36px}.pirate-live-score,.pirate-live-bank{font-size:12px}}
