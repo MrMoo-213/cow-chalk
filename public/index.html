@@ -1020,5 +1020,10 @@ body.pirate-on #moreMenu[hidden]{display:none!important}
 <script id="pirate-grid-cell-builder">
 (()=>{const grid=document.querySelector("#pirateGame>.pirate-grid-backdrop");if(grid&&!grid.children.length){const fragment=document.createDocumentFragment();for(let i=0;i<49;i++){const cell=document.createElement("div");cell.className="pirate-grid-cell";fragment.appendChild(cell)}grid.appendChild(fragment)}})();
 </script>
+<style id="pirate-intro-button-order-fix">
+#pirateGame .pirate-intro-actions>#pirateNewGame{animation-delay:2.3s!important}
+#pirateGame .pirate-intro-actions>#pirateLoadGame{animation-delay:2.85s!important}
+#pirateGame .pirate-more-button{animation:pirateMoreEntrance .8s 3.4s ease-out forwards!important}
+</style>
 </body>
 </html>
