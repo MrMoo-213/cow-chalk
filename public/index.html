@@ -291,6 +291,7 @@ function clearAlarm(){
 }
 document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{
   clearAlarm();
+  try{localStorage.setItem("cowChalkSound",r.value)}catch(e){}
 }));
 const showMoreButton=$("showMore");
 showMoreButton.addEventListener("click",()=>{
@@ -324,6 +325,7 @@ function showRealTime(){
 function selectOption(choice){
   hideMenu();
   if(choice==="wheel"||choice==="pirate")return;
+  try{localStorage.setItem("cowChalkScreen",choice)}catch(e){}
   clearInterval(clockId);realTimeMode=false;document.body.classList.remove("realtime-on");
   if(choice==="realtime"){showRealTime();return;}
   stopwatchMode=choice==="stopwatch";
@@ -335,6 +337,19 @@ moreMenu.addEventListener("click",event=>{if(event.target===moreMenu)hideMenu();
 moreMenu.querySelectorAll("[data-choice]").forEach(button=>button.addEventListener("click",()=>selectOption(button.dataset.choice)));
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!moreMenu.hidden)hideMenu();});
 render();
+try{
+  const savedSound=localStorage.getItem("cowChalkSound");
+  if(savedSound){
+    const soundOption=document.querySelector('input[name="alarm"][value="'+CSS.escape(savedSound)+'"]');
+    if(soundOption)soundOption.checked=true;
+  }
+  const savedScreen=localStorage.getItem("cowChalkScreen");
+  if(savedScreen==="realtime")showRealTime();
+  else if(savedScreen==="stopwatch"){
+    stopwatchMode=true;
+    page.classList.add("stopwatch-on");
+  }
+}catch(e){}
 })();
 </script>
 </body>
