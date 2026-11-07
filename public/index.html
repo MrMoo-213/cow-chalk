@@ -366,10 +366,31 @@ body.pirate-on #pirateGame{display:flex}
       </div>
       <div class="pirate-intro-actions" id="pirateIntroActions">
         <button class="pirate-play-button" id="pirateNewGame" type="button">New Game</button>
-        <button class="pirate-play-button" id="pirateLoadGame" type="button">Load Game</button>
+        <button class="pirate-play-button" id="pirateLoadGame" type="button">Play Online</button>
         <button class="pirate-play-button pirate-more-button" id="pirateIntroMore" type="button">More</button>
       </div>
-      <div class="pirate-save-panel" id="pirateSavePanel" hidden>
+      <section class="pirate-online-panel" id="pirateOnlinePanel" hidden>
+  <div class="pirate-online-heading"><h2>Play Online</h2><p>Choose a lobby to play with others</p></div>
+  <div class="pirate-online-toolbar"><span id="pirateOnlineStatus">Connecting to lobby server…</span><button type="button" id="pirateOnlineRefresh" aria-label="Refresh lobbies">↻ Refresh</button></div>
+  <div class="pirate-online-list" id="pirateOnlineList"></div>
+  <div class="pirate-online-actions"><button class="pirate-play-button" id="pirateOnlineBack" type="button">Back</button></div>
+  <button class="pirate-online-create-button" id="pirateOnlineCreateOpen" type="button" aria-label="Create lobby">+</button>
+</section>
+<section class="pirate-online-panel pirate-online-create-panel" id="pirateOnlineCreatePanel" hidden>
+  <div class="pirate-online-heading"><h2>Create Lobby</h2><p>Set up a game for others to join</p></div>
+  <form id="pirateOnlineCreateForm" class="pirate-online-form">
+    <label>Lobby name<input id="pirateLobbyName" maxlength="32" required placeholder="Enter a lobby name"></label>
+    <label class="pirate-online-check"><input id="pirateLobbyHostPlaying" type="checkbox" checked><span>I'm playing</span></label>
+    <label class="pirate-online-check"><input id="pirateLobbyPrivate" type="checkbox"><span>Private lobby</span></label>
+    <label id="pirateLobbyPinWrap" hidden>4-digit PIN<input id="pirateLobbyPin" inputmode="numeric" autocomplete="off" maxlength="4" pattern="[0-9]{4}" placeholder="0000"></label>
+    <label>Game mode<select id="pirateLobbyMode"><option value="Classic">Classic</option></select></label>
+    <label>Server<select id="pirateLobbyServer"><option value="sheets">Google Sheets — 5 second delay</option><option value="firestore" disabled>Firestore — 1 second delay (not set up)</option></select></label>
+    <p class="pirate-online-note">Google Sheets lobbies are available for up to 24 hours. Maximum 10 active lobbies.</p>
+    <div class="pirate-online-form-actions"><button type="button" id="pirateOnlineCreateBack">Back</button><button type="submit" id="pirateOnlineLaunch">Launch Now</button></div>
+    <p class="pirate-online-error" id="pirateOnlineCreateError" role="status"></p>
+  </form>
+</section>
+<div class="pirate-save-panel" id="pirateSavePanel" hidden>
         <h2>Saved Games</h2>
         <div class="pirate-save-list" id="pirateSaveList"></div>
         <button class="pirate-play-button pirate-back-intro" id="pirateLoadBack" type="button">Back</button>
@@ -676,7 +697,7 @@ function showPirateIntro(quick=false){
   setPirateIntroReady(quick?450:3900);
   $("pirateGame").classList.add("pirate-intro-active");
   $("pirateGame").classList.remove("pirate-launching","pirate-returning");
-  $("pirateSavePanel").hidden=true;$("pirateIntroActions").hidden=false;
+  $("pirateSavePanel").hidden=true;$("pirateOnlinePanel").hidden=true;$("pirateOnlineCreatePanel").hidden=true;clearInterval(pirateLobbyRefreshTimer);$("pirateIntroActions").hidden=false;
   $("pirateIntroContent").classList.remove("pirate-load-view");
   renderPirateSaves();
 }
@@ -714,6 +735,87 @@ function openPirateSaveList(){
   $("pirateIntroActions").hidden=true;$("pirateSavePanel").hidden=false;
   $("pirateIntroContent").classList.add("pirate-load-view");renderPirateSaves();
 }
+
+const PIRATE_LOBBY_API_URL="";
+let pirateLobbyRefreshTimer=0,pirateLobbyRequest=null;
+function pirateLobbyApi(params){
+  return new Promise((resolve,reject)=>{
+    if(!PIRATE_LOBBY_API_URL){reject(new Error("The Google Sheets lobby API has not been connected yet."));return}
+    const callback="pirateLobbyCallback"+Date.now()+Math.floor(Math.random()*10000);
+    const script=document.createElement("script"),query=new URLSearchParams({...params,callback});
+    window[callback]=data=>{delete window[callback];script.remove();resolve(data)};
+    script.onerror=()=>{delete window[callback];script.remove();reject(new Error("Could not reach the lobby server."))};
+    script.src=PIRATE_LOBBY_API_URL+"?"+query.toString();
+    document.head.appendChild(script);
+  });
+}
+function pirateOnlineStatus(message){$("pirateOnlineStatus").textContent=message}
+function renderOnlineLobbies(lobbies){
+  const list=$("pirateOnlineList");list.replaceChildren();
+  if(!lobbies.length){const empty=document.createElement("div");empty.className="pirate-online-empty";empty.textContent="No active lobbies. Create one with the + button.";list.append(empty);return}
+  lobbies.slice(0,10).forEach(lobby=>{
+    const item=document.createElement("div");item.className="pirate-online-lobby";
+    const info=document.createElement("div"),name=document.createElement("strong"),meta=document.createElement("small");
+    name.textContent=lobby.name;meta.textContent=(lobby.mode||"Classic")+" · "+(lobby.hostPlaying?"Host playing":"Host not playing")+" · "+(lobby.private?"Private":"Public");
+    info.append(name,meta);item.append(info);
+    if(lobby.private){const lock=document.createElement("small");lock.className="pirate-online-private";lock.textContent="PIN";item.append(lock)}
+    list.append(item);
+  });
+}
+async function refreshPirateLobbies(){
+  if($("pirateOnlinePanel").hidden||!$("pirateGame").classList.contains("pirate-intro-active"))return;
+  pirateOnlineStatus("Refreshing…");
+  try{
+    const result=await pirateLobbyApi({action:"list"});
+    if(!result||!result.ok)throw new Error(result&&result.error||"Lobby server error.");
+    renderOnlineLobbies(result.lobbies||[]);
+    pirateOnlineStatus("Updated "+new Date(result.updatedAt||Date.now()).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}));
+  }catch(error){
+    renderOnlineLobbies([]);
+    pirateLobbyStatusError(error.message);
+  }
+}
+function pirateLobbyStatusError(message){pirateOnlineStatus(message)}
+function openPirateOnline(){
+  $("pirateIntroActions").hidden=true;$("pirateSavePanel").hidden=true;$("pirateOnlineCreatePanel").hidden=true;$("pirateOnlinePanel").hidden=false;
+  $("pirateIntroContent").classList.add("pirate-load-view");
+  clearInterval(pirateLobbyRefreshTimer);refreshPirateLobbies();pirateLobbyRefreshTimer=setInterval(refreshPirateLobbies,15000);
+}
+function closePirateOnline(){
+  clearInterval(pirateLobbyRefreshTimer);pirateLobbyRefreshTimer=0;
+  $("pirateOnlinePanel").hidden=true;$("pirateOnlineCreatePanel").hidden=true;
+  $("pirateIntroActions").hidden=false;$("pirateIntroContent").classList.remove("pirate-load-view");
+}
+$("pirateLobbyPrivate").addEventListener("change",()=>{
+  const isPrivate=$("pirateLobbyPrivate").checked;
+  $("pirateLobbyPinWrap").hidden=!isPrivate;$("pirateLobbyPin").required=isPrivate;
+});
+$("pirateLobbyPin").addEventListener("input",event=>{event.target.value=event.target.value.replace(/\\D/g,"").slice(0,4)});
+$("pirateOnlineRefresh").addEventListener("click",refreshPirateLobbies);
+$("pirateOnlineBack").addEventListener("click",closePirateOnline);
+$("pirateOnlineCreateOpen").addEventListener("click",()=>{
+  $("pirateOnlinePanel").hidden=true;$("pirateOnlineCreatePanel").hidden=false;$("pirateOnlineCreateError").textContent="";
+});
+$("pirateOnlineCreateBack").addEventListener("click",()=>{
+  $("pirateOnlineCreatePanel").hidden=true;$("pirateOnlinePanel").hidden=false;refreshPirateLobbies();
+});
+$("pirateOnlineCreateForm").addEventListener("submit",async event=>{
+  event.preventDefault();const launch=$("pirateOnlineLaunch"),error=$("pirateOnlineCreateError");
+  error.textContent="";launch.disabled=true;launch.textContent="Launching…";
+  try{
+    const result=await pirateLobbyApi({
+      action:"create",name:$("pirateLobbyName").value.trim(),
+      hostPlaying:String($("pirateLobbyHostPlaying").checked),
+      private:String($("pirateLobbyPrivate").checked),pin:$("pirateLobbyPin").value,
+      mode:$("pirateLobbyMode").value,server:$("pirateLobbyServer").value
+    });
+    if(!result||!result.ok)throw new Error(result&&result.error||"Could not create the lobby.");
+    $("pirateOnlineCreateForm").reset();$("pirateLobbyPinWrap").hidden=true;$("pirateLobbyPin").required=false;
+    $("pirateOnlineCreatePanel").hidden=true;$("pirateOnlinePanel").hidden=false;await refreshPirateLobbies();
+  }catch(err){error.textContent=err.message}
+  finally{launch.disabled=false;launch.textContent="Launch Now"}
+});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&!$("pirateOnlinePanel").hidden)refreshPirateLobbies()});
 function buildPirateBoard(){
   pirateBoard.innerHTML="";
   pirateBoard.append(document.createElement("div"));
@@ -875,7 +977,7 @@ $("pirateReset").addEventListener("click",()=>{
 });
 $("pirateBack").addEventListener("click",returnToPirateIntro);
 $("pirateNewGame").addEventListener("click",startNewPirateGame);
-$("pirateLoadGame").addEventListener("click",openPirateSaveList);
+$("pirateLoadGame").addEventListener("click",openPirateOnline);
 $("pirateLoadBack").addEventListener("click",()=>showPirateIntro(true));
 $("pirateIntroMore").addEventListener("click",()=>{showMenu()});
 loadPirateState();
@@ -1032,6 +1134,34 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;user-
 #pirateGame .pirate-intro-actions>#pirateNewGame{animation-delay:2.3s!important}
 #pirateGame .pirate-intro-actions>#pirateLoadGame{animation-delay:2.85s!important}
 #pirateGame .pirate-more-button{animation:pirateMoreEntrance .8s 3.4s ease-out forwards!important}
+</style>
+
+<style id="pirate-online-styles">
+#pirateGame .pirate-online-panel{position:relative;z-index:8;width:min(620px,92vw);max-height:calc(100dvh - 38px);min-height:min(390px,70dvh);margin-top:12px;padding:24px 22px 20px;background:linear-gradient(145deg,rgba(16,31,43,.97),rgba(7,15,22,.98));border:1px solid #806b36;box-shadow:0 0 32px #000b,inset 0 0 24px #ffd7000d;display:flex;flex-direction:column;gap:14px;animation:pirateSavePanelIn .4s ease both}
+#pirateGame .pirate-online-panel[hidden]{display:none!important}
+#pirateGame .pirate-online-heading{text-align:center}
+#pirateGame .pirate-online-heading h2{margin:0;color:#ffd700;font-size:clamp(1.45rem,4vw,2rem);letter-spacing:3px;text-transform:uppercase}
+#pirateGame .pirate-online-heading p{margin:7px 0 0;color:#9aabba;font-size:.8rem;letter-spacing:1px}
+#pirateGame .pirate-online-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#9aabba;font-size:.75rem}
+#pirateGame .pirate-online-toolbar button,#pirateGame .pirate-online-form-actions button{border:1px solid #806b36;background:#172634;color:#ffd700;padding:9px 13px;font:inherit;cursor:pointer}
+#pirateGame .pirate-online-list{display:grid;gap:8px;overflow:auto;min-height:90px;align-content:start;padding:2px}
+#pirateGame .pirate-online-empty{padding:26px 12px;text-align:center;border:1px dashed #40576a;color:#91a5b5;font-size:.85rem}
+#pirateGame .pirate-online-lobby{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #40576a;background:linear-gradient(100deg,#142533,#0b151e);color:#eee;text-align:left}
+#pirateGame .pirate-online-lobby strong{display:block;color:#ffd700;font-size:.95rem}
+#pirateGame .pirate-online-lobby small{display:block;margin-top:5px;color:#9aabba;font-size:.7rem}
+#pirateGame .pirate-online-lobby .pirate-online-private{color:#d8b95c}
+#pirateGame .pirate-online-actions{display:flex;justify-content:center;margin-top:auto}
+#pirateGame .pirate-online-create-button{position:absolute;right:18px;bottom:18px;width:52px;height:52px;border:1px solid #ffe58a;border-radius:50%;background:linear-gradient(145deg,#ffd700,#a66b12);color:#111;font-size:2rem;line-height:1;cursor:pointer;box-shadow:0 0 18px #ffd70066}
+#pirateGame .pirate-online-form{display:grid;gap:12px;overflow:auto;padding:2px 4px}
+#pirateGame .pirate-online-form>label{display:grid;gap:6px;color:#d8cda8;font-size:.78rem;letter-spacing:.5px}
+#pirateGame .pirate-online-form input:not([type=checkbox]),#pirateGame .pirate-online-form select{width:100%;min-height:40px;padding:9px 11px;border:1px solid #52677a;background:#0b151e;color:#fff;font:inherit;outline:none}
+#pirateGame .pirate-online-form .pirate-online-check{display:flex;align-items:center;gap:9px;color:#eee}
+#pirateGame .pirate-online-form input[type=checkbox]{width:17px;height:17px;accent-color:#ffd700}
+#pirateGame .pirate-online-note{margin:0;color:#91a5b5;font-size:.7rem;line-height:1.5}
+#pirateGame .pirate-online-form-actions{display:flex;justify-content:space-between;gap:12px}
+#pirateGame .pirate-online-form-actions button:last-child{background:linear-gradient(110deg,#ffd700,#b77c18);color:#17120a;border-color:#ffe58a;font-weight:700}
+#pirateGame .pirate-online-error{min-height:18px;margin:0;color:#ff9a8d;font-size:.75rem}
+@media(max-width:520px){#pirateGame .pirate-online-panel{padding:18px 14px 16px;min-height:65dvh}#pirateGame .pirate-online-create-button{right:12px;bottom:12px}}
 </style>
 </body>
 </html>
