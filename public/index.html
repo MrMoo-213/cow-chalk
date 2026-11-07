@@ -230,7 +230,42 @@ body.pirate-on #pirateGame{display:flex}
 
 
 </style>
-</head>
+
+<style id="pirate-intro-reference-style">
+#pirateGame .pirate-intro{background:transparent;font-family:'Share Tech Mono',monospace;perspective:1000px}
+#pirateGame .pirate-ambient{background:radial-gradient(circle at 50% 50%,rgba(26,47,68,.4) 0%,rgba(10,17,24,1) 80%),linear-gradient(0deg,rgba(139,0,0,.15) 0%,transparent 100%);animation:pirateOceanPulse 8s ease-in-out infinite alternate}
+#pirateGame .pirate-grid-backdrop{width:min(700px,90vw);height:min(700px,90vw);opacity:.12;border:2px solid #4a6984;transform:rotateX(60deg) rotateZ(-30deg) translateZ(-100px);animation:pirateReferenceGrid 20s linear infinite}
+#pirateGame .pirate-floats span{color:#4a6984;font-size:2rem;font-weight:bold;animation:pirateSymbolFly 12s infinite linear}
+#pirateGame .pirate-floats span:nth-child(1){top:20%;left:10%;animation-delay:0s}
+#pirateGame .pirate-floats span:nth-child(2){top:70%;left:15%;animation-delay:3s;color:#ffd700;font-size:3rem}
+#pirateGame .pirate-floats span:nth-child(3){top:40%;left:80%;animation-delay:1.5s}
+#pirateGame .pirate-floats span:nth-child(4){top:80%;left:75%;animation-delay:4.5s}
+#pirateGame .pirate-floats span:nth-child(5){top:15%;left:60%;animation-delay:6s}
+#pirateGame .pirate-intro-content{width:100%;max-width:800px;padding:20px;max-height:100dvh;overflow-y:auto;justify-content:center}
+#pirateGame .pirate-credits{font-size:.9rem;text-transform:uppercase;letter-spacing:4px;color:#4a6984;opacity:0;transform:translateY(-20px);animation:pirateFadeDown 1s cubic-bezier(.19,1,.22,1) forwards;animation-delay:.5s;margin-bottom:10px}
+#pirateGame .pirate-credits span{color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.3)}
+#pirateGame .pirate-intro-title-wrap{position:relative;margin-bottom:40px}
+#pirateGame .pirate-intro-title{font-family:'Pirata One',cursive;font-size:clamp(3.1rem,10.4vw,6.5rem);color:#eee;text-transform:uppercase;letter-spacing:2px;line-height:1;margin:0;filter:drop-shadow(0 15px 20px rgba(0,0,0,.7));opacity:0;transform:scale(2.5) translateZ(300px);animation:pirateTitleSlam .6s cubic-bezier(.175,.885,.32,1.275) forwards;animation-delay:1.2s}
+#pirateGame .pirate-intro-subtitle{color:#c0c0c0;font-size:clamp(1rem,2.1vw,1.3rem);letter-spacing:clamp(3px,.7vw,6px);text-transform:uppercase;margin-top:15px;opacity:0;transform:translateY(20px);animation:pirateFadeUp .8s ease-out forwards;animation-delay:2s}
+#pirateGame .pirate-intro-actions{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;width:100%}
+#pirateGame .pirate-play-button{position:relative;min-width:230px;background:linear-gradient(135deg,#8b0000 0%,#500 100%);color:#ffd700;font-family:'Share Tech Mono',monospace;font-size:1.5rem;font-weight:bold;padding:18px 45px;border:2px solid #ffd700;border-radius:4px;cursor:pointer;text-transform:uppercase;letter-spacing:3px;overflow:hidden;box-shadow:0 0 20px rgba(139,0,0,.6),inset 0 0 15px rgba(255,215,0,.2);opacity:0;transform:translateY(30px);animation:pirateFadeUp .8s ease-out forwards;animation-delay:2.6s;transition:all .3s ease}
+#pirateGame .pirate-play-button:before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,215,0,.4),transparent);transition:none}
+#pirateGame .pirate-play-button:hover:before{left:100%;transition:left .6s linear}
+#pirateGame .pirate-play-button:hover{transform:scale(1.05) translateY(-2px);box-shadow:0 0 35px #ffd700,inset 0 0 10px rgba(255,215,0,.4);color:#fff;border-color:#fff}
+#pirateGame .pirate-play-button:active{transform:scale(.98) translateY(1px)}
+#pirateGame .pirate-save-panel{width:min(560px,92vw);max-height:calc(100dvh - 40px);margin-top:0}
+#pirateGame .pirate-save-panel h2{font-family:'Pirata One',cursive;font-size:2.2rem;text-transform:uppercase}
+#pirateGame .pirate-play-button.pirate-back-intro{margin-top:14px;animation-delay:0s}
+#pirateGame .pirate-save-list{max-height:min(48vh,420px)}
+@keyframes pirateReferenceGrid{0%{transform:rotateX(65deg) rotateZ(0deg) translateZ(-100px)}100%{transform:rotateX(65deg) rotateZ(-360deg) translateZ(-100px)}}
+#pirateGame.pirate-launching .pirate-intro-content{animation:pirateReferenceLaunch .78s cubic-bezier(.7,0,.2,1) both}
+#pirateGame.pirate-launching .pirate-intro-title{animation:pirateReferenceTitleExit .78s cubic-bezier(.7,0,.2,1) both}
+#pirateGame.pirate-launching .pirate-play-button{animation:pirateReferenceButtonsExit .55s cubic-bezier(.7,0,.2,1) both}
+@keyframes pirateReferenceLaunch{to{transform:translateY(-115vh) scale(.82);opacity:0}}
+@keyframes pirateReferenceTitleExit{to{transform:translateY(-120vh) rotate(-8deg) scale(.8);opacity:0}}
+@keyframes pirateReferenceButtonsExit{to{transform:translateY(120vh) rotate(8deg);opacity:0}}
+@media(max-width:520px){#pirateGame .pirate-play-button{font-size:1.15rem;padding:15px 28px;min-width:min(230px,82vw)}}
+</style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
