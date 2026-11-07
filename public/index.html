@@ -530,7 +530,7 @@ function choosePirateSquare(coordinate){
   savePirateState();showPiratePop(coordinate);
 }
 function addPiratePlayer(name){
-  name=name.trim().replace(/\s+/g," ").toLocaleLowerCase().replace(/(^|[\s-\'])\p{L}/gu,letter=>letter.toLocaleUpperCase());
+  name=name.trim().replace(/\s+/g," ").toLocaleLowerCase().replace(/(^|[\s'-])([a-z])/g,(match,prefix,letter)=>prefix+letter.toLocaleUpperCase());
   if(!name)return;
   pirateNames.push(name);$("pirateName").value="";$("pirateAddForm").classList.remove("open");
   renderPirate();savePirateState();
