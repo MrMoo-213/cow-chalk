@@ -102,10 +102,10 @@ body.pirate-on #pirateGame{display:flex}
 .pirate-icon:disabled{opacity:.38;filter:grayscale(.5);cursor:default;transform:none}
 .pirate-board{display:grid;grid-template-columns:clamp(22px,3.4vh,30px) repeat(7,minmax(0,1fr));grid-template-rows:clamp(22px,3.4vh,30px) repeat(7,minmax(0,1fr));width:min(100%,calc(100dvh - 105px));height:min(100%,calc(100dvh - 105px));aspect-ratio:1/1;max-height:calc(100dvh - 105px);margin:0 auto;background:var(--bg);flex:none;touch-action:manipulation}
 .pirate-axis{display:grid;place-items:center;font-size:clamp(12px,2.3vh,18px);font-weight:800;color:#fff}
-.pirate-square{position:relative;display:block;min-width:0;min-height:0;width:100%;height:100%;border:1px solid #222;border-radius:0;background:#fff;padding:0;overflow:hidden;appearance:none;-webkit-appearance:none;touch-action:manipulation}
-.pirate-square:hover:not(.marked){background:#f2f2f2}
+.pirate-square{position:relative;display:block;min-width:0;min-height:0;width:100%;height:100%;border:1px solid #fff;border-radius:0;background:var(--bg);padding:0;overflow:hidden;appearance:none;-webkit-appearance:none;touch-action:manipulation}
+.pirate-square:hover:not(.marked){background:#07505b}
 .pirate-square:focus-visible{outline:3px solid #ed244f;outline-offset:-3px;z-index:1}
-.pirate-square.marked{cursor:default;background:#fff}
+.pirate-square.marked{cursor:default;background:var(--bg)}
 .pirate-cross{position:absolute;inset:8%;width:84%;height:84%;overflow:visible}
 .pirate-cross path{fill:none;stroke:#e32636;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:120;filter:none}
 .pirate-square.just-marked .pirate-cross path{animation:drawPirateCross .42s ease-out forwards}
@@ -456,7 +456,7 @@ function loadPirateState(){
     pirateNames=Array.isArray(data.names)?data.names.filter(n=>typeof n==="string").slice(0,50):[];
     pirateMoves=Array.isArray(data.moves)?data.moves.slice(-5):[];
     pirateRedoMoves=Array.isArray(data.redo)?data.redo.slice(-5):[];
-    pirateMarks=data.marks&&typeof data.marks==="object"?Object.fromEntries(Object.entries(data.marks).filter(([coordinate,marked])=>/^[A-G][1-7]$/.test(coordinate)&&marked===true)):{};pirateLastRemoved=typeof data.lastRemoved==="string"?data.lastRemoved:null;
+    pirateMarks=data.marks&&typeof data.marks==="object"?data.marks:{};pirateLastRemoved=typeof data.lastRemoved==="string"?data.lastRemoved:null;
   }catch(e){pirateNames=[];pirateMoves=[];pirateRedoMoves=[];pirateMarks={}}
 }
 function buildPirateBoard(){
