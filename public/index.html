@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#00343d">
 <title id="pageTitle">Cow Chalk Timer</title>
 <link rel="icon" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/pictures/favicon1.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 /* --u = one "design pixel". The page is drawn on a 1200 x 800 grid and
    scaled to fit the window, so proportions stay identical at any size. */
@@ -86,7 +89,6 @@ body.realtime-on #realDate{display:block}
 body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:center}
 
 
-@import url("https://fonts.googleapis.com/css2?family=Pirata+One&family=Share+Tech+Mono&display=swap");
 /* ---------- Pirate Game Intro ---------- */
 #pirateGame{background:#0a1118}
 .pirate-intro{position:absolute;inset:0;z-index:30;display:none;overflow:hidden;align-items:center;justify-content:center;background:#0a1118;color:#eee;font-family:"Share Tech Mono","Courier New",monospace;perspective:1000px}
@@ -115,10 +117,15 @@ body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:cent
 .pirate-play-button:hover:before{left:120%}
 .pirate-play-button:hover{transform:scale(1.06) translateY(-3px);box-shadow:0 0 35px #ffd700,inset 0 0 10px #ffd70066;color:#fff;border-color:#fff}
 .pirate-play-button:active{transform:scale(.97) translateY(1px)}
-.pirate-save-panel{width:min(560px,92vw);margin-top:10px;text-align:center;animation:pirateSavePanelIn .55s cubic-bezier(.2,.8,.2,1) both}
-.pirate-save-panel[hidden]{display:none}
+.pirate-save-panel{width:min(560px,92vw);max-height:calc(100dvh - 34px);margin-top:10px;text-align:center;display:flex;flex-direction:column;min-height:0;animation:pirateSavePanelIn .55s cubic-bezier(.2,.8,.2,1) both}
+.pirate-save-panel[hidden]{display:none!important}
+.pirate-intro-content{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#4a6984 transparent}
+#pirateGame:not(.pirate-intro-active)>.pirate-ambient{opacity:1}
+#pirateGame:not(.pirate-intro-active)>.pirate-grid-backdrop{opacity:.09}
+#pirateGame:not(.pirate-intro-active)>.pirate-floats{opacity:1}
+#pirateGame:not(.pirate-intro-active) .pirate-floats span{opacity:.32}
 .pirate-save-panel h2{color:#ffd700;font:clamp(22px,3vw,30px) Georgia,serif;letter-spacing:2px;margin:0 0 15px}
-.pirate-save-list{display:grid;gap:9px;max-height:42vh;overflow:auto;padding:4px}
+.pirate-save-list{display:grid;gap:9px;max-height:min(48vh,420px);min-height:0;overflow:auto;padding:4px;overscroll-behavior:contain}
 .pirate-save-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border:1px solid #4a6984;background:linear-gradient(110deg,#142433,#0b151e);color:#eee;text-align:left;font:14px "Share Tech Mono","Courier New",monospace;cursor:pointer;transition:transform .25s,border-color .25s,background .25s;animation:pirateSaveItemIn .4s both}
 .pirate-save-item:hover{transform:translateX(7px);border-color:#ffd700;background:#251c18}
 .pirate-save-item strong{color:#ffd700;font-weight:700}
@@ -143,35 +150,35 @@ body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:cent
 @media(max-width:520px){.pirate-play-button{min-width:min(190px,78vw)}.pirate-intro-title-wrap{margin-bottom:28px}.pirate-save-item{padding:11px 10px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){.pirate-intro *,.pirate-intro *:before{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 /* ---------- Pirate Game ---------- */
-#pirateGame{display:none;position:fixed;inset:0;z-index:15;background:var(--bg);color:#fff;overflow:hidden;padding:clamp(8px,1.5vh,18px) clamp(10px,2vw,26px);font-family:Arial,Helvetica,sans-serif}
+#pirateGame{display:none;position:fixed;inset:0;z-index:15;background:#0a1118;color:#eee;overflow:hidden;padding:clamp(8px,1.5vh,18px) clamp(10px,2vw,26px);font-family:"Share Tech Mono","Courier New",monospace}
 body.pirate-on #page,body.pirate-on #moreMenu{display:none}
 body.pirate-on #pirateGame{display:flex}
-.pirate-layout{width:min(1180px,100%);height:100%;min-height:0;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,270px);gap:clamp(14px,3vw,38px);align-items:center}
+.pirate-layout{position:relative;z-index:2;width:min(1180px,100%);height:100%;min-height:0;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,270px);gap:clamp(14px,3vw,38px);align-items:center}
 .pirate-board-wrap{width:100%;min-width:0;display:flex;flex-direction:column;justify-content:center;min-height:0}
 .pirate-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 clamp(5px,1.5vh,14px)}
-.pirate-heading{font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(25px,4.3vh,43px);font-weight:500;letter-spacing:-2px;margin:0;color:#fff;white-space:nowrap}
+.pirate-heading,.pirate-next-label{font-family:"Pirata One","Old English Text MT",Georgia,serif;letter-spacing:1px;text-shadow:0 5px 12px #000b}.pirate-heading{font-size:clamp(30px,5vh,52px);font-weight:400;margin:0;color:#eee;white-space:nowrap}
 .pirate-tools{display:flex;gap:6px;align-items:center}
-.pirate-icon{width:clamp(30px,3.8vh,39px);height:clamp(30px,3.8vh,39px);display:grid;place-items:center;border:2px solid #c42c68;border-radius:6px;background:linear-gradient(#ff82b8 0,#ff4f91 48%,#ff3c82 100%);color:#fff;font-size:clamp(17px,2.5vh,23px);font-weight:900;line-height:1;padding:0;text-shadow:0 1px 2px #b51b5a;box-shadow:inset 0 2px 0 #ffffff55,0 2px 3px #0008;transition:filter .15s,transform .15s}
+.pirate-icon{width:clamp(32px,4vh,42px);height:clamp(32px,4vh,42px);display:grid;place-items:center;border:1px solid #ffd700;border-radius:3px;background:linear-gradient(135deg,#8b0000,#500);color:#ffd700;font:700 clamp(17px,2.5vh,23px) "Share Tech Mono",monospace;line-height:1;padding:0;box-shadow:0 0 12px #8b000077,inset 0 0 8px #ffd70022;transition:filter .15s,transform .15s}
 .pirate-icon:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .pirate-side>.pirate-icon{display:grid;margin:0 auto}
 .pirate-icon:active{transform:translateY(1px)}
 .pirate-icon:disabled{opacity:.38;filter:grayscale(.5);cursor:default;transform:none}
 .pirate-board{display:grid;grid-template-columns:clamp(22px,3.4vh,30px) repeat(7,minmax(0,1fr));grid-template-rows:clamp(22px,3.4vh,30px) repeat(7,minmax(0,1fr));width:min(100%,calc(100dvh - 105px));height:min(100%,calc(100dvh - 105px));aspect-ratio:1/1;max-height:calc(100dvh - 105px);margin:0 auto;background:var(--bg);flex:none;touch-action:manipulation}
 .pirate-axis{display:grid;place-items:center;font-size:clamp(12px,2.3vh,18px);font-weight:800;color:#fff}
-.pirate-square{position:relative;display:block;min-width:0;min-height:0;width:100%;height:100%;border:1px solid #fff;border-radius:0;background:var(--bg);padding:0;overflow:hidden;appearance:none;-webkit-appearance:none;touch-action:manipulation}
-.pirate-square:hover:not(.marked){background:#07505b}
+.pirate-square{position:relative;display:block;min-width:0;min-height:0;width:100%;height:100%;border:1px solid #66849a;border-radius:2px;background:linear-gradient(145deg,#142b3b,#0b1924);padding:0;overflow:hidden;appearance:none;-webkit-appearance:none;touch-action:manipulation;transition:background .18s,border-color .18s}
+.pirate-square:hover:not(.marked){background:linear-gradient(145deg,#29465a,#142b3b);border-color:#ffd700}
 .pirate-square:focus-visible{outline:3px solid #ed244f;outline-offset:-3px;z-index:1}
-.pirate-square.marked{cursor:default;background:var(--bg)}
+.pirate-square.marked{cursor:default;background:#0a1118;border-color:#4a6984}
 .pirate-cross{position:absolute;inset:8%;width:84%;height:84%;overflow:visible}
 .pirate-cross path{fill:none;stroke:#e32636;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:120;filter:none}
 .pirate-square.just-marked .pirate-cross path{animation:drawPirateCross .42s ease-out forwards}
 @keyframes drawPirateCross{to{stroke-dashoffset:0}}
 @keyframes piratePlayerIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 .pirate-side{width:100%;align-self:start;min-width:0;padding-top:clamp(4px,1.5vh,16px)}
-.pirate-next-label{font-family:"Segoe Print","Comic Sans MS",cursive;color:#fff;font-size:clamp(25px,4.3vh,43px);font-weight:500;text-decoration:none;text-underline-offset:0;letter-spacing:-2px;margin:0 0 clamp(12px,2.5vh,24px);white-space:nowrap}
-.pirate-turn{font-size:clamp(15px,2.2vh,19px);font-weight:700;line-height:1.3;margin:0 0 12px;min-height:2.6em;color:#fff}
+.pirate-next-label{color:#ffd700;font-size:clamp(28px,4.5vh,42px);font-weight:400;text-decoration:none;margin:0 0 clamp(12px,2.5vh,24px);white-space:normal}
+.pirate-turn{font-size:clamp(15px,2.2vh,19px);font-weight:700;line-height:1.3;margin:0 0 12px;min-height:2.6em;color:#c0c0c0}
 .pirate-players{display:grid;gap:6px;margin:0 0 12px;padding:0;list-style:none;max-height:30vh;overflow:auto;scrollbar-width:none;overscroll-behavior:contain}.pirate-players::-webkit-scrollbar{display:none;width:0;height:0}
-.pirate-player{font-size:clamp(13px,1.9vh,16px);padding:5px 0;border-bottom:1px solid #ffffff40;color:#fff;font-weight:500;animation:piratePlayerIn .32s cubic-bezier(.2,.8,.2,1) both}
+.pirate-player{font-size:clamp(13px,1.9vh,16px);padding:5px 0;border-bottom:1px solid #4a6984;color:#eee;font-weight:500;animation:piratePlayerIn .32s cubic-bezier(.2,.8,.2,1) both}
 .pirate-player:first-child{font-weight:800}
 .pirate-add{display:none;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin:9px 0 10px}
 .pirate-add.open{display:grid}
@@ -288,10 +295,10 @@ body.pirate-on #pirateGame{display:flex}
 </div>
 
 <div id="pirateGame" aria-label="The Pirate Game" class="pirate-intro-active">
+  <div class="pirate-ambient"></div>
+  <div class="pirate-grid-backdrop" aria-hidden="true"></div>
+  <div class="pirate-floats" aria-hidden="true"><span>A7</span><span>⚡</span><span>F4</span><span>×2</span><span>⚓</span></div>
   <section class="pirate-intro" id="pirateIntro">
-    <div class="pirate-ambient"></div>
-    <div class="pirate-grid-backdrop" aria-hidden="true"></div>
-    <div class="pirate-floats" aria-hidden="true"><span>A7</span><span>⚡</span><span>F4</span><span>×2</span><span>⚓</span></div>
     <div class="pirate-intro-content" id="pirateIntroContent">
       <div class="pirate-credits">IT'S TIME <span>TO PLAY</span></div>
       <div class="pirate-intro-title-wrap">
@@ -561,12 +568,21 @@ function loadPirateState(saveId){
   try{
     const data=JSON.parse(localStorage.getItem(pirateStorageKey)||"{}");
     if(Array.isArray(data.saves)){
-      pirateSaves=data.saves.filter(item=>item&&typeof item.id==="string"&&item.state).sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
+      const cutoff=Date.now()-30*24*60*60*1000;
+      pirateSaves=data.saves.filter(item=>{
+        if(!item||typeof item.id!=="string"||!item.state)return false;
+        const state=item.state,updated=item.updatedAt||item.createdAt||0;
+        const blank=(!Array.isArray(state.names)||state.names.length===0)&&(!state.marks||Object.keys(state.marks).length===0);
+        return updated>=cutoff&&!blank;
+      }).sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
     }else if(Array.isArray(data.names)||data.marks){
       const now=Date.now(),id="save-"+now;
-      pirateSaves=[{id,createdAt:now,updatedAt:now,state:{names:data.names||[],moves:data.moves||[],redo:data.redo||[],marks:data.marks||{},lastRemoved:data.lastRemoved||null}}];
+      const legacyState={names:data.names||[],moves:data.moves||[],redo:data.redo||[],marks:data.marks||{},lastRemoved:data.lastRemoved||null};
+      const legacyBlank=legacyState.names.length===0&&Object.keys(legacyState.marks).length===0;
+      pirateSaves=legacyBlank?[]:[{id,createdAt:now,updatedAt:now,state:legacyState}];
       localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:null}));
     }else pirateSaves=[];
+    localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:data.activeId||null}));
     const selected=pirateSaves.find(item=>item.id===saveId);
     if(selected){activePirateSaveId=selected.id;applyPirateSnapshot(selected.state)}
     else{activePirateSaveId=null;applyPirateSnapshot({})}
