@@ -590,9 +590,10 @@ function showRealTime(){
   clearInterval(clockId);updateClock();clockId=setInterval(updateClock,10);
 }
 function selectOption(choice){
+  const previousScreen=localStorage.getItem("cowChalkPreviousScreen")||"timer";
   hideMenu();
   if(choice==="wheel"){try{localStorage.setItem("cowChalkScreen","timer")}catch(e){}return;}
-  if(choice==="pirate"){openPirateGame();return;}
+  if(choice==="pirate"){openPirateGame(previousScreen==="pirate");return;}
   try{localStorage.setItem("cowChalkScreen",choice)}catch(e){}
   clearInterval(clockId);realTimeMode=false;document.body.classList.remove("realtime-on","pirate-on");
   if(choice==="realtime"){showRealTime();return;}
@@ -761,13 +762,12 @@ function renderPirate(){
   $("pirateRedo").classList.toggle("is-visible",pirateRedoMoves.length>0);
   $("pirateReset").classList.toggle("is-visible",pirateMoves.length>0||pirateNames.length>0);
 }
-function openPirateGame(){
-  setPirateIntroReady();
+function openPirateGame(quick=false){
   stopLoop();clearInterval(clockId);clearAlarm();
   try{localStorage.setItem("cowChalkScreen","pirate")}catch(e){}
   document.body.classList.remove("realtime-on");document.body.classList.add("pirate-on");
   $("pageTitle").textContent="The Pirate Game";
-  hideMenu();showPirateIntro();
+  hideMenu();showPirateIntro(quick);
 }
 function closePirateGame(){
   document.body.classList.remove("pirate-on");
@@ -902,6 +902,15 @@ try{
 })();
 </script>
 
+<style id="pirate-return-and-save-fixes">
+#pirateGame .pirate-intro-actions>.pirate-play-button{animation-delay:.45s!important;animation-duration:.65s!important}
+#pirateGame .pirate-intro-actions>#pirateLoadGame{animation-delay:.7s!important}
+#pirateGame .pirate-more-button{animation:pirateMoreEntrance .65s 1s ease-out forwards!important}
+#pirateGame .pirate-save-panel{flex:0 1 auto!important}
+#pirateGame .pirate-save-list{width:min(900px,100%)!important;max-height:min(55vh,480px)!important;flex:0 1 auto!important;align-self:center!important;align-content:start!important;grid-auto-rows:max-content!important}
+#pirateGame .pirate-save-item{min-height:58px!important;height:auto!important;flex:none!important;align-self:start!important}
+#pirateGame .pirate-save-empty{align-self:start!important}
+</style>
 <style id="pirate-user-refinements">
 #pirateGame .pirate-big-card{font-family:Arial,Helvetica,sans-serif!important;font-weight:700!important;letter-spacing:.02em!important}
 #pirateGame .pirate-toast{opacity:1;transform:translate(-50%,0);transition:opacity .45s ease,transform .45s ease}
