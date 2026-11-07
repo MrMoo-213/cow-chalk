@@ -871,7 +871,7 @@ try{
 
 <style id="pirate-layout-final-fixes">
 body.pirate-on{overflow:hidden!important}
-#pirateGame{overflow:hidden!important;isolation:isolate}
+#pirateGame{overflow:hidden!important;isolation:isolate;perspective:1000px}
 #pirateGame>.pirate-grid-backdrop{
   position:absolute!important;
   top:50%!important;
@@ -890,10 +890,11 @@ body.pirate-on{overflow:hidden!important}
   border:2px solid #4a6984!important;
   background:transparent!important;
   background-image:none!important;
-  opacity:.12!important;
+  opacity:.22!important;
   transform:translate(-50%,-50%) rotateX(65deg) rotateZ(0deg) translateZ(-100px)!important;
   transform-origin:center center!important;
-  animation:pirateGridCentered 20s linear infinite!important;
+  animation:pirateGridCentered 8s linear infinite!important;
+  will-change:transform;
   pointer-events:none!important;
 }
 #pirateGame>.pirate-grid-backdrop .pirate-grid-cell{
@@ -903,8 +904,8 @@ body.pirate-on{overflow:hidden!important}
   background:transparent!important;
 }
 @keyframes pirateGridCentered{
-  from{transform:translate(-50%,-50%) rotateX(65deg) rotateZ(0deg) translateZ(-100px)}
-  to{transform:translate(-50%,-50%) rotateX(65deg) rotateZ(-360deg) translateZ(-100px)}
+  0%{transform:translate(-50%,-50%) rotateX(65deg) rotateZ(0deg) translateZ(-100px)}
+  100%{transform:translate(-50%,-50%) rotateX(65deg) rotateZ(-360deg) translateZ(-100px)}
 }
 #pirateGame.pirate-returning .pirate-layout{
   animation:pirateGameBoardExit .65s cubic-bezier(.65,0,.85,.35) both;
