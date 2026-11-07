@@ -86,13 +86,14 @@ body.realtime-on #realDate{display:block}
 body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:center}
 
 
+@import url("https://fonts.googleapis.com/css2?family=Pirata+One&family=Share+Tech+Mono&display=swap");
 /* ---------- Pirate Game Intro ---------- */
 #pirateGame{background:#0a1118}
 .pirate-intro{position:absolute;inset:0;z-index:30;display:none;overflow:hidden;align-items:center;justify-content:center;background:#0a1118;color:#eee;font-family:"Share Tech Mono","Courier New",monospace;perspective:1000px}
 #pirateGame.pirate-intro-active .pirate-intro{display:flex}
 #pirateGame.pirate-intro-active .pirate-layout{display:none}
 .pirate-ambient{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(26,47,68,.55),#0a1118 80%),linear-gradient(0deg,rgba(139,0,0,.2),transparent);animation:pirateOceanPulse 8s ease-in-out infinite alternate}
-.pirate-grid-backdrop{position:absolute;width:min(700px,90vw);height:min(700px,90vw);display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);border:2px solid #4a6984;opacity:.14;transform:rotateX(65deg) rotateZ(0deg) translateZ(-100px);animation:pirateGridFloat 24s linear infinite}
+.pirate-grid-backdrop{position:absolute;width:min(700px,90vw);height:min(700px,90vw);display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);border:2px solid #4a6984;background-image:linear-gradient(to right,transparent calc(100% - 1px),#4a6984 1px),linear-gradient(to bottom,transparent calc(100% - 1px),#4a6984 1px);background-size:14.2857% 14.2857%;opacity:.14;transform:rotateX(65deg) rotateZ(0deg) translateZ(-100px);animation:pirateGridFloat 24s linear infinite}
 .pirate-grid-backdrop span{border:1px dashed #4a6984}
 .pirate-floats{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .pirate-floats span{position:absolute;color:#4a6984;font-size:clamp(24px,4vw,48px);font-weight:800;opacity:0;animation:pirateSymbolFly 12s linear infinite}
@@ -108,6 +109,7 @@ body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:cent
 .pirate-intro-title{font-family:"Pirata One","Old English Text MT",Georgia,serif;font-size:clamp(48px,10vw,104px);line-height:1;color:#eee;letter-spacing:2px;text-transform:uppercase;filter:drop-shadow(0 15px 20px #000b);opacity:0;transform:scale(2.5) translateZ(300px);animation:pirateTitleSlam .8s 0.7s cubic-bezier(.175,.885,.32,1.275) forwards}
 .pirate-intro-subtitle{color:#c0c0c0;font-size:clamp(11px,2vw,21px);letter-spacing:clamp(3px,.7vw,7px);margin-top:15px;opacity:0;transform:translateY(20px);animation:pirateFadeUp .8s 1.45s ease-out forwards}
 .pirate-intro-actions{display:flex;justify-content:center;gap:clamp(12px,3vw,28px);flex-wrap:wrap}
+.pirate-intro-actions[hidden]{display:none!important}
 .pirate-play-button{position:relative;min-width:190px;padding:16px 30px;border:2px solid #ffd700;border-radius:4px;overflow:hidden;background:linear-gradient(135deg,#8b0000,#500);color:#ffd700;font:700 clamp(15px,2vw,22px) "Share Tech Mono","Courier New",monospace;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px #8b000099,inset 0 0 15px #ffd70033;opacity:0;transform:translateY(30px);animation:pirateFadeUp .8s 2s ease-out forwards;transition:transform .3s,box-shadow .3s,color .3s,border-color .3s}
 .pirate-play-button:before{content:"";position:absolute;inset:0;left:-120%;width:100%;background:linear-gradient(90deg,transparent,#ffd70066,transparent);transition:left .65s}
 .pirate-play-button:hover:before{left:120%}
@@ -608,8 +610,9 @@ function startPirateSave(saveId){
   },780);
 }
 function startNewPirateGame(){
+  hidePirateToast();
   pirateNames=[];pirateMoves=[];pirateRedoMoves=[];pirateMarks={};pirateLastRemoved=null;
-  hidePirateToast();clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);pirateBigPop.hidden=true;
+  clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);pirateBigPop.hidden=true;
   createPirateSave();startPirateSave(activePirateSaveId);
 }
 function openPirateSaveList(){
