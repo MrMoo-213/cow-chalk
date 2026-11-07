@@ -87,19 +87,22 @@ body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:cent
 
 
 /* ---------- Pirate Game ---------- */
-#pirateGame{display:none;position:fixed;inset:0;z-index:15;background:#fff;color:#111;overflow:hidden;padding:clamp(8px,2vh,20px) clamp(10px,2vw,28px);font-family:Arial,Helvetica,sans-serif}
+#pirateGame{display:none;position:fixed;inset:0;z-index:15;background:var(--bg);color:#fff;overflow:hidden;padding:clamp(8px,1.5vh,18px) clamp(10px,2vw,26px);font-family:Arial,Helvetica,sans-serif}
 body.pirate-on #page,body.pirate-on #moreMenu{display:none}
 body.pirate-on #pirateGame{display:flex}
-.pirate-layout{width:min(1180px,100%);height:100%;min-height:0;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,260px);gap:clamp(14px,3vw,38px);align-items:center}
+.pirate-layout{width:min(1180px,100%);height:100%;min-height:0;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,270px);gap:clamp(14px,3vw,38px);align-items:center}
 .pirate-board-wrap{width:100%;min-width:0;display:flex;flex-direction:column;justify-content:center;min-height:0}
 .pirate-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 clamp(5px,1.5vh,14px)}
-.pirate-heading{font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(25px,4.3vh,43px);font-weight:500;letter-spacing:-2px;margin:0;color:#111;white-space:nowrap}
-.pirate-tools{display:flex;gap:7px;align-items:center}
-.pirate-icon{width:clamp(30px,4vh,39px);height:clamp(30px,4vh,39px);display:grid;place-items:center;border:1.5px solid #222;border-radius:50%;background:#fff;color:#111;font-size:clamp(17px,2.5vh,24px);line-height:1;padding:0;transition:background .15s,transform .15s}
-.pirate-icon:hover{background:#ffe7ef;transform:translateY(-1px)}
-.pirate-icon:disabled{opacity:.3;cursor:default;transform:none}
-.pirate-board{display:grid;grid-template-columns:clamp(18px,3.4vh,30px) repeat(7,minmax(0,1fr));grid-template-rows:clamp(18px,3.4vh,30px) repeat(7,minmax(0,1fr));width:min(100%,calc(100dvh - 105px));aspect-ratio:1/1;max-height:calc(100dvh - 105px);margin:0 auto}
-.pirate-axis{display:grid;place-items:center;font-size:clamp(12px,2.3vh,18px);font-weight:400;color:#111}
+.pirate-heading{font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(25px,4.3vh,43px);font-weight:500;letter-spacing:-2px;margin:0;color:#fff;white-space:nowrap}
+.pirate-tools{display:flex;gap:6px;align-items:center}
+.pirate-icon{width:clamp(30px,3.8vh,39px);height:clamp(30px,3.8vh,39px);display:grid;place-items:center;border:2px solid #c42c68;border-radius:6px;background:linear-gradient(#ff82b8 0,#ff4f91 48%,#ff3c82 100%);color:#fff;font-size:clamp(17px,2.5vh,23px);font-weight:900;line-height:1;padding:0;text-shadow:0 1px 2px #b51b5a;box-shadow:inset 0 2px 0 #ffffff55,0 2px 3px #0008;transition:filter .15s,transform .15s}
+.pirate-icon:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.pirate-icon:active{transform:translateY(1px)}
+.pirate-icon:disabled{opacity:.38;filter:grayscale(.5);cursor:default;transform:none}
+.pirate-board{display:grid;grid-template-columns:clamp(18px,3.4vh,30px) repeat(7,minmax(0,1fr));grid-template-rows:clamp(18px,3.4vh,30px) repeat(7,minmax(0,1fr));width:min(100%,calc(100dvh - 105px));aspect-ratio:1/1;max-height:calc(100dvh - 105px);margin:0 auto;background:#fff}
+.pirate-axis{display:grid;place-items:center;font-size:clamp(12px,2.3vh,18px);font-weight:400;color:#fff}
+.pirate-board>.pirate-axis{color:#fff}
+.pirate-board>.pirate-axis:nth-child(n+2):nth-child(-n+8){color:#fff}
 .pirate-square{position:relative;min-width:0;min-height:0;border:1px solid #222;border-radius:0;background:#fff;padding:0;overflow:hidden}
 .pirate-square:hover:not(.marked){background:#fff6f8}
 .pirate-square:focus-visible{outline:3px solid #ed244f;outline-offset:-3px;z-index:1}
@@ -109,22 +112,22 @@ body.pirate-on #pirateGame{display:flex}
 .pirate-square.just-marked .pirate-cross path{animation:drawPirateCross .42s ease-out forwards}
 @keyframes drawPirateCross{to{stroke-dashoffset:0}}
 .pirate-side{width:100%;align-self:center;min-width:0}
-.pirate-next-label{font-family:Arial,Helvetica,sans-serif;color:#e32636;font-size:clamp(16px,2.6vh,22px);font-weight:500;text-decoration:underline;text-underline-offset:3px;margin:0 0 clamp(12px,2.5vh,24px);white-space:nowrap}
-.pirate-turn{font-size:clamp(15px,2.2vh,19px);font-weight:600;line-height:1.3;margin:0 0 12px;min-height:2.6em;color:#222}
+.pirate-next-label{font-family:Arial,Helvetica,sans-serif;color:#ff3030;font-size:clamp(15px,2.2vh,20px);font-weight:400;text-decoration:underline;text-underline-offset:2px;margin:0 0 clamp(12px,2.5vh,24px);white-space:nowrap}
+.pirate-turn{font-size:clamp(15px,2.2vh,19px);font-weight:700;line-height:1.3;margin:0 0 12px;min-height:2.6em;color:#fff}
 .pirate-players{display:grid;gap:6px;margin:0 0 12px;padding:0;list-style:none;max-height:30vh;overflow:auto}
-.pirate-player{font-size:clamp(13px,1.9vh,16px);padding:5px 0;border-bottom:1px solid #ddd;color:#222;font-weight:500}
+.pirate-player{font-size:clamp(13px,1.9vh,16px);padding:5px 0;border-bottom:1px solid #ffffff40;color:#fff;font-weight:500}
 .pirate-player:first-child{font-weight:800}
 .pirate-add{display:none;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin:0 0 10px}
 .pirate-add.open{display:grid}
 .pirate-add input{min-width:0;width:100%;height:34px;border:1px solid #888;border-radius:4px;background:#fff;color:#111;padding:0 8px;font-size:15px}
-.pirate-add button{height:34px;padding:0 11px;border:1px solid #222;border-radius:4px;background:#fff;color:#111;font-weight:600}
-.pirate-toast{position:fixed;left:50%;bottom:12px;z-index:30;transform:translateX(-50%);display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);padding:8px 12px;border:1px solid #bbb;border-radius:5px;background:#fff;color:#111;box-shadow:0 3px 14px #0002;font-size:14px}
+.pirate-add button{height:34px;padding:0 11px;border:2px solid #c42c68;border-radius:6px;background:linear-gradient(#ff82b8,#ff3c82);color:#fff;font-weight:900;text-shadow:0 1px 2px #b51b5a}
+.pirate-toast{position:fixed;top:10px;left:50%;z-index:35;transform:translateX(-50%);display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);padding:7px 12px;border:1px solid #ff82b8;border-radius:7px;background:#00343d;color:#fff;box-shadow:0 3px 14px #0005;font-size:14px}
 .pirate-toast[hidden]{display:none}
-.pirate-toast button{border:0;background:none;color:#e32636;text-decoration:underline;font-weight:700;padding:3px 5px}
-.pirate-big-pop{position:fixed;inset:0;z-index:25;display:grid;place-items:center;pointer-events:none;background:#000b;animation:pirateDim .18s ease-out both}
+.pirate-toast button{border:0;background:none;color:#ff82b8;text-decoration:underline;font-weight:900;padding:3px 5px}
+.pirate-big-pop{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:auto;touch-action:none;background:#000b;opacity:1;transition:opacity .45s ease}
 .pirate-big-pop[hidden]{display:none}
-.pirate-big-card{color:#fff;font-family:"Segoe Print","Comic Sans MS",cursive;font-size:clamp(110px,27vw, min(36vh,300px));font-weight:700;line-height:1;text-shadow:0 5px 24px #000;animation:pirateCoordinate .38s cubic-bezier(.2,.8,.2,1) both}
-@keyframes pirateDim{from{opacity:0}to{opacity:1}}
+.pirate-big-pop.fading{opacity:0}
+.pirate-big-card{color:#fff;font-family:"Segoe Print","Comic Sans MS",cursive;font-size:min(30vw,38vh,300px);font-weight:700;line-height:1;text-shadow:0 5px 24px #000;animation:pirateCoordinate .38s cubic-bezier(.2,.8,.2,1) both}
 @keyframes pirateCoordinate{from{opacity:0;transform:scale(.55) rotate(-7deg)}to{opacity:1;transform:scale(1) rotate(0)}}
 @media(max-width:620px){
  #pirateGame{padding:7px}
@@ -150,7 +153,7 @@ body.pirate-on #pirateGame{display:flex}
  .pirate-side{font-size:12px}
  .pirate-players{max-height:24vh}
 }
-@media(prefers-reduced-motion:reduce){.pirate-square,.pirate-cross path,.pirate-big-card,.pirate-icon{animation:none!important;transition:none!important}.pirate-cross path{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){.pirate-cross path,.pirate-big-card,.pirate-icon{animation:none!important;transition:none!important}.pirate-cross path{stroke-dashoffset:0}}
 
 
 </style>
@@ -401,8 +404,14 @@ showMoreButton.addEventListener("click",()=>{
 
 startButton.addEventListener("click",startPause);
 resetButton.addEventListener("click",reset);
-function showMenu(){moreMenu.hidden=false;}
-function hideMenu(){moreMenu.hidden=true;}
+function showMenu(){
+  try{localStorage.setItem("cowChalkPreviousScreen",localStorage.getItem("cowChalkScreen")||"timer");localStorage.setItem("cowChalkScreen","menu")}catch(e){}
+  moreMenu.hidden=false;
+}
+function hideMenu(){
+  moreMenu.hidden=true;
+  try{if(localStorage.getItem("cowChalkScreen")==="menu")localStorage.setItem("cowChalkScreen",localStorage.getItem("cowChalkPreviousScreen")||"timer")}catch(e){}
+}
 function showRealTime(){
   stopLoop();clearAlarm();realTimeMode=true;stopwatchMode=false;
   document.body.classList.add("realtime-on");page.classList.remove("stopwatch-on");
@@ -421,7 +430,7 @@ function showRealTime(){
 }
 function selectOption(choice){
   hideMenu();
-  if(choice==="wheel")return;
+  if(choice==="wheel"){try{localStorage.setItem("cowChalkScreen","timer")}catch(e){}return;}
   if(choice==="pirate"){openPirateGame();return;}
   try{localStorage.setItem("cowChalkScreen",choice)}catch(e){}
   clearInterval(clockId);realTimeMode=false;document.body.classList.remove("realtime-on","pirate-on");
@@ -436,10 +445,10 @@ moreMenu.querySelectorAll("[data-choice]").forEach(button=>button.addEventListen
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!moreMenu.hidden)hideMenu();});
 
 const pirateBoard=$("pirateBoard"),piratePlayers=$("piratePlayers"),pirateTurn=$("pirateTurn"),pirateToast=$("pirateToast"),pirateBigPop=$("pirateBigPop");
-let pirateNames=[],pirateMoves=[],pirateRedoMoves=[],pirateMarks={},pirateLastRemoved=null,piratePopTimer=0;
+let pirateNames=[],pirateMoves=[],pirateRedoMoves=[],pirateMarks={},pirateLastRemoved=null,piratePopTimer=0,piratePopFadeTimer=0;
 const pirateLetters="ABCDEFG",pirateStorageKey="cowChalkPirateGame";
 function savePirateState(){
-  try{localStorage.setItem(pirateStorageKey,JSON.stringify({names:pirateNames,moves:pirateMoves,redo:pirateRedoMoves,marks:pirateMarks}))}catch(e){}
+  try{localStorage.setItem(pirateStorageKey,JSON.stringify({names:pirateNames,moves:pirateMoves,redo:pirateRedoMoves,marks:pirateMarks,lastRemoved:pirateLastRemoved}))}catch(e){}
 }
 function loadPirateState(){
   try{
@@ -447,7 +456,7 @@ function loadPirateState(){
     pirateNames=Array.isArray(data.names)?data.names.filter(n=>typeof n==="string").slice(0,50):[];
     pirateMoves=Array.isArray(data.moves)?data.moves.slice(-5):[];
     pirateRedoMoves=Array.isArray(data.redo)?data.redo.slice(-5):[];
-    pirateMarks=data.marks&&typeof data.marks==="object"?data.marks:{};
+    pirateMarks=data.marks&&typeof data.marks==="object"?data.marks:{};pirateLastRemoved=typeof data.lastRemoved==="string"?data.lastRemoved:null;
   }catch(e){pirateNames=[];pirateMoves=[];pirateRedoMoves=[];pirateMarks={}}
 }
 function buildPirateBoard(){
@@ -497,18 +506,17 @@ function closePirateGame(){
   try{localStorage.setItem("cowChalkScreen","timer")}catch(e){}
   stopwatchMode=false;page.classList.remove("stopwatch-on");reset();
 }
-function hidePirateToast(){pirateToast.hidden=true;pirateLastRemoved=null}
+function hidePirateToast(){pirateToast.hidden=true;pirateLastRemoved=null;savePirateState()}
 function showPirateToast(name){
   $("pirateToastText").textContent=name+" was removed";
-  pirateToast.hidden=false;pirateLastRemoved=name;
+  pirateToast.hidden=false;pirateLastRemoved=name;savePirateState();
 }
-function showPiratePop(coordinate){
-  clearTimeout(piratePopTimer);
+function showPiratePop(coordinate,duration=3000){
+  clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);
   $("pirateBigCard").textContent=coordinate;
-  pirateBigPop.hidden=false;
-  pirateBigPop.style.animation="none";void pirateBigPop.offsetWidth;pirateBigPop.style.animation="";
+  pirateBigPop.hidden=false;pirateBigPop.classList.remove("fading");
   $("pirateBigCard").style.animation="none";void $("pirateBigCard").offsetWidth;$("pirateBigCard").style.animation="";
-  piratePopTimer=setTimeout(()=>{pirateBigPop.hidden=true},3000);
+  piratePopTimer=setTimeout(()=>{pirateBigPop.classList.add("fading");piratePopFadeTimer=setTimeout(()=>{pirateBigPop.hidden=true;pirateBigPop.classList.remove("fading")},450)},duration);
 }
 function choosePirateSquare(coordinate){
   if(pirateMarks[coordinate])return;
@@ -539,7 +547,7 @@ function redoPirateMove(){
   if(!pirateRedoMoves.length)return;
   hidePirateToast();const move=pirateRedoMoves.pop();pirateMoves.push(move);
   pirateMarks={...move.after.marks};pirateNames=[...move.after.players];
-  renderPirate();savePirateState();showPiratePop(move.coordinate);
+  renderPirate();savePirateState();showPiratePop(move.coordinate,1000);
 }
 $("pirateAddToggle").addEventListener("click",()=>{
   const form=$("pirateAddForm");form.classList.toggle("open");
@@ -559,6 +567,7 @@ $("pirateBack").addEventListener("click",closePirateGame);
 loadPirateState();
 buildPirateBoard();
 renderPirate();
+if(pirateLastRemoved){$("pirateToastText").textContent=pirateLastRemoved+" was removed";pirateToast.hidden=false;}
 render();
 try{
   const savedSound=localStorage.getItem("cowChalkSound");
@@ -567,7 +576,8 @@ try{
     if(soundOption)soundOption.checked=true;
   }
   const savedScreen=localStorage.getItem("cowChalkScreen");
-  if(savedScreen==="pirate"){openPirateGame();}
+  if(savedScreen==="menu"){moreMenu.hidden=false;}
+  else if(savedScreen==="pirate"){openPirateGame();}
   else if(savedScreen==="realtime")showRealTime();
   else if(savedScreen==="stopwatch"){
     stopwatchMode=true;
