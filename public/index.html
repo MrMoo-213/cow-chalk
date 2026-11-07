@@ -74,14 +74,17 @@ button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 .menu-overlay{position:fixed;inset:0;z-index:20;background:#00343d;display:flex;align-items:center;justify-content:center;padding:24px}
 .menu-overlay[hidden]{display:none}
-.menu-panel{width:min(520px,92vw);display:grid;gap:16px}
+.menu-panel{width:min(420px,92vw);display:grid;gap:calc(18*var(--u))}
 .menu-title{font-size:clamp(30px,5vw,48px);font-weight:900;text-align:center;margin:0 0 12px}
-.menu-option{min-height:68px;border:3px solid #68c8d8;border-radius:10px;background:#000;color:#fff;font-size:clamp(20px,3vw,28px);font-weight:800}
+.menu-option{width:100%;min-height:calc(60*var(--u));border:calc(3*var(--u)) solid #c42c68;border-radius:calc(7*var(--u));background:linear-gradient(#ff82b8 0,#ff4f91 48%,#ff3c82 100%);color:#fff;font-size:clamp(19px,3vw,26px);font-weight:900;font-style:italic;letter-spacing:calc(1*var(--u));text-shadow:0 calc(1*var(--u)) calc(2*var(--u)) #b51b5a;box-shadow:inset 0 calc(3*var(--u)) 0 #ffffff55,0 calc(2*var(--u)) calc(3*var(--u)) #0008}
 .menu-option:active{transform:translateY(2px)}
 .menu-option:focus-visible{outline:3px solid #fff;outline-offset:3px}
 body.realtime-on .sounds,body.realtime-on .controls,body.realtime-on .arrow{display:none}
 body.realtime-on .timer-wrap{margin-top:calc(145*var(--u))}
 body.realtime-on .mode{display:none}
+#realDate{display:none;text-align:center;font-size:calc(32*var(--u));font-weight:800;margin-bottom:calc(24*var(--u));color:#fff}
+body.realtime-on #realDate{display:block}
+body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:center}
 
 </style>
 </head>
@@ -125,6 +128,7 @@ body.realtime-on .mode{display:none}
   </section>
 
   <section class="timer-wrap" aria-label="Timer display">
+    <div id="realDate" aria-live="off"></div>
     <div class="display" id="display" role="timer" aria-label="00 hours, 00 minutes, 00 seconds, 00 hundredths"></div>
   </section>
 
@@ -300,8 +304,7 @@ showMoreButton.addEventListener("click",()=>{
 
 startButton.addEventListener("click",startPause);
 resetButton.addEventListener("click",reset);
-function playClick(){new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/click.MP3").play().catch(()=>{});}
-function showMenu(){playClick();moreMenu.hidden=false;}
+function showMenu(){moreMenu.hidden=false;}
 function hideMenu(){moreMenu.hidden=true;}
 function showRealTime(){
   stopLoop();clearAlarm();realTimeMode=true;stopwatchMode=false;
@@ -309,6 +312,7 @@ function showRealTime(){
   modeButton.textContent="MORE";
   function updateClock(){
     const now=new Date();
+    $("realDate").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
     const hours=String(now.getHours()).padStart(2,"0");
     const minutes=String(now.getMinutes()).padStart(2,"0");
     const seconds=String(now.getSeconds()).padStart(2,"0");
@@ -319,7 +323,7 @@ function showRealTime(){
   clearInterval(clockId);updateClock();clockId=setInterval(updateClock,10);
 }
 function selectOption(choice){
-  hideMenu();playClick();
+  hideMenu();
   if(choice==="wheel"||choice==="pirate")return;
   clearInterval(clockId);realTimeMode=false;document.body.classList.remove("realtime-on");
   if(choice==="realtime"){showRealTime();return;}
