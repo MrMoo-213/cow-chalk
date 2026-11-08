@@ -858,7 +858,6 @@ async function pirateJoinRoom(code,playerName){
  if(playerError)throw playerError;
  pirateOnlineIsHost=false;await pirateEnterRoom(room,id);
 }
-   }
 async function pirateEnterRoom(room,playerId){
  pirateRoom=room;pirateMe=playerId;pirateOnlineCurrentLobby=room;pirateOnlineIsHost=room.host_id===playerId;
  try{const saved=JSON.parse(localStorage.getItem("pirateProcessed:"+room.code+":"+playerId)||"[]");pirateProcessedReveals=new Set(saved)}catch(e){pirateProcessedReveals=new Set()}
