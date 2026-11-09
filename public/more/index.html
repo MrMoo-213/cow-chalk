@@ -628,7 +628,6 @@ function selectOption(choice){
 }
 if(modeButton)modeButton.addEventListener("click",showMenu);
 if(moreMenu){
-  moreMenu.addEventListener("click",event=>{if(event.target===moreMenu)hideMenu();});
   moreMenu.querySelectorAll("[data-choice]").forEach(button=>button.addEventListener("click",()=>selectOption(button.dataset.choice)));
 }
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&moreMenu&&!moreMenu.hidden)hideMenu();});
