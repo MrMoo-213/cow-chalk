@@ -411,3 +411,6 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;user-
 #pirateGame .pirate-intro-actions>#pirateNewGame{animation-delay:2.3s!important}
 #pirateGame .pirate-intro-actions>#pirateLoadGame{animation-delay:2.85s!important}
 #pirateGame .pirate-more-button{animation:pirateMoreEntrance .8s 3.4s ease-out forwards!important}
+
+
+html:not(.route-ready) body{visibility:hidden!important}
