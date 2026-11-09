@@ -5,10 +5,76 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#00343d">
 <title>Real Time</title>
-<style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#00343d}iframe{display:block;width:100%;height:100%;border:0}</style>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/pictures/favicon1.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app.css">
 </head>
 <body>
-<iframe title="Real Time" src="/app.html?screen=time" allow="autoplay"></iframe>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="arrowGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".45" stop-color="#cdcdcd"/>
+      <stop offset="1" stop-color="#6a6a6a"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="page" id="page">
+  <section class="sounds" aria-label="Alarm sound">
+    <label class="opt"><input type="radio" name="alarm" value="none"><span class="dot"></span><span>None</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="clarabelle.MP3" checked><span class="dot"></span><span>Cow Moo</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="among-us.mp3"><span class="dot"></span><span>Among Us</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="bruh.mp3"><span class="dot"></span><span>Bruh</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="chicken-scream.mp3"><span class="dot"></span><span>Chicken Scream</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="correct.mp3"><span class="dot"></span><span>Correct</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="disapearing-scream.mp3"><span class="dot"></span><span>Disappearing Scream</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="dog-bark.mp3"><span class="dot"></span><span>Dog Bark</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="fahhh.mp3"><span class="dot"></span><span>Fahhh</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="flash-bang.mp3"><span class="dot"></span><span>Flash Bang</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="get-out.mp3"><span class="dot"></span><span>Get Out</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="halloween-call.mp3"><span class="dot"></span><span>Halloween Call</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="huh-cat.mp3"><span class="dot"></span><span>Huh Cat</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="metal-pipe.mp3"><span class="dot"></span><span>Metal Pipe</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="noot-noot.mp3"><span class="dot"></span><span>Noot Noot</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="nope.mp3"><span class="dot"></span><span>Nope</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="normal-call.mp3"><span class="dot"></span><span>Normal Call</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="school-bell.mp3"><span class="dot"></span><span>School Bell</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="teleport.mp3"><span class="dot"></span><span>Teleport</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="train-wistle.mp3"><span class="dot"></span><span>Train Whistle</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="vine-boom.mp3"><span class="dot"></span><span>Vine Boom</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="violin-screech.mp3"><span class="dot"></span><span>Violin Screech</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="you-win.mp3"><span class="dot"></span><span>You Win</span></label>
+    <button class="show-more" id="showMore" type="button" aria-expanded="false">Show More</button>
+  </section>
+
+  <section class="timer-wrap" aria-label="Timer display">
+    <div id="realDate" aria-live="off"></div>
+    <div class="display" id="display" role="timer" aria-label="00 hours, 00 minutes, 00 seconds, 00 hundredths"></div>
+  </section>
+
+  <div class="controls">
+    <button class="ctl" id="start" aria-label="Start" title="Start"></button>
+    <button class="ctl" id="reset" aria-label="Reset" title="Reset"></button>
+  </div>
+
+  <button class="mode" id="mode" type="button">MORE</button>
+
+</div>
+
+<div class="menu-overlay" id="moreMenu" hidden>
+  <div class="menu-panel" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+    <h1 class="menu-title" id="menuTitle">More</h1>
+    <button class="menu-option" type="button" data-choice="timer">Timer</button>
+    <button class="menu-option" type="button" data-choice="stopwatch">Stopwatch</button>
+    <button class="menu-option" type="button" data-choice="realtime">Real Time</button>
+    <button class="menu-option" type="button" data-choice="pirate">Pirate Game</button>
+  </div>
+</div>
+
+
+<script src="/app.js" defer></script>
 </body>
 </html>
