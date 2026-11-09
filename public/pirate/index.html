@@ -5,10 +5,92 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#00343d">
 <title>Pirate Game</title>
-<style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#00343d}iframe{display:block;width:100%;height:100%;border:0}</style>
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/update/assets/pictures/favicon2.png?v=1">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/a06ad000ba31ae6ae7dff9d396aece111760687e/assets/pictures/favicon2.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app.css">
 </head>
 <body>
-<iframe title="The Pirate Game" src="/app.html?screen=pirate" allow="autoplay"></iframe>
+<div class="menu-overlay" id="moreMenu" hidden>
+  <div class="menu-panel" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+    <h1 class="menu-title" id="menuTitle">More</h1>
+    <button class="menu-option" type="button" data-choice="timer">Timer</button>
+    <button class="menu-option" type="button" data-choice="stopwatch">Stopwatch</button>
+    <button class="menu-option" type="button" data-choice="realtime">Real Time</button>
+    <button class="menu-option" type="button" data-choice="pirate">Pirate Game</button>
+  </div>
+</div>
+
+<div id="pirateGame" aria-label="The Pirate Game" class="pirate-intro-active">
+  <div class="pirate-ambient"></div>
+  <div class="pirate-grid-backdrop" aria-hidden="true"></div>
+  <div class="pirate-floats" aria-hidden="true"><span>A7</span><span>⚡</span><span>F4</span><span>×2</span><span>⚓</span></div>
+  <section class="pirate-intro" id="pirateIntro">
+    <div class="pirate-intro-content" id="pirateIntroContent">
+      <div class="pirate-credits">IT'S TIME <span>TO PLAY</span></div>
+      <div class="pirate-intro-title-wrap">
+        <h1 class="pirate-intro-title">The Pirate Game</h1>
+        <p class="pirate-intro-subtitle">DOMINATE THE GRID</p>
+      </div>
+      <div class="pirate-intro-actions" id="pirateIntroActions">
+        <button class="pirate-play-button" id="pirateNewGame" type="button">New Game</button>
+        <button class="pirate-play-button" id="pirateLoadGame" type="button">Load Game</button>
+        <button class="pirate-play-button pirate-more-button" id="pirateIntroMore" type="button">More</button>
+      </div>
+      <div class="pirate-save-panel" id="pirateSavePanel" hidden>
+        <h2>Saved Games</h2>
+        <div class="pirate-save-list" id="pirateSaveList"></div>
+        <button class="pirate-play-button pirate-back-intro" id="pirateLoadBack" type="button">Back</button>
+      </div>
+    </div>
+  </section>
+  <div class="pirate-layout">
+    <main class="pirate-board-wrap">
+      <header class="pirate-header">
+        <h1 class="pirate-heading">The Pirate Game</h1>
+        <div class="pirate-tools">
+          <button class="pirate-random-button" id="pirateRandom" type="button" aria-label="Random square" title="Random square"><svg class="pirate-dice-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.75h14a1.75 1.75 0 0 1 1.75 1.75v13A1.75 1.75 0 0 1 19 20.25H5A1.75 1.75 0 0 1 3.25 18.5v-13A1.75 1.75 0 0 1 5 3.75Z"/><path d="M8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01"/></svg></button>
+          <button class="pirate-icon pirate-conditional-control" id="pirateUndo" type="button" aria-label="Undo">↶</button>
+          <button class="pirate-icon pirate-conditional-control" id="pirateRedo" type="button" aria-label="Redo">↷</button>
+          <button class="pirate-icon pirate-conditional-control" id="pirateReset" type="button" aria-label="Reset board">⟲</button>
+          <button class="pirate-icon" id="pirateBack" type="button" aria-label="Back to timer">×</button>
+        </div>
+      </header>
+      <div class="pirate-board" id="pirateBoard" role="grid" aria-label="Pirate game board"></div>
+    </main>
+    <aside class="pirate-side">
+      <h2 class="pirate-next-label">Choose Next Square:</h2>
+      <p class="pirate-turn" id="pirateTurn">Add players to begin</p>
+      <ul class="pirate-players" id="piratePlayers" aria-label="Players waiting"></ul>
+      <button class="pirate-icon" id="pirateAddToggle" type="button" aria-label="Add player">+</button>
+      <form class="pirate-add" id="pirateAddForm">
+        <input id="pirateName" maxlength="24" placeholder="Type a name" aria-label="Player name" autocomplete="off" inputmode="text">
+        <div class="pirate-keyboard" id="pirateKeyboard" aria-label="On-screen keyboard">
+          <div class="pirate-key-row pirate-number-row"><button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button><button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button><button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button><button type="button" data-key="0">0</button></div>
+          <div class="pirate-key-row"><button type="button" data-key="q">Q</button><button type="button" data-key="w">W</button><button type="button" data-key="e">E</button><button type="button" data-key="r">R</button><button type="button" data-key="t">T</button><button type="button" data-key="y">Y</button><button type="button" data-key="u">U</button><button type="button" data-key="i">I</button><button type="button" data-key="o">O</button><button type="button" data-key="p">P</button></div>
+          <div class="pirate-key-row"><button type="button" data-key="a">A</button><button type="button" data-key="s">S</button><button type="button" data-key="d">D</button><button type="button" data-key="f">F</button><button type="button" data-key="g">G</button><button type="button" data-key="h">H</button><button type="button" data-key="j">J</button><button type="button" data-key="k">K</button><button type="button" data-key="l">L</button></div>
+          <div class="pirate-key-row"><button type="button" class="wide" data-key="backspace">⌫</button><button type="button" data-key="z">Z</button><button type="button" data-key="x">X</button><button type="button" data-key="c">C</button><button type="button" data-key="v">V</button><button type="button" data-key="b">B</button><button type="button" data-key="n">N</button><button type="button" data-key="m">M</button><button type="button" class="wide" data-key="clear">Clear</button></div>
+          <div class="pirate-key-row" style="grid-template-columns:1fr"><button type="button" data-key="space">Space</button></div>
+        </div>
+        <button type="submit">Add Player</button>
+      </form>
+    </aside>
+  </div>
+  <div class="pirate-toast" id="pirateToast" hidden><span id="pirateToastText"></span><button id="pirateToastUndo" type="button">Undo</button></div>
+  <div class="pirate-big-pop" id="pirateBigPop" hidden><div class="pirate-big-card" id="pirateBigCard"></div></div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<script src="/app.js" defer></script>
 </body>
 </html>
