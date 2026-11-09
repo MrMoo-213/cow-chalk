@@ -4,6 +4,8 @@
 const $=id=>document.getElementById(id);
 const page=$("page"),display=$("display"),startButton=$("start"),resetButton=$("reset"),modeButton=$("mode"),moreMenu=$("moreMenu");
 const routeScreen=new URLSearchParams(location.search).get("screen")||"timer";
+const routeTitles={timer:"Cow Chalk Timer",more:"More",time:"Real Time",stopwatch:"Stopwatch",pirate:"Pirate Game"};
+document.title=routeTitles[routeScreen]||"Cow Chalk Timer";
 const embedded=window.self!==window.top;
 function goRoute(screen){if(embedded){window.parent.location.href="/"+screen;return}location.href="/"+screen;}
 
@@ -342,7 +344,7 @@ function openPirateGame(quick=false){
   stopLoop();clearInterval(clockId);clearAlarm();
   document.body.classList.remove("realtime-on");document.body.classList.add("pirate-on");
   $("pageTitle").textContent="The Pirate Game";
-  hideMenu();showPirateIntro(quick);
+  moreMenu.hidden=true;showPirateIntro(quick);
 }
 function closePirateGame(){goRoute("more")}
 let pirateToastTimer=0;
