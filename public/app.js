@@ -3,7 +3,7 @@
 "use strict";
 const $=id=>document.getElementById(id);
 const page=$("page"),display=$("display"),startButton=$("start"),resetButton=$("reset"),modeButton=$("mode"),moreMenu=$("moreMenu");
-const routeScreen=new URLSearchParams(location.search).get("screen")||"timer";
+const routeScreen=location.pathname.split("/").filter(Boolean)[0]||"timer";
 const routeTitles={timer:"Cow Chalk Timer",more:"More",time:"Real Time",stopwatch:"Stopwatch",pirate:"Pirate Game"};
 document.title=routeTitles[routeScreen]||"Cow Chalk Timer";
 const embedded=window.self!==window.top;
@@ -13,8 +13,8 @@ const ICON_PLAY='<svg viewBox="0 0 50 50" aria-hidden="true"><polygon points="10
 const ICON_PAUSE='<svg viewBox="0 0 50 50" aria-hidden="true"><rect x="8" y="3" width="13" height="44" fill="#000"/><rect x="29" y="3" width="13" height="44" fill="#000"/></svg>';
 const ICON_RESET='<svg viewBox="0 0 50 50" aria-hidden="true"><rect x="2" y="3" width="10" height="44" fill="#000"/><polygon points="48,3 48,47 16,25" fill="#000"/></svg>';
 const ARROW='<svg viewBox="0 0 76 76" aria-hidden="true"><polygon points="38,2 74,72 2,72" fill="#050505" stroke="#050505" stroke-width="2" stroke-linejoin="round"/><polygon points="38,14 63,64 13,64" fill="url(#arrowGrad)"/></svg>';
-resetButton.innerHTML=ICON_RESET;
-startButton.innerHTML=ICON_PLAY;
+if(resetButton)resetButton.innerHTML=ICON_RESET;
+if(startButton)startButton.innerHTML=ICON_PLAY;
 
 /* Tall slanted segments with pointed ends (like the real digits) */
 const segmentPolys={
@@ -33,7 +33,7 @@ const digitSVG='<svg viewBox="-10 0 92 160" preserveAspectRatio="none" aria-hidd
 /* Units: hours is one pair of digits with ONE pair of arrows; every other digit has its own. */
 const units=[{first:0,count:2},{first:2,count:1},{first:3,count:1},{first:4,count:1},{first:5,count:1},{first:6,count:1},{first:7,count:1}];
 const digits=[];
-units.forEach(u=>{
+if(display)units.forEach(u=>{
   if([2,4,6].includes(u.first)){
     const sep=document.createElement("div");
     sep.className="separator"+(u.first===6?" decimal":"");
@@ -57,6 +57,7 @@ units.forEach(u=>{
 let values=[0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,realTimeMode=false,remaining=0,elapsed=0,lastTick=0,timerId=0,clockId=0,audioContext=null,alarmAudio=null,alarmTimeout=0;
 
 function render(){
+  if(!display)return;
   digits.forEach((el,i)=>{const v=String(values[i]);el.querySelectorAll(".segment").forEach(s=>s.classList.toggle("on",digitSegments[v].includes(s.dataset.segment)))});
   display.setAttribute("aria-label",values.slice(0,2).join("")+" hours, "+values.slice(2,4).join("")+" minutes, "+values.slice(4,6).join("")+" seconds, "+values.slice(6,8).join("")+" hundredths");
 }
@@ -87,6 +88,7 @@ function tick(){
   }
 }
 function setRunningUI(){
+  if(!startButton)return;
   startButton.innerHTML=running?ICON_PAUSE:ICON_PLAY;
   startButton.setAttribute("aria-label",running?"Pause":"Start");startButton.title=running?"Pause":"Start";
 }
@@ -146,7 +148,7 @@ document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("
   try{localStorage.setItem("cowChalkSound",r.value)}catch(e){}
 }));
 const showMoreButton=$("showMore");
-showMoreButton.addEventListener("click",()=>{
+if(showMoreButton)showMoreButton.addEventListener("click",()=>{
   const expanded=showMoreButton.getAttribute("aria-expanded")==="true";
   document.querySelectorAll(".sounds .opt").forEach((option,index)=>{if(index>=11)option.classList.toggle("hidden-sound",expanded)});
   showMoreButton.setAttribute("aria-expanded",String(!expanded));
@@ -154,8 +156,8 @@ showMoreButton.addEventListener("click",()=>{
 });
 
 
-startButton.addEventListener("click",startPause);
-resetButton.addEventListener("click",reset);
+if(startButton)startButton.addEventListener("click",startPause);
+if(resetButton)resetButton.addEventListener("click",reset);
 function showMenu(){goRoute("more")}
 function hideMenu(){goRoute("timer")}
 function showRealTime(){
@@ -180,12 +182,16 @@ function selectOption(choice){
   if(choice==="stopwatch"){goRoute("stopwatch");return}
   goRoute("timer");
 }
-modeButton.addEventListener("click",showMenu);
-moreMenu.addEventListener("click",event=>{if(event.target===moreMenu)hideMenu();});
-moreMenu.querySelectorAll("[data-choice]").forEach(button=>button.addEventListener("click",()=>selectOption(button.dataset.choice)));
-document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!moreMenu.hidden)hideMenu();});
+if(modeButton)modeButton.addEventListener("click",showMenu);
+if(moreMenu){
+  moreMenu.addEventListener("click",event=>{if(event.target===moreMenu)hideMenu();});
+  moreMenu.querySelectorAll("[data-choice]").forEach(button=>button.addEventListener("click",()=>selectOption(button.dataset.choice)));
+}
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&moreMenu&&!moreMenu.hidden)hideMenu();});
 
-const pirateBoard=$("pirateBoard"),piratePlayers=$("piratePlayers"),pirateTurn=$("pirateTurn"),pirateToast=$("pirateToast"),pirateBigPop=$("pirateBigPop");
+const pirateBoard=$("pirateBoard");
+if(pirateBoard){
+const piratePlayers=$("piratePlayers"),pirateTurn=$("pirateTurn"),pirateToast=$("pirateToast"),pirateBigPop=$("pirateBigPop");
 let pirateNames=[],pirateMoves=[],pirateRedoMoves=[],pirateMarks={},pirateLastRemoved=null,piratePopTimer=0,piratePopFadeTimer=0,pirateSaves=[],activePirateSaveId=null,pirateEditingIndex=null;
 const pirateLetters="ABCDEFG",pirateStorageKey="cowChalkPirateGame";
 function pirateSnapshot(){return {names:[...pirateNames],moves:[...pirateMoves],redo:[...pirateRedoMoves],marks:{...pirateMarks},lastRemoved:pirateLastRemoved}}
@@ -343,7 +349,6 @@ function renderPirate(){
 function openPirateGame(quick=false){
   stopLoop();clearInterval(clockId);clearAlarm();
   document.body.classList.remove("realtime-on");document.body.classList.add("pirate-on");
-  $("pageTitle").textContent="The Pirate Game";
   moreMenu.hidden=true;showPirateIntro(quick);
 }
 function closePirateGame(){goRoute("more")}
@@ -456,7 +461,8 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 buildPirateBoard();
 renderPirate();
 if(pirateLastRemoved){$("pirateToastText").textContent=pirateLastRemoved+" was removed";pirateToast.hidden=false;}
-render();
+}
+if(display)render();
 try{
   const savedSound=localStorage.getItem("cowChalkSound");
   if(savedSound){
@@ -464,10 +470,10 @@ try{
     if(soundOption)soundOption.checked=true;
   }
   }catch(e){}
-if(routeScreen==="more"){moreMenu.hidden=false}
-else if(routeScreen==="pirate"){openPirateGame()}
-else if(routeScreen==="time"){showRealTime()}
-else if(routeScreen==="stopwatch"){stopwatchMode=true;page.classList.add("stopwatch-on")}
+if(routeScreen==="more"&&moreMenu)moreMenu.hidden=false;
+else if(routeScreen==="pirate"&&pirateBoard)openPirateGame();
+else if(routeScreen==="time"&&display)showRealTime();
+else if(routeScreen==="stopwatch"&&display){stopwatchMode=true;page.classList.add("stopwatch-on")}
 
 })();
 
