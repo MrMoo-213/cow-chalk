@@ -266,7 +266,6 @@ function returnToPirateIntro(){
   setTimeout(()=>{
     $("pirateGame").classList.remove("pirate-returning");
     showPirateIntro(true);
-catch(e){}
     const animated=[$("pirateIntroContent").querySelector(".pirate-credits"),$("pirateIntroContent").querySelector(".pirate-intro-title"),$("pirateIntroContent").querySelector(".pirate-intro-subtitle"),$("pirateNewGame"),$("pirateLoadGame"),$("pirateIntroMore")];
     animated.forEach((element,index)=>{if(!element)return;element.style.animation="none";void element.offsetWidth;element.style.animation="";element.style.setProperty("animation-delay",["0s",".08s",".16s",".24s",".38s",".52s"][index],"important")});
   },680);
@@ -277,7 +276,6 @@ function startPirateSave(saveId){
   $("pirateIntroActions").hidden=true;$("pirateSavePanel").hidden=true;
   setTimeout(()=>{
     $("pirateGame").classList.remove("pirate-intro-active","pirate-launching");
-catch(e){}
     renderPirate();if(pirateLastRemoved){$("pirateToastText").textContent=pirateLastRemoved+" was removed";pirateToast.hidden=false}
   },780);
 }
@@ -342,7 +340,6 @@ function renderPirate(){
 }
 function openPirateGame(quick=false){
   stopLoop();clearInterval(clockId);clearAlarm();
-catch(e){}
   document.body.classList.remove("realtime-on");document.body.classList.add("pirate-on");
   $("pageTitle").textContent="The Pirate Game";
   hideMenu();showPirateIntro(quick);
