@@ -472,3 +472,6 @@ else if(routeScreen==="stopwatch"){stopwatchMode=true;page.classList.add("stopwa
 ;
 
 (()=>{const grid=document.querySelector("#pirateGame>.pirate-grid-backdrop");if(grid&&!grid.children.length){const fragment=document.createDocumentFragment();for(let i=0;i<49;i++){const cell=document.createElement("div");cell.className="pirate-grid-cell";fragment.appendChild(cell)}grid.appendChild(fragment)}})();
+
+
+document.documentElement.classList.add('route-ready');
