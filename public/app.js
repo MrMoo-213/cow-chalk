@@ -461,6 +461,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 buildPirateBoard();
 renderPirate();
 if(pirateLastRemoved){$("pirateToastText").textContent=pirateLastRemoved+" was removed";pirateToast.hidden=false;}
+if(routeScreen==="pirate")openPirateGame();
 }
 if(display)render();
 try{
@@ -471,7 +472,6 @@ try{
   }
   }catch(e){}
 if(routeScreen==="more"&&moreMenu)moreMenu.hidden=false;
-else if(routeScreen==="pirate"&&pirateBoard)openPirateGame();
 else if(routeScreen==="time"&&display)showRealTime();
 else if(routeScreen==="stopwatch"&&display){stopwatchMode=true;page.classList.add("stopwatch-on")}
 
