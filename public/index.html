@@ -18,7 +18,10 @@ html,body{margin:0;min-height:100%}
 body{background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#fff;overflow-x:hidden}
 button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:calc(30*var(--u))}
-
+npm i @vercel/analytics
+   yarn add @vercel/analytics
+   pnpm i @vercel/analytics
+   import { Analytics } from "@vercel/analytics/next"
 /* ---------- sound options ---------- */
 .sounds{margin-top:calc(30*var(--u));width:min(calc(1125*var(--u)),94vw);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;justify-items:start;gap:calc(12*var(--u)) calc(18*var(--u))}
 .opt{position:relative;display:flex;align-items:center;gap:calc(10*var(--u));font-size:calc(19*var(--u));font-weight:700;white-space:nowrap;cursor:pointer;min-width:0}
