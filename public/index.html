@@ -822,6 +822,8 @@ const PIRATE_SUPABASE_ANON_KEY="sb_publishable_MWShImy-OyiqDC9oWy8mWQ_p5K-sTc7";
 let pirateDb=null,pirateRoom=null,pirateMe=null,pirateRoomChannel=null,piratePlayersChannel=null,pirateLobbyRefreshTimer=0;
 let pirateRoomState=null,piratePlayersState=[],pirateSetupTicker=0,pirateProcessedReveals=new Set();
 let pirateOnlineIsHost=false,pirateOnlineCurrentLobby=null,pirateOnlineTray=[],pirateOnlineGrid=[];
+let pirateAdminUnlocked=false,pirateAdminCode="",pirateAdminPanelOpen=false;
+let pirateSelectedSetupTileUid=null;
 let pirateActiveRevealId=null,pirateSetupInitFor=null,piratePopupBusy=false;
 let piratePlayerSnapshot=null,pirateNoticeQueue=[],pirateNoticeShowing=false,pirateLastMultiplierEventId=null;
 const pirateTileDefinitions=[
@@ -880,19 +882,38 @@ function pirateInitOnlineUI(){
  <div class="pirate-online-list" id="pirateWaitingPlayers"></div><div class="pirate-online-form-actions"><button type="button" id="pirateWaitingLeave">Leave room</button><button type="button" id="pirateWaitingStart">Start preparation</button></div>
  <p class="pirate-online-error" id="pirateWaitingError" role="status"></p></div>`;
  stage.innerHTML=`<header class="pirate-stage-top"><div id="pirateOnlineGameTitle">The Pirate Game</div><button type="button" id="pirateStageLeave" class="pirate-stage-leave">Leave</button></header>
- <section id="pirateStageSetup" class="pirate-stage-view pirate-setup-view" hidden><div class="pirate-setup-heading"><div><h2>Your personal treasure grid</h2><p>Every player has their own 49 tiles. Drag your upgrades and money onto the squares.</p></div><strong id="pirateSetupTimer">02:00</strong></div>
+ <section id="pirateStageSetup" class="pirate-stage-view pirate-setup-view" hidden><div class="pirate-setup-heading"><div><h2>Your personal treasure grid</h2><p>Drag a tile or tap a tile then tap a square. You have 48 tiles and one empty square.</p></div><div class="pirate-setup-heading-actions"><button id="pirateSetupRandom" type="button">Randomise grid</button><strong id="pirateSetupTimer">05:00</strong></div></div>
  <div class="pirate-setup-workspace"><div id="pirateSetupGrid" class="pirate-setup-grid"></div><aside class="pirate-tile-tray-wrap"><h3>Your tiles</h3><div id="pirateTileTray" class="pirate-tile-tray"></div></aside></div>
  <footer class="pirate-setup-footer"><span id="pirateSetupCount">49 tiles left to place</span><button id="pirateSetupStart" type="button">I'm ready</button></footer></section>
  <section id="pirateStageGame" class="pirate-stage-view pirate-live-view" hidden><section id="pirateHostDashboard" hidden><h2>Host control room</h2><p id="pirateHostStatus">Players and live game controls</p><div id="pirateHostPlayers" class="pirate-scoreboard"></div><h3 class="pirate-host-grid-heading">Choose the next square</h3><p class="pirate-host-grid-help">Click a coordinate to reveal that square for every player. This board is for choosing only — the host cannot place upgrades.</p><div id="pirateHostGrid" class="pirate-host-grid" role="grid" aria-label="Host square selection grid"></div><h3>Game events</h3><div class="pirate-host-events"><button data-host-event="multiplier">Swashbuckle Multiplier</button><button data-host-event="plank">Walk the Plank</button><button data-host-event="clarabelle">Clarabelle's Revenge</button><button data-host-event="conjugate">Conjugate Madness</button><button data-host-event="shift">Ah Shift</button><button data-host-event="chest">Captain Cresswell's Chest</button><button data-host-event="jake_reece">Jake and Reece's Special Event</button></div><div class="pirate-host-actions"><button type="button" id="pirateHostNext">Reveal next square</button><button type="button" id="pirateEndGame" hidden>End game</button></div></section><div id="piratePlayerDashboard"><p id="pirateGameInstruction">Waiting for the host to choose a square.</p><div class="pirate-live-main"><div id="pirateLiveGrid" class="pirate-live-grid"></div><aside class="pirate-live-tools"><div class="pirate-defence-box"><span class="pirate-defence-icon">🛡</span><span>Shields</span><strong id="pirateShieldCount">0</strong></div><div class="pirate-defence-box"><span class="pirate-defence-icon">🪞</span><span>Mirrors</span><strong id="pirateMirrorCount">0</strong></div></aside></div>
  <div id="pirateLastReveal" class="pirate-last-reveal">Waiting for the first square…</div><div id="pirateAbilityStatus" class="pirate-ability-status"></div><div id="pirateScoreboard" class="pirate-scoreboard"></div>
  <footer class="pirate-live-footer"><div><div id="pirateOnlineScore" class="pirate-live-score">Unbanked: £0</div><div id="pirateOnlineBank" class="pirate-live-bank">Bank: £0</div></div><div class="pirate-live-bank" id="pirateTurnStatus">Waiting…</div><div class="pirate-live-footer-actions"><button type="button" id="pirateActivateMultiplier" hidden>Swashbuckle multiplier</button></div></footer></div></section>
  <section id="pirateStageEnd" class="pirate-stage-view" hidden><h2>Game Over</h2><div id="pirateFinalScores" class="pirate-scoreboard"></div><button type="button" id="pirateBackToIntro">Return to menu</button></section>
+ <div class="pirate-admin-toggle-wrap"><button type="button" id="pirateAdminToggle" class="pirate-admin-toggle" hidden aria-expanded="false">⚙ Admin panel <span aria-hidden="true">▾</span></button></div>
+ <section id="pirateAdminPanel" class="pirate-admin-panel" hidden>
+  <div class="pirate-admin-heading"><div><h2>⚙ Secret Admin Panel</h2><p>Game controls for this room</p></div><button type="button" id="pirateAdminClose">Close</button></div>
+  <div class="pirate-admin-section"><h3>Your money</h3><div class="pirate-admin-controls"><label>Amount (£)<input id="pirateAdminAmount" type="number" step="1" value="1000"></label><button type="button" id="pirateAdminAddBank">Add to my bank</button><button type="button" id="pirateAdminAddScore">Add to my unbanked</button><button type="button" id="pirateAdminSubtractBank">Remove from my bank</button><button type="button" id="pirateAdminSubtractScore">Remove from my unbanked</button></div></div>
+  <div class="pirate-admin-section"><h3>Take money from a player</h3><div class="pirate-admin-controls"><label>Player<select id="pirateAdminTakeTarget"></select></label><label>Take from<select id="pirateAdminTakeAccount"><option value="score">Unbanked</option><option value="bank">Banked</option></select></label><label>Amount (£)<input id="pirateAdminTakeAmount" type="number" min="1" step="1" value="1000"></label><button type="button" id="pirateAdminTake">Take money (add to my bank)</button></div></div>
+  <div class="pirate-admin-section"><h3>Redirect an effect</h3><p>These use the game's existing Present, Kill and Steal rules, including shields and mirrors.</p><div class="pirate-admin-controls"><label>Target player<input id="pirateAdminAttackTarget" list="pirateAdminAttackNames" placeholder="Type a player name"><datalist id="pirateAdminAttackNames"></datalist></label><label>Effect<select id="pirateAdminAbility"><option value="present">Present (£1,000)</option><option value="kill">Kill (wipe unbanked)</option><option value="rob">Steal (take unbanked)</option></select></label><button type="button" id="pirateAdminRedirect">Apply effect to player</button></div></div>
+  <div class="pirate-admin-section"><h3>Suggest the next square</h3><div class="pirate-admin-controls"><label>Square<select id="pirateAdminSquare"></select></label><button type="button" id="pirateAdminSuggest">Send suggestion to host</button></div><p id="pirateAdminStatus" role="status"></p></div>
+  <div class="pirate-admin-section"><div class="pirate-admin-section-heading"><h3>Everyone's balances</h3><button type="button" id="pirateAdminRefresh">Refresh</button></div><div id="pirateAdminBalances" class="pirate-admin-balances"></div></div>
+ </section>
  <div id="pirateResultModal" class="pirate-result-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pirateResultTitle"><div class="pirate-result-card"><h2 id="pirateResultTitle">Square revealed</h2><p id="pirateResultText"></p><div id="pirateResultTargets"></div><button type="button" id="pirateResultOkay">Okay</button></div></div>
  <div id="pirateNoticeModal" class="pirate-result-modal pirate-notice-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pirateNoticeTitle"><div class="pirate-result-card"><h2 id="pirateNoticeTitle">You have been affected</h2><p id="pirateNoticeText"></p><button type="button" id="pirateNoticeOkay">Okay</button></div></div>`;
 }
 pirateInitOnlineUI();
 $("pirateActivateMultiplier").addEventListener("click",pirateActivateMultiplier);
 $("pirateNoticeOkay").addEventListener("click",pirateCloseNotice);
+$("pirateAdminClose").addEventListener("click",pirateAdminClosePanel);
+$("pirateAdminToggle").addEventListener("click",pirateAdminTogglePanel);
+$("pirateAdminAddBank").addEventListener("click",()=>pirateAdminAdjust("bank",1));
+$("pirateAdminAddScore").addEventListener("click",()=>pirateAdminAdjust("score",1));
+$("pirateAdminSubtractBank").addEventListener("click",()=>pirateAdminAdjust("bank",-1));
+$("pirateAdminSubtractScore").addEventListener("click",()=>pirateAdminAdjust("score",-1));
+$("pirateAdminTake").addEventListener("click",pirateAdminTakeMoney);
+$("pirateAdminRedirect").addEventListener("click",pirateAdminRedirectEffect);
+$("pirateAdminSuggest").addEventListener("click",pirateAdminSuggestSquare);
+$("pirateAdminRefresh").addEventListener("click",pirateAdminRefreshBalances);
 $("pirateHostNext").addEventListener("click",()=>{const chosen=pirateRoom?.chosen||[];const next=Array.from({length:49},(_,i)=>i).find(i=>!chosen.includes(i));if(next!==undefined)pirateReveal(next)});
 document.querySelectorAll("[data-host-event]").forEach(b=>b.addEventListener("click",()=>pirateRunHostEvent(b.dataset.hostEvent,b)));
 function pirateRequireConfig(){
@@ -933,6 +954,15 @@ async function pirateJoinRoom(code,playerName){
 async function pirateEnterRoom(room,playerId){
  pirateRoom=room;pirateMe=playerId;pirateOnlineCurrentLobby=room;pirateOnlineIsHost=room.host_id===playerId;pirateActiveRevealId=null;pirateSetupInitFor=null;piratePlayerSnapshot=null;pirateLastMultiplierEventId=room.multiplier_event_id||null;pirateNoticeQueue=[];pirateNoticeShowing=false;
  localStorage.setItem("pirateOnlinePlayerName",pirateOnlineIsHost?$("pirateHostName").value.trim():$("pirateOnlineName").value.trim());
+ pirateAdminUnlocked=false;pirateAdminCode="";pirateAdminPanelOpen=false;pirateSelectedSetupTileUid=null;
+ const enteredName=localStorage.getItem("pirateOnlinePlayerName")||"";
+ if(!pirateOnlineIsHost&&enteredName.trim().startsWith(",")){
+  const attempt=window.prompt("Secret admin area detected. Enter the admin code:");
+  if(attempt!==null&&attempt==="4444"){
+   pirateAdminUnlocked=true;pirateAdminCode=attempt;
+
+  }else if(attempt!==null){window.alert("Incorrect admin code.");}
+ }
  pirateShowOnlinePanel("pirateWaitingPanel");$("pirateWaitingTitle").textContent=room.name;$("pirateRoomCodeDisplay").textContent=room.code;
  await pirateRefreshRoom();
  if(pirateRoomChannel)pirateDb.removeChannel(pirateRoomChannel);
@@ -967,6 +997,11 @@ function pirateShowStageForRoom(){
 }
 function pirateRenderState(){
  if(!pirateRoom)return;
+ const adminPanel=$("pirateAdminPanel"),adminToggle=$("pirateAdminToggle");
+ const adminAvailable=!!(pirateAdminUnlocked&&pirateRoom.phase==="game"&&!pirateOnlineIsHost);
+ if(adminToggle)adminToggle.hidden=!adminAvailable;
+ if(adminPanel)adminPanel.hidden=!(adminAvailable&&pirateAdminPanelOpen);
+ if(adminToggle){adminToggle.setAttribute("aria-expanded",String(!!(adminAvailable&&pirateAdminPanelOpen)));adminToggle.innerHTML=pirateAdminPanelOpen?'⚙ Admin panel <span aria-hidden="true">▴</span>':'⚙ Admin panel <span aria-hidden="true">▾</span>';}
  if(pirateRoom.phase==="waiting"){
   $("pirateWaitingPlayers").innerHTML=piratePlayersState.map(p=>`<div class="pirate-waiting-player"><strong>${pirateEscape(p.name)}</strong>${p.id===pirateRoom.host_id?" · Host":""}</div>`).join("");
   $("pirateWaitingStatus").textContent=piratePlayersState.length+" player(s) in the room.";
@@ -1018,23 +1053,34 @@ async function pirateRenderSetup(){
   const nextGrid=[...grid],nextTray=[...pool];
   const fromTray=nextTray.findIndex(t=>t.uid===uid),fromGrid=nextGrid.findIndex(t=>t&&t.uid===uid);
   if(fromTray>=0){
-   if(fromTray<0)return;
    const moving=nextTray.splice(fromTray,1)[0],displaced=nextGrid[targetIndex];
    nextGrid[targetIndex]=moving;if(displaced)nextTray.push(displaced);
   }else if(fromGrid>=0&&fromGrid!==targetIndex){
    const moving=nextGrid[fromGrid],displaced=nextGrid[targetIndex];
    nextGrid[targetIndex]=moving;nextGrid[fromGrid]=displaced||null;
   }else return;
+  pirateSelectedSetupTileUid=null;
   pirateSavePersonalSetup(nextGrid,nextTray);
+ };
+ const selectSetupTile=(uid,node)=>{
+  pirateSelectedSetupTileUid=pirateSelectedSetupTileUid===uid?null:uid;
+  board.querySelectorAll(".selected-for-placement").forEach(el=>el.classList.remove("selected-for-placement"));
+  tray.querySelectorAll(".selected-for-placement").forEach(el=>el.classList.remove("selected-for-placement"));
+  if(pirateSelectedSetupTileUid&&node)node.classList.add("selected-for-placement");
  };
  for(let i=0;i<49;i++){
   const cell=document.createElement("button");cell.type="button";cell.className="pirate-setup-cell";cell.dataset.cell=i;
   const tile=grid[i];
   if(tile){
    const placed=pirateTileNode(tile,true);
-   placed.addEventListener("dragstart",e=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",tile.uid)});
+   placed.addEventListener("click",e=>{e.stopPropagation();if(pirateSelectedSetupTileUid&&pirateSelectedSetupTileUid!==tile.uid)saveDrop(pirateSelectedSetupTileUid,i);else selectSetupTile(tile.uid,placed)});
+   placed.addEventListener("dragstart",e=>{pirateSelectedSetupTileUid=null;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",tile.uid)});
    cell.append(placed);
   }
+  cell.addEventListener("click",()=>{
+   if(pirateSelectedSetupTileUid)saveDrop(pirateSelectedSetupTileUid,i);
+   else if(grid[i]){const node=cell.querySelector(".pirate-tile-piece");selectSetupTile(grid[i].uid,node);}
+  });
   cell.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="move";cell.classList.add("drop-ready")});
   cell.addEventListener("dragleave",()=>cell.classList.remove("drop-ready"));
   cell.addEventListener("drop",e=>{e.preventDefault();cell.classList.remove("drop-ready");const uid=e.dataTransfer.getData("text/plain");if(uid)saveDrop(uid,i)});
@@ -1042,15 +1088,29 @@ async function pirateRenderSetup(){
  }
  pool.forEach(tile=>{
   const node=pirateTileNode(tile,true);
-  node.addEventListener("dragstart",e=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",tile.uid)});
+  node.addEventListener("click",e=>{e.stopPropagation();selectSetupTile(tile.uid,node)});
+  node.addEventListener("dragstart",e=>{pirateSelectedSetupTileUid=null;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",tile.uid)});
   tray.append(node);
  });
+ tray.addEventListener("click",()=>{
+  if(!pirateSelectedSetupTileUid)return;
+  const fromGrid=grid.findIndex(t=>t&&t.uid===pirateSelectedSetupTileUid);
+  if(fromGrid<0)return;
+  const nextGrid=[...grid],nextTray=[...pool];nextTray.push(nextGrid[fromGrid]);nextGrid[fromGrid]=null;pirateSelectedSetupTileUid=null;pirateSavePersonalSetup(nextGrid,nextTray);
+ });
+ const randomButton=$("pirateSetupRandom");
+ if(randomButton)randomButton.onclick=async()=>{
+  if(mine.setup_ready&&!confirm("Randomise your grid? This will replace your current arrangement."))return;
+  const shuffled=pirateRandomise(pirateCreateTiles()),randomGrid=Array(49).fill(null);
+  shuffled.forEach((tile,index)=>{if(index<48)randomGrid[index]=tile;});
+  pirateSelectedSetupTileUid=null;await pirateSavePersonalSetup(randomGrid,[]);
+ };
  tray.addEventListener("dragover",e=>{if(e.dataTransfer.types.includes("text/plain")){e.preventDefault();e.dataTransfer.dropEffect="move"}});
  tray.addEventListener("drop",e=>{
   e.preventDefault();const uid=e.dataTransfer.getData("text/plain"),fromGrid=grid.findIndex(t=>t&&t.uid===uid);
   if(fromGrid<0)return;const nextGrid=[...grid],nextTray=[...pool];nextTray.push(nextGrid[fromGrid]);nextGrid[fromGrid]=null;pirateSavePersonalSetup(nextGrid,nextTray);
  });
- $("pirateSetupCount").textContent=pool.length+" tiles left to place · "+(49-pool.length)+" / 49 placed";
+ $("pirateSetupCount").textContent=pool.length+" tiles left to place · "+(48-pool.length)+" / 48 placed";
  $("pirateSetupStart").disabled=pool.length>0||mine.setup_ready===true;
  $("pirateSetupStart").textContent=mine.setup_ready?"Ready — waiting for others":"I'm ready";
  const remain=Math.max(0,Math.ceil((new Date(pirateRoom.setup_ends_at).getTime()-Date.now())/1000));
@@ -1099,7 +1159,9 @@ function pirateAllActionsDone(){return piratePlayersState.length>0&&piratePlayer
 function pirateRenderGameBoard(){
  if(pirateOnlineIsHost){
   $("pirateHostDashboard").hidden=false;$("piratePlayerDashboard").hidden=true;
-  $("pirateHostStatus").textContent=piratePlayersState.length+" active player(s) · Host controls";
+  const suggestedIndex=pirateRoom.admin_suggested_index!==null&&pirateRoom.admin_suggested_index!==undefined&&Number.isInteger(Number(pirateRoom.admin_suggested_index))?Number(pirateRoom.admin_suggested_index):-1;
+  const suggestedBy=pirateRoom.admin_suggested_by||"a player";
+  $("pirateHostStatus").textContent=piratePlayersState.length+" active player(s) · Host controls"+(suggestedIndex>=0?" · Suggested next: "+pirateCoordinate(suggestedIndex)+" (by "+suggestedBy+")":"");
   $("pirateHostPlayers").innerHTML=piratePlayersState.map(p=>`<div class="pirate-score-row"><strong>${pirateEscape(p.name)}</strong><span>Unbanked £${Number(p.score||0).toLocaleString('en-GB')}</span><small>🛡 ${p.shields||0} shields · 🪞 ${p.mirrors||0} mirrors</small></div>`).join('');
   const hostGrid=$("pirateHostGrid");hostGrid.replaceChildren();
   const hostChosen=Array.isArray(pirateRoom.chosen)?pirateRoom.chosen:[];
@@ -1110,6 +1172,7 @@ function pirateRenderGameBoard(){
    square.textContent=pirateCoordinate(i);square.setAttribute("aria-label","Reveal square "+pirateCoordinate(i));
    if(hostChosen.includes(i)){square.classList.add("chosen");square.disabled=true;square.textContent="✓";}
    else{square.disabled=!hostCanReveal;if(hostCanReveal)square.addEventListener("click",()=>pirateReveal(i));}
+   if(i===suggestedIndex&&!hostChosen.includes(i))square.classList.add("admin-suggested");
    hostGrid.append(square);
   }
   $("pirateHostNext").hidden=true;
@@ -1117,6 +1180,7 @@ function pirateRenderGameBoard(){
   return;
  }
  $("pirateHostDashboard").hidden=true;$("piratePlayerDashboard").hidden=false;
+ if(pirateAdminUnlocked){pirateAdminPopulateSelectors();pirateAdminRenderBalances();}
  const board=$("pirateLiveGrid");board.replaceChildren();
  const chosen=Array.isArray(pirateRoom.chosen)?pirateRoom.chosen:[];
  const queued=piratePlayersState.filter(p=>Number(p.choose_tokens||0)>0).sort((a,b)=>String(a.joined_at).localeCompare(String(b.joined_at)));
@@ -1246,6 +1310,71 @@ async function pirateRunHostEvent(eventName,button){
  button.disabled=true;
  try{const {data,error}=await pirateDb.rpc("pirate_host_event",{p_room_code:pirateRoom.code,p_host_id:pirateMe,p_event:eventName});if(error)throw error;if(data?.error)throw new Error(data.error);await pirateRefreshRoom();}
  catch(e){pirateShowNotice("Event could not be activated",e.message)}finally{button.disabled=false}
+}
+
+function pirateAdminOpenPanel(){
+ if(!pirateAdminUnlocked||!pirateRoom||pirateRoom.phase!=="game")return;
+ pirateAdminPanelOpen=true;pirateRenderState();pirateAdminPopulateSelectors();pirateAdminRenderBalances();
+ window.setTimeout(()=>$("pirateAdminPanel")?.scrollIntoView({behavior:"smooth",block:"start"}),100);
+}
+function pirateAdminClosePanel(){
+ pirateAdminPanelOpen=false;
+ const panel=$("pirateAdminPanel"),toggle=$("pirateAdminToggle");
+ if(panel)panel.hidden=true;
+ if(toggle){toggle.setAttribute("aria-expanded","false");toggle.innerHTML="⚙ Admin panel <span aria-hidden=\"true\">▾</span>";}
+}
+function pirateAdminTogglePanel(){
+ if(pirateAdminPanelOpen)pirateAdminClosePanel();
+ else pirateAdminOpenPanel();
+}
+function pirateAdminPopulateSelectors(){
+ const targets=[...piratePlayersState].filter(p=>p.id!==pirateMe);
+ const takeSelect=$("pirateAdminTakeTarget");
+ if(takeSelect){const current=takeSelect.value;takeSelect.innerHTML=targets.map(p=>'<option value="'+pirateEscape(p.id)+'">'+pirateEscape(p.name)+'</option>').join("");if(targets.some(p=>p.id===current))takeSelect.value=current;}
+ const nameList=$("pirateAdminAttackNames");if(nameList)nameList.innerHTML=targets.map(p=>'<option value="'+pirateEscape(p.name)+'"></option>').join("");
+ const squareSelect=$("pirateAdminSquare");if(squareSelect&&!squareSelect.options.length){for(let i=0;i<49;i++){const option=document.createElement("option");option.value=String(i);option.textContent=pirateCoordinate(i);squareSelect.append(option)}}
+}
+function pirateAdminRenderBalances(){
+ const host=$("pirateAdminBalances");if(!host)return;
+ host.innerHTML=piratePlayersState.map(p=>'<div class="pirate-admin-balance-row"><strong>'+pirateEscape(p.name)+'</strong><span>Banked £'+Number(p.bank||0).toLocaleString("en-GB")+'</span><span>Unbanked £'+Number(p.score||0).toLocaleString("en-GB")+'</span><span>Total £'+(Number(p.bank||0)+Number(p.score||0)).toLocaleString("en-GB")+'</span></div>').join("")||"No active players.";
+}
+async function pirateAdminRun(action,extra={}){
+ if(!pirateAdminUnlocked||!pirateRoom||!pirateMe)throw new Error("Admin access is not active.");
+ const args={p_room_code:pirateRoom.code,p_admin_id:pirateMe,p_code:pirateAdminCode,p_action:action,p_target_id:extra.targetId||null,p_account:extra.account||null,p_amount:Number(extra.amount||0),p_ability:extra.ability||null,p_square:extra.square===undefined?null:Number(extra.square)};
+ const {data,error}=await pirateDb.rpc("pirate_admin_command",args);
+ if(error){if(error.code==="PGRST202"||/could not find the function/i.test(error.message||""))throw new Error("Supabase cannot see pirate_admin_command yet. Run the latest pirate_admin_panel.sql migration in SQL Editor, then wait a few seconds and try again. Details: "+error.message);throw error;}if(data&&data.error)throw new Error(data.error);
+ await pirateRefreshRoom();pirateAdminPopulateSelectors();pirateAdminRenderBalances();return data;
+}
+async function pirateAdminAdjust(account,direction){
+ const amount=Math.abs(Number($("pirateAdminAmount").value||0))*direction;
+ if(!Number.isSafeInteger(amount)||amount===0){$("pirateAdminStatus").textContent="Enter a whole-number amount greater than zero.";return}
+ try{await pirateAdminRun("adjust",{account,amount});$("pirateAdminStatus").textContent=(amount>0?"Added ":"Removed ")+"£"+Math.abs(amount).toLocaleString("en-GB")+" "+(account==="bank"?"to/from your bank.":"to/from your unbanked money.")}
+ catch(e){$("pirateAdminStatus").textContent="Admin action failed: "+e.message}
+}
+async function pirateAdminTakeMoney(){
+ const amount=Number($("pirateAdminTakeAmount").value||0),targetId=$("pirateAdminTakeTarget").value,account=$("pirateAdminTakeAccount").value;
+ if(!targetId||!Number.isSafeInteger(amount)||amount<=0){$("pirateAdminStatus").textContent="Choose a player and enter a positive whole-number amount.";return}
+ try{const data=await pirateAdminRun("take",{targetId,account,amount});$("pirateAdminStatus").textContent="Taken £"+Number(data.taken||0).toLocaleString("en-GB")+" and added it to your bank."}
+ catch(e){$("pirateAdminStatus").textContent="Could not take money: "+e.message}
+}
+async function pirateAdminRedirectEffect(){
+ const targetName=$("pirateAdminAttackTarget").value.trim(),ability=$("pirateAdminAbility").value;
+ if(!targetName){$("pirateAdminStatus").textContent="Type a target player's name first.";return}
+ const target=piratePlayersState.find(p=>p.id!==pirateMe&&p.name.trim().toLowerCase()===targetName.toLowerCase());
+ if(!target){$("pirateAdminStatus").textContent="No other player has that exact name. Choose a name from the suggestions.";return}
+ if(!confirm("Apply "+ability.toUpperCase()+" to "+target.name+"?"))return;
+ const targetId=target.id;
+ try{await pirateAdminRun("redirect",{targetId,ability});$("pirateAdminStatus").textContent=ability.toUpperCase()+" applied to "+target.name+"."}
+ catch(e){$("pirateAdminStatus").textContent="Could not redirect effect: "+e.message}
+}
+async function pirateAdminSuggestSquare(){
+ const square=Number($("pirateAdminSquare").value);
+ try{await pirateAdminRun("suggest",{square});$("pirateAdminStatus").textContent="Suggested "+pirateCoordinate(square)+" to the host."}
+ catch(e){$("pirateAdminStatus").textContent="Could not send suggestion: "+e.message}
+}
+async function pirateAdminRefreshBalances(){
+ try{await pirateRefreshPlayers();pirateAdminRenderBalances();$("pirateAdminStatus").textContent="Balances refreshed."}
+ catch(e){$("pirateAdminStatus").textContent="Could not refresh balances: "+e.message}
 }
 
 async function pirateEndGame(){
@@ -1778,4 +1907,35 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;user-
 </style>
 <style id="pirate-host-events-update">
 #pirateGame #pirateHostDashboard{padding:clamp(12px,2vw,24px);color:#eee}#pirateGame .pirate-host-events{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:16px 0}#pirateGame .pirate-host-events button,#pirateGame .pirate-host-actions button{min-height:46px;padding:9px 12px;background:#17364a;border:1px solid #d6ad4d;color:#fff;border-radius:7px;font-weight:800;cursor:pointer;white-space:normal}#pirateGame .pirate-host-actions{display:flex;gap:10px;flex-wrap:wrap}#pirateGame .pirate-cow-cell{font-size:clamp(18px,3vw,34px);line-height:1}#pirateGame #pirateHostDashboard .pirate-score-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}#pirateGame #pirateHostDashboard h2,#pirateGame #pirateHostDashboard h3{color:#ffd700}
+</style>
+
+<style id="pirate-secret-admin-panel">
+#pirateGame .pirate-admin-panel{width:min(1100px,96%);margin:24px auto 60px;padding:clamp(14px,2vw,24px);border:1px solid #d6ad4d;border-radius:10px;background:linear-gradient(145deg,#102434,#08131d);color:#eee;box-shadow:0 12px 35px #0008}
+#pirateGame .pirate-admin-panel[hidden]{display:none!important}
+#pirateGame .pirate-admin-heading,#pirateGame .pirate-admin-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#pirateGame .pirate-admin-panel h2,#pirateGame .pirate-admin-panel h3{color:#ffd700;margin:0 0 8px}
+#pirateGame .pirate-admin-panel p{color:#b8c8d1}
+#pirateGame .pirate-admin-panel button{min-height:38px;padding:8px 12px;border:1px solid #d6ad4d;border-radius:6px;background:#17364a;color:#fff;font-weight:700;cursor:pointer}
+#pirateGame .pirate-admin-panel label{display:flex;flex-direction:column;gap:5px;color:#d7e0e5;font-size:12px}
+#pirateGame .pirate-admin-panel input,#pirateGame .pirate-admin-panel select{min-height:38px;min-width:130px;padding:7px 9px;border:1px solid #536d7c;border-radius:5px;background:#07131d;color:#fff;font:inherit}
+#pirateGame .pirate-admin-section{margin-top:18px;padding-top:16px;border-top:1px solid #395365}
+#pirateGame .pirate-admin-controls{display:flex;align-items:end;gap:9px;flex-wrap:wrap;margin-top:10px}
+#pirateGame .pirate-admin-balances{display:grid;gap:6px;margin-top:10px}
+#pirateGame .pirate-admin-balance-row{display:grid;grid-template-columns:1.2fr repeat(3,minmax(100px,1fr));gap:8px;padding:9px;border:1px solid #314b5d;border-radius:5px;background:#0b1b28;font-size:12px}
+#pirateGame .pirate-admin-balance-row strong{color:#ffd700}
+#pirateGame .pirate-host-square.admin-suggested{outline:3px solid #66e0a3;outline-offset:1px;background:#194d3d;color:#fff}
+@media(max-width:650px){#pirateGame .pirate-admin-balance-row{grid-template-columns:1fr 1fr}#pirateGame .pirate-admin-controls>*{flex:1 1 145px}}
+</style>
+
+<style id="pirate-admin-dropdown-and-tap-placement">
+#pirateGame .pirate-admin-toggle-wrap{width:min(1100px,96%);margin:12px auto 0;display:flex;justify-content:flex-start}
+#pirateGame .pirate-admin-toggle-wrap[hidden],#pirateGame .pirate-admin-toggle[hidden]{display:none!important}
+#pirateGame .pirate-admin-toggle{display:inline-flex;align-items:center;gap:12px;min-height:38px;padding:8px 14px;border:1px solid #d6ad4d;border-radius:7px;background:#17364a;color:#ffd700;font-weight:800;cursor:pointer}
+#pirateGame .pirate-admin-panel{margin-top:10px}
+#pirateGame .pirate-setup-heading-actions{display:flex;align-items:center;gap:12px;flex:none}
+#pirateGame .pirate-setup-heading-actions button{border:1px solid #b58a39;background:linear-gradient(135deg,#741018,#36080d);color:#f2d58a;padding:9px 12px;font:700 12px "Share Tech Mono",monospace;cursor:pointer}
+#pirateGame .pirate-setup-cell{cursor:crosshair}
+#pirateGame .pirate-tile-piece.selected-for-placement{outline:3px solid #66e0a3;outline-offset:-2px;border-radius:5px;background:#174b3c!important;filter:brightness(1.3)}
+#pirateGame .pirate-setup-cell:has(.selected-for-placement){border-color:#66e0a3}
+@media(max-width:600px){#pirateGame .pirate-setup-heading-actions{gap:5px;flex-direction:column;align-items:flex-end}#pirateGame .pirate-setup-heading-actions button{font-size:10px;padding:7px 8px}}
 </style>
