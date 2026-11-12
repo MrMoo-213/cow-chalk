@@ -5,10 +5,981 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#00343d">
 <title>Real Time</title>
-<style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#00343d}iframe{display:block;width:100%;height:100%;border:0}</style>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/pictures/favicon1.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+
+/* --u = one "design pixel". The page is drawn on a 1200 x 800 grid and
+   scaled to fit the window, so proportions stay identical at any size. */
+:root{color-scheme:dark;--bg:#00343d;--cyan:#68c8d8;--u:min(calc(100vw / 1200),calc(100vh / 850))}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#fff;overflow-x:hidden}
+button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:calc(30*var(--u))}
+
+/* ---------- sound options ---------- */
+.sounds{margin-top:calc(30*var(--u));width:min(calc(1125*var(--u)),94vw);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;justify-items:start;gap:calc(12*var(--u)) calc(18*var(--u))}
+.opt{position:relative;display:flex;align-items:center;gap:calc(10*var(--u));font-size:calc(19*var(--u));font-weight:700;white-space:nowrap;cursor:pointer;min-width:0}
+.opt.hidden-sound{display:none}
+.show-more{display:flex;align-items:center;justify-content:center;gap:calc(12*var(--u));min-height:calc(36*var(--u));padding:0;border:0;background:none;color:#fff;font:700 calc(19*var(--u)) Arial,Helvetica,sans-serif;cursor:pointer;white-space:nowrap}
+.show-more:focus-visible{outline:calc(3*var(--u)) solid #fff;outline-offset:calc(3*var(--u))}
+@media(max-width:700px){.sounds{grid-template-columns:repeat(2,minmax(0,1fr))}.opt{font-size:calc(18*var(--u))}}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.dot{position:relative;flex:none;width:calc(36*var(--u));height:calc(36*var(--u));border-radius:50%;border:calc(1.5*var(--u)) solid #0a8a97;
+  background:radial-gradient(circle at 35% 30%,#46d3de 0 12%,#1aa3b0 36%,#087a87 70%,#056571 100%);
+  box-shadow:inset calc(2*var(--u)) calc(2*var(--u)) calc(5*var(--u)) #7fe3ea88,0 0 calc(2*var(--u)) #71dce7}
+.dot:after{content:"";position:absolute;inset:25%;border-radius:50%;background:#04424c;box-shadow:inset 0 calc(2*var(--u)) calc(3*var(--u)) #0009}
+.opt input:checked+.dot:after{background:#aef3f6;box-shadow:0 0 calc(9*var(--u)) #7ff0f6}
+.opt input:focus-visible+.dot{outline:calc(3*var(--u)) solid #fff;outline-offset:calc(3*var(--u))}
+.stopwatch-on .sounds{visibility:hidden}
+
+/* ---------- display ---------- */
+.timer-wrap{position:relative;margin-top:calc(145*var(--u));width:calc(1125*var(--u))}
+.display{--bw:calc(14*var(--u));--vp:calc(12*var(--u));
+  display:flex;align-items:stretch;height:calc(220*var(--u));padding:var(--vp) calc(16*var(--u));
+  background:#000;border:var(--bw) solid var(--cyan);border-radius:calc(42*var(--u))}
+.unit{position:relative;flex:none;display:flex;width:calc(103*var(--u))}
+.unit.wide{width:calc(206*var(--u))}
+.digit{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center}
+.digit svg{display:block;flex:none;width:calc(96.6*var(--u));height:calc(158*var(--u));overflow:visible;filter:drop-shadow(calc(-6*var(--u)) calc(7*var(--u)) 0 #707070)}
+.segment{fill:transparent;stroke:none}
+.segment.on{fill:#67c8d8}
+
+.separator{flex:none;width:calc(80*var(--u));display:flex;flex-direction:column;justify-content:center;align-items:center;gap:calc(18*var(--u))}
+.separator i{display:block;flex:none;width:calc(46*var(--u));height:calc(46*var(--u));border-radius:50%;background:var(--cyan);box-shadow:calc(-7*var(--u)) calc(8*var(--u)) 0 #707070}
+.separator.decimal{justify-content:flex-end}
+.separator.decimal i{width:calc(44*var(--u));height:calc(44*var(--u))}
+
+/* ---------- arrows ---------- */
+.arrow{position:absolute;left:50%;width:calc(76*var(--u));height:calc(76*var(--u));padding:0;border:0;background:none}
+.arrow svg{display:block;width:100%;height:100%;filter:drop-shadow(calc(2*var(--u)) calc(3*var(--u)) 0 #0007)}
+.arrow.up{bottom:calc(100% + var(--vp) + var(--bw) + 8*var(--u));transform:translateX(-50%)}
+.arrow.down{top:calc(100% + var(--vp) + var(--bw) + 10*var(--u));transform:translateX(-50%) rotate(180deg)}
+.arrow:active svg{filter:brightness(.7) drop-shadow(calc(1*var(--u)) calc(1*var(--u)) 0 #0007)}
+.stopwatch-on .arrow{visibility:hidden}
+
+/* ---------- controls ---------- */
+.controls{display:flex;gap:calc(67*var(--u));margin-top:calc(115*var(--u))}
+.ctl{width:calc(100*var(--u));height:calc(100*var(--u));border:0;border-radius:calc(5*var(--u));background:#fff;display:grid;place-items:center;
+  box-shadow:calc(2*var(--u)) calc(3*var(--u)) calc(4*var(--u)) #0008}
+.ctl svg{width:52%;height:52%;display:block}
+.ctl:active{transform:translateY(calc(2*var(--u)));box-shadow:none}
+.ctl:focus-visible,.mode:focus-visible,.arrow:focus-visible{outline:calc(3*var(--u)) solid #fff;outline-offset:calc(3*var(--u))}
+
+/* ---------- stopwatch / timer switch ---------- */
+.mode{margin-top:calc(26*var(--u));width:calc(285*var(--u));height:calc(52*var(--u));border:calc(3*var(--u)) solid #c42c68;border-radius:calc(7*var(--u));
+  background:linear-gradient(#ff82b8 0,#ff4f91 48%,#ff3c82 100%);color:#fff;font-size:calc(26*var(--u));font-weight:900;font-style:italic;letter-spacing:calc(1*var(--u));
+  text-shadow:0 calc(1*var(--u)) calc(2*var(--u)) #b51b5a;box-shadow:inset 0 calc(3*var(--u)) 0 #ffffff55,0 calc(2*var(--u)) calc(3*var(--u)) #0008}
+.mode:active{transform:translateY(calc(2*var(--u)))}
+
+
+.menu-overlay{position:fixed;inset:0;z-index:20;background:#00343d;display:flex;align-items:center;justify-content:center;padding:24px}
+.menu-overlay[hidden]{display:none}
+.menu-panel{width:min(420px,92vw);display:grid;gap:calc(18*var(--u))}
+.menu-title{font-size:clamp(30px,5vw,48px);font-weight:900;text-align:center;margin:0 0 12px}
+.menu-option{width:100%;min-height:calc(60*var(--u));border:calc(3*var(--u)) solid #c42c68;border-radius:calc(7*var(--u));background:linear-gradient(#ff82b8 0,#ff4f91 48%,#ff3c82 100%);color:#fff;font-size:clamp(19px,3vw,26px);font-weight:900;font-style:italic;letter-spacing:calc(1*var(--u));text-shadow:0 calc(1*var(--u)) calc(2*var(--u)) #b51b5a;box-shadow:inset 0 calc(3*var(--u)) 0 #ffffff55,0 calc(2*var(--u)) calc(3*var(--u)) #0008}
+.menu-option:active{transform:translateY(2px)}
+.menu-option:focus-visible{outline:3px solid #fff;outline-offset:3px}
+body.realtime-on .sounds,body.realtime-on .controls,body.realtime-on .arrow{display:none}
+body.realtime-on .timer-wrap{margin-top:auto;margin-bottom:auto}
+#realDate{display:none;text-align:center;font-size:calc(32*var(--u));font-weight:800;margin-bottom:calc(24*var(--u));color:#fff}
+body.realtime-on #realDate{display:block}
+body.realtime-on .timer-wrap{display:flex;flex-direction:column;align-items:center}
+
+
+/* ---------- Pirate Game Intro ---------- */
+#pirateGame{background:#0a1118}
+.pirate-intro{position:absolute;inset:0;z-index:30;display:none;overflow:hidden;align-items:center;justify-content:center;background:#0a1118;color:#eee;font-family:"Share Tech Mono",monospace;perspective:1000px}
+#pirateGame.pirate-intro-active .pirate-intro{display:flex}
+#pirateGame.pirate-intro-active .pirate-layout{display:none}
+.pirate-ambient{position:absolute;inset:0;z-index:1;background:radial-gradient(circle at 50% 50%,rgba(26,47,68,.4),#0a1118 80%),linear-gradient(0deg,rgba(139,0,0,.15),transparent);animation:pirateOceanPulse 8s ease-in-out infinite alternate}
+.pirate-grid-backdrop{position:absolute;top:50%;left:50%;width:700px;height:700px;opacity:.12;z-index:2;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);border:2px solid #4a6984;background:transparent;transform:translate(-50%,-50%) rotateX(65deg) rotateZ(0deg) translateZ(-100px);animation:pirateGridFloat 20s linear infinite;pointer-events:none}
+.pirate-grid-backdrop .pirate-grid-cell{position:relative;border:1px dashed #4a6984;background:transparent}
+.pirate-floats{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:hidden}
+.pirate-floats span{position:absolute;color:#4a6984;font-size:2rem;font-weight:bold;opacity:0;animation:pirateSymbolFly 12s infinite linear}
+.pirate-floats span:nth-child(1){top:20%;left:10%;animation-delay:0s}
+.pirate-floats span:nth-child(2){top:70%;left:15%;animation-delay:3s;color:#ffd700;font-size:3rem}
+.pirate-floats span:nth-child(3){top:40%;left:80%;animation-delay:1.5s}
+.pirate-floats span:nth-child(4){top:80%;left:75%;animation-delay:4.5s}
+.pirate-floats span:nth-child(5){top:15%;left:60%;animation-delay:6s}
+.pirate-intro-content{position:relative;z-index:10;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:800px;padding:20px;max-height:100%;overflow:visible}
+.pirate-credits{font-size:.9rem;text-transform:uppercase;letter-spacing:4px;color:#4a6984;opacity:0;transform:translateY(-20px);animation:pirateFadeDown 1s .5s cubic-bezier(.19,1,.22,1) forwards;margin-bottom:10px}
+.pirate-credits span{color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.3)}
+.pirate-intro-title-wrap{position:relative;margin-bottom:40px}
+.pirate-intro-title{font-family:"Pirata One",cursive;font-size:6.5rem;color:#eee;text-transform:uppercase;letter-spacing:2px;line-height:1;margin:0;filter:drop-shadow(0 15px 20px rgba(0,0,0,.7));opacity:0;transform:scale(2.5) translateZ(300px);animation:pirateTitleSlam .6s 1.2s cubic-bezier(.175,.885,.32,1.275) forwards}
+.pirate-intro-subtitle{color:#c0c0c0;font-size:1.3rem;letter-spacing:6px;text-transform:uppercase;margin-top:15px;opacity:0;transform:translateY(20px);animation:pirateFadeUp .8s 2s ease-out forwards}
+.pirate-intro-actions{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px}
+.pirate-intro-actions[hidden]{display:none!important}
+.pirate-play-button{position:relative;background:linear-gradient(135deg,#8b0000 0%,#500 100%);color:#ffd700;font-family:"Share Tech Mono",monospace;font-size:1.5rem;font-weight:bold;padding:18px 45px;border:2px solid #ffd700;border-radius:4px;cursor:pointer;text-transform:uppercase;letter-spacing:3px;overflow:hidden;box-shadow:0 0 20px rgba(139,0,0,.6),inset 0 0 15px rgba(255,215,0,.2);opacity:0;transform:translateY(30px);animation:pirateFadeUp .8s 2.6s ease-out forwards;transition:all .3s ease}
+.pirate-play-button:before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,215,0,.4),transparent);transition:none}
+.pirate-play-button:hover:before{left:100%;transition:left .6s linear}
+.pirate-play-button:hover{transform:scale(1.05) translateY(-2px);box-shadow:0 0 35px #ffd700,inset 0 0 10px rgba(255,215,0,.4);color:#fff;border-color:#fff}
+.pirate-play-button:active{transform:scale(.98) translateY(1px)}
+.pirate-save-panel{width:min(560px,92vw);max-height:calc(100dvh - 34px);margin-top:10px;text-align:center;display:flex;flex-direction:column;min-height:0;animation:pirateSavePanelIn .55s cubic-bezier(.2,.8,.2,1) both}
+.pirate-save-panel[hidden]{display:none!important}
+.pirate-save-list{display:grid;gap:9px;max-height:min(48vh,420px);min-height:0;overflow-y:auto;overflow-x:hidden;padding:4px;overscroll-behavior:contain}
+.pirate-save-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border:1px solid #4a6984;background:linear-gradient(110deg,#142433,#0b151e);color:#eee;text-align:left;font:14px "Share Tech Mono",monospace;cursor:pointer;transition:transform .25s,border-color .25s,background .25s;animation:pirateSaveItemIn .4s both}
+.pirate-save-item:hover{transform:translateX(7px);border-color:#ffd700;background:#251c18}
+.pirate-save-item strong{color:#ffd700;font-weight:700}
+.pirate-save-item small{color:#8ca4b8;white-space:nowrap}
+.pirate-save-empty{padding:18px;color:#8ca4b8;border:1px dashed #4a6984}
+.pirate-play-button.pirate-back-intro{margin-top:13px;animation-delay:0s}
+@keyframes pirateOceanPulse{0%{background-position:0 0}100%{background-position:0 100%;filter:hue-rotate(15deg)}}
+@keyframes pirateGridFloat{0%{transform:translate(-50%,-50%) rotateX(65deg) rotateZ(0deg) translateZ(-100px)}100%{transform:translate(-50%,-50%) rotateX(65deg) rotateZ(-360deg) translateZ(-100px)}}
+@keyframes pirateSymbolFly{0%{transform:translateY(100vh) rotate(0deg) scale(.5);opacity:0}10%{opacity:.4}90%{opacity:.4}100%{transform:translateY(-20vh) rotate(720deg) scale(1.2);opacity:0}}
+@keyframes pirateFadeDown{to{opacity:1;transform:translateY(0)}}
+@keyframes pirateFadeUp{to{opacity:1;transform:translateY(0)}}
+@keyframes pirateTitleSlam{0%{opacity:0;transform:scale(3) translateZ(300px);filter:blur(10px)}70%{opacity:1;transform:scale(.95) translateZ(0);filter:blur(0)}100%{opacity:1;transform:scale(1) translateZ(0);filter:drop-shadow(0 8px 4px rgba(0,0,0,.8))}}
+@keyframes pirateSavePanelIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes pirateSaveItemIn{from{opacity:0;transform:translateX(-25px)}to{opacity:1;transform:none}}
+#pirateGame.pirate-launching .pirate-intro-title-wrap{animation:pirateTitleFly .75s cubic-bezier(.6,0,.8,.2) both}
+#pirateGame.pirate-launching .pirate-credits{animation:pirateTitleFly .55s ease-in both}
+#pirateGame.pirate-launching .pirate-intro-actions{animation:pirateButtonsScatter .8s cubic-bezier(.7,0,.9,.2) both}
+#pirateGame.pirate-launching .pirate-ambient{animation:pirateSeaFlash .8s ease-in both}
+@keyframes pirateTitleFly{to{opacity:0;transform:translateY(-120vh) rotateX(70deg) scale(.4);filter:blur(12px)}}
+@keyframes pirateButtonsScatter{0%{opacity:1;transform:translateY(0) scale(1)}45%{opacity:1;transform:translateY(15px) scale(.9)}100%{opacity:0;transform:translate(120vw,-30vh) rotate(35deg) scale(.5)}}
+@keyframes pirateSeaFlash{50%{filter:brightness(2.2)}100%{opacity:0}}
+@media(max-width:700px){.pirate-intro-title{font-size:clamp(3rem,10vw,6.5rem)}.pirate-intro-subtitle{font-size:clamp(.8rem,2vw,1.3rem)}.pirate-play-button{font-size:clamp(1rem,4vw,1.5rem);padding:16px 30px}.pirate-grid-backdrop{width:90vw;height:90vw}}
+@media(max-height:600px){.pirate-intro-content{transform:none}}
+@media(prefers-reduced-motion:reduce){.pirate-intro *,.pirate-intro *:before{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+/* ---------- Pirate Game ---------- */
+#pirateGame{display:none;position:fixed;inset:0;z-index:15;background:#0a1118;color:#eee;overflow:hidden;padding:clamp(8px,1.5vh,18px) clamp(10px,2vw,26px);font-family:"Share Tech Mono","Courier New",monospace}
+body.pirate-on #page,body.pirate-on #moreMenu{display:none}
+body.pirate-on #pirateGame{display:flex}
+.pirate-layout{position:relative;z-index:2;width:min(1180px,100%);height:100%;min-height:0;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,270px);gap:clamp(14px,3vw,38px);align-items:center}
+.pirate-board-wrap{width:100%;min-width:0;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.pirate-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 clamp(5px,1.5vh,14px)}
+.pirate-heading,.pirate-next-label{font-family:"Pirata One","Old English Text MT",Georgia,serif;letter-spacing:1px;text-shadow:0 5px 12px #000b}.pirate-heading{font-size:clamp(30px,5vh,52px);font-weight:400;margin:0;color:#eee;white-space:nowrap}
+.pirate-tools{display:flex;gap:6px;align-items:center}
+.pirate-icon{width:clamp(32px,4vh,42px);height:clamp(32px,4vh,42px);display:grid;place-items:center;border:1px solid #ffd700;border-radius:3px;background:linear-gradient(135deg,#8b0000,#500);color:#ffd700;font:700 clamp(17px,2.5vh,23px) "Share Tech Mono",monospace;line-height:1;padding:0;box-shadow:0 0 12px #8b000077,inset 0 0 8px #ffd70022;transition:filter .15s,transform .15s}
+.pirate-icon:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.pirate-side>.pirate-icon{display:grid;margin:0 auto}
+.pirate-icon:active{transform:translateY(1px)}
+.pirate-icon:disabled{opacity:.38;filter:grayscale(.5);cursor:default;transform:none}
+.pirate-board{display:grid;grid-template-columns:clamp(22px,3.4vh,30px) repeat(7,minmax(0,1fr));grid-template-rows:clamp(22px,3.4vh,30px) repeat(7,minmax(0,1fr));width:min(100%,calc(100dvh - 105px));height:min(100%,calc(100dvh - 105px));aspect-ratio:1/1;max-height:calc(100dvh - 105px);margin:0 auto;background:var(--bg);flex:none;touch-action:manipulation}
+.pirate-axis{display:grid;place-items:center;font-size:clamp(12px,2.3vh,18px);font-weight:800;color:#fff}
+.pirate-square{position:relative;display:block;min-width:0;min-height:0;width:100%;height:100%;border:1px solid #66849a;border-radius:2px;background:linear-gradient(145deg,#142b3b,#0b1924);padding:0;overflow:hidden;appearance:none;-webkit-appearance:none;touch-action:manipulation;transition:background .18s,border-color .18s}
+.pirate-square:hover:not(.marked){background:linear-gradient(145deg,#29465a,#142b3b);border-color:#ffd700}
+.pirate-square:focus-visible{outline:3px solid #ed244f;outline-offset:-3px;z-index:1}
+.pirate-square.marked{cursor:default;background:#0a1118;border-color:#4a6984}
+.pirate-cross{position:absolute;inset:8%;width:84%;height:84%;overflow:visible}
+.pirate-cross path{fill:none;stroke:#e32636;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:120;filter:none}
+.pirate-square.just-marked .pirate-cross path{animation:drawPirateCross .42s ease-out forwards}
+@keyframes drawPirateCross{to{stroke-dashoffset:0}}
+@keyframes piratePlayerIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.pirate-side{width:100%;align-self:start;min-width:0;padding-top:clamp(4px,1.5vh,16px)}
+.pirate-next-label{color:#ffd700;font-size:clamp(28px,4.5vh,42px);font-weight:400;text-decoration:none;margin:0 0 clamp(12px,2.5vh,24px);white-space:normal}
+.pirate-turn{font-size:clamp(15px,2.2vh,19px);font-weight:700;line-height:1.3;margin:0 0 12px;min-height:2.6em;color:#c0c0c0}
+.pirate-players{display:grid;gap:6px;margin:0 0 12px;padding:0;list-style:none;max-height:30vh;overflow:auto;scrollbar-width:none;overscroll-behavior:contain}.pirate-players::-webkit-scrollbar{display:none;width:0;height:0}
+.pirate-player{font-size:clamp(13px,1.9vh,16px);padding:5px 0;border-bottom:1px solid #4a6984;color:#eee;font-weight:500;animation:piratePlayerIn .32s cubic-bezier(.2,.8,.2,1) both}
+.pirate-player:first-child{font-weight:800}
+.pirate-player{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pirate-player-name{min-width:0;overflow-wrap:anywhere}
+.pirate-player-actions{display:flex;align-items:center;gap:5px;flex:none}
+.pirate-player-action{display:grid;place-items:center;width:27px;height:27px;padding:4px;border:1px solid #8b6540;border-radius:3px;background:linear-gradient(145deg,#263b4b,#111d28);color:#e9d6a2;cursor:pointer}
+.pirate-player-action svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pirate-player-action:hover{border-color:#ffd700;color:#ffd700}
+.pirate-add{display:none;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin:9px 0 10px}
+.pirate-add.open{display:grid}
+.pirate-add input{grid-column:1/-1;min-width:0;width:100%;height:36px;border:1px solid #66849a;border-radius:3px;background:#101e29;color:#fff;padding:0 10px;font:15px "Share Tech Mono",monospace;outline:none}.pirate-add input:focus{border-color:#ffd700;box-shadow:0 0 10px #ffd70044}
+.pirate-add>button[type="submit"]{grid-column:1/-1;height:36px;padding:0 11px;border:1px solid #ffd700;border-radius:3px;background:linear-gradient(135deg,#8b0000,#500);color:#ffd700;font:700 14px "Share Tech Mono",monospace;letter-spacing:1px;text-transform:uppercase;box-shadow:0 0 12px #8b000055,inset 0 0 8px #ffd70022}
+.pirate-keyboard{grid-column:1/-1;display:grid;gap:5px;margin-top:3px;user-select:none;touch-action:manipulation}
+.pirate-key-row{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.pirate-key-row.pirate-number-row{grid-template-columns:repeat(10,minmax(0,1fr))}
+.pirate-key-row:nth-child(3){grid-template-columns:repeat(9,minmax(0,1fr));padding:0 4%}
+.pirate-key-row:nth-child(4){grid-template-columns:1.4fr repeat(7,minmax(0,1fr)) 1.4fr}
+.pirate-keyboard button{min-width:0;height:clamp(27px,4vh,36px);padding:0 2px;border:1px solid #8b6540;border-radius:3px;background:linear-gradient(145deg,#263b4b,#111d28);color:#e9d6a2;font:700 clamp(11px,1.6vh,15px) "Share Tech Mono",monospace;box-shadow:inset 0 1px 0 #ffffff22;touch-action:manipulation}
+.pirate-keyboard button:active{filter:brightness(.88);transform:translateY(1px)}
+.pirate-keyboard button.pressed{animation:pirateKeyPress .18s ease-out}
+@keyframes pirateKeyPress{0%{filter:brightness(1);transform:scale(1)}45%{filter:brightness(.72);transform:scale(.91) translateY(2px);box-shadow:inset 0 2px 5px #7d123d}100%{filter:brightness(1);transform:scale(1)}}
+.pirate-keyboard .wide{font-size:clamp(9px,1.3vh,12px)}
+.pirate-toast{position:fixed;top:10px;left:50%;z-index:45;transform:translateX(-50%);display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);padding:7px 12px;border:1px solid #ffd700;border-radius:3px;background:#101e29;color:#eee;box-shadow:0 3px 14px #0009;font:14px "Share Tech Mono",monospace}
+.pirate-toast[hidden]{display:none}
+.pirate-toast button{border:0;background:none;color:#ffd700;text-decoration:underline;font:700 14px "Share Tech Mono",monospace;padding:3px 5px}
+.pirate-big-pop{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:auto;touch-action:none;background:#000b;opacity:1;transition:opacity .45s ease}
+.pirate-big-pop[hidden]{display:none}
+.pirate-big-pop.fading{opacity:0}
+.pirate-big-card{color:#ffd700;font-family:"Pirata One",Georgia,serif;font-size:min(30vw,38vh,300px);font-weight:400;line-height:1;text-shadow:0 5px 24px #000,0 0 30px #ffd70066;animation:pirateCoordinate .38s cubic-bezier(.2,.8,.2,1) both}
+@keyframes pirateCoordinate{from{opacity:0;transform:scale(.55) rotate(-7deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@media(max-width:620px){
+ #pirateGame{padding:7px}
+ .pirate-layout{grid-template-columns:minmax(0,1fr) minmax(112px,34vw);gap:8px}
+ .pirate-header{align-items:flex-start;flex-direction:column;gap:3px;margin-bottom:2px}
+ .pirate-heading{font-size:clamp(20px,4vw,30px)}
+ .pirate-tools{gap:4px}
+ .pirate-icon{width:27px;height:27px;font-size:16px}
+ .pirate-board{width:min(100%,calc(100dvh - 50px));max-height:calc(100dvh - 50px);grid-template-columns:18px repeat(7,minmax(0,1fr));grid-template-rows:20px repeat(7,minmax(0,1fr))}
+ .pirate-axis{font-size:11px}
+ .pirate-next-label{font-size:clamp(13px,3.5vw,17px);white-space:normal;margin-bottom:9px}
+ .pirate-turn{font-size:clamp(12px,3vw,15px);margin-bottom:7px}
+ .pirate-players{max-height:32vh;gap:3px}
+ .pirate-player{font-size:12px;padding:4px 0}
+ .pirate-add input{font-size:13px;padding:0 5px}
+ .pirate-add button{padding:0 7px}
+}
+@media(max-height:520px){
+ #pirateGame{padding:4px 10px}
+ .pirate-heading{font-size:24px}
+ .pirate-header{margin-bottom:2px}
+ .pirate-board{width:min(100%,calc(100dvh - 48px));max-height:calc(100dvh - 48px)}
+ .pirate-side{font-size:12px}
+ .pirate-players{max-height:24vh}
+}
+@media(prefers-reduced-motion:reduce){.pirate-cross path,.pirate-big-card,.pirate-icon{animation:none!important;transition:none!important}.pirate-cross path{stroke-dashoffset:0}}
+
+
+
+
+
+#pirateGame .pirate-intro{background:transparent;font-family:'Share Tech Mono',monospace;perspective:1000px}
+#pirateGame .pirate-ambient{background:radial-gradient(circle at 50% 50%,rgba(26,47,68,.4) 0%,rgba(10,17,24,1) 80%),linear-gradient(0deg,rgba(139,0,0,.15) 0%,transparent 100%);animation:pirateOceanPulse 8s ease-in-out infinite alternate}
+#pirateGame .pirate-grid-backdrop{width:min(700px,90vw);height:min(700px,90vw);opacity:.12;border:2px solid #4a6984;transform:rotateX(60deg) rotateZ(-30deg) translateZ(-100px);animation:pirateReferenceGrid 20s linear infinite}
+#pirateGame .pirate-floats span{color:#4a6984;font-size:2rem;font-weight:bold;animation:pirateSymbolFly 12s infinite linear}
+#pirateGame .pirate-floats span:nth-child(1){top:20%;left:10%;animation-delay:0s}
+#pirateGame .pirate-floats span:nth-child(2){top:70%;left:15%;animation-delay:3s;color:#ffd700;font-size:3rem}
+#pirateGame .pirate-floats span:nth-child(3){top:40%;left:80%;animation-delay:1.5s}
+#pirateGame .pirate-floats span:nth-child(4){top:80%;left:75%;animation-delay:4.5s}
+#pirateGame .pirate-floats span:nth-child(5){top:15%;left:60%;animation-delay:6s}
+#pirateGame .pirate-intro-content{width:100%;max-width:800px;padding:20px;max-height:100dvh;overflow-y:auto;justify-content:center}
+#pirateGame .pirate-credits{font-size:.9rem;text-transform:uppercase;letter-spacing:4px;color:#4a6984;opacity:0;transform:translateY(-20px);animation:pirateFadeDown 1s cubic-bezier(.19,1,.22,1) forwards;animation-delay:.5s;margin-bottom:10px}
+#pirateGame .pirate-credits span{color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.3)}
+#pirateGame .pirate-intro-title-wrap{position:relative;margin-bottom:40px}
+#pirateGame .pirate-intro-title{font-family:'Pirata One',cursive;font-size:clamp(3.1rem,10.4vw,6.5rem);color:#eee;text-transform:uppercase;letter-spacing:2px;line-height:1;margin:0;filter:drop-shadow(0 15px 20px rgba(0,0,0,.7));opacity:0;transform:scale(2.5) translateZ(300px);animation:pirateTitleSlam .6s cubic-bezier(.175,.885,.32,1.275) forwards;animation-delay:1.2s}
+#pirateGame .pirate-intro-subtitle{color:#c0c0c0;font-size:clamp(1rem,2.1vw,1.3rem);letter-spacing:clamp(3px,.7vw,6px);text-transform:uppercase;margin-top:15px;opacity:0;transform:translateY(20px);animation:pirateFadeUp .8s ease-out forwards;animation-delay:2s}
+#pirateGame .pirate-intro-actions{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;width:100%}
+#pirateGame .pirate-play-button{position:relative;min-width:230px;background:linear-gradient(135deg,#8b0000 0%,#500 100%);color:#ffd700;font-family:'Share Tech Mono',monospace;font-size:1.5rem;font-weight:bold;padding:18px 45px;border:2px solid #ffd700;border-radius:4px;cursor:pointer;text-transform:uppercase;letter-spacing:3px;overflow:hidden;box-shadow:0 0 20px rgba(139,0,0,.6),inset 0 0 15px rgba(255,215,0,.2);opacity:0;transform:translateY(30px);animation:pirateFadeUp .8s ease-out forwards;animation-delay:2.6s;transition:all .3s ease}
+#pirateGame .pirate-play-button:before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,215,0,.4),transparent);transition:none}
+#pirateGame .pirate-play-button:hover:before{left:100%;transition:left .6s linear}
+#pirateGame .pirate-play-button:hover{transform:scale(1.05) translateY(-2px);box-shadow:0 0 35px #ffd700,inset 0 0 10px rgba(255,215,0,.4);color:#fff;border-color:#fff}
+#pirateGame .pirate-play-button:active{transform:scale(.98) translateY(1px)}
+#pirateGame .pirate-save-panel{width:min(560px,92vw);max-height:calc(100dvh - 40px);margin-top:0}
+#pirateGame .pirate-save-panel h2{font-family:'Pirata One',cursive;font-size:2.2rem;text-transform:uppercase}
+#pirateGame .pirate-play-button.pirate-back-intro{margin-top:14px;animation-delay:0s}
+#pirateGame .pirate-save-list{max-height:min(48vh,420px)}
+@keyframes pirateReferenceGrid{0%{transform:rotateX(65deg) rotateZ(0deg) translateZ(-100px)}100%{transform:rotateX(65deg) rotateZ(-360deg) translateZ(-100px)}}
+#pirateGame.pirate-launching .pirate-intro-content{animation:pirateReferenceLaunch .78s cubic-bezier(.7,0,.2,1) both}
+#pirateGame.pirate-launching .pirate-intro-title{animation:pirateReferenceTitleExit .78s cubic-bezier(.7,0,.2,1) both}
+#pirateGame.pirate-launching .pirate-play-button{animation:pirateReferenceButtonsExit .55s cubic-bezier(.7,0,.2,1) both}
+@keyframes pirateReferenceLaunch{to{transform:translateY(-115vh) scale(.82);opacity:0}}
+@keyframes pirateReferenceTitleExit{to{transform:translateY(-120vh) rotate(-8deg) scale(.8);opacity:0}}
+@keyframes pirateReferenceButtonsExit{to{transform:translateY(120vh) rotate(8deg);opacity:0}}
+@media(max-width:520px){#pirateGame .pirate-play-button{font-size:1.15rem;padding:15px 28px;min-width:min(230px,82vw)}}
+
+<style id="pirate-grid-centering-fix">
+#pirateGame>.pirate-grid-backdrop{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:min(700px,90vw);
+  height:min(700px,90vw);
+  margin:0;
+  padding:0;
+  background:transparent!important;
+  transform:translate(-50%,-50%) rotateX(60deg) rotateZ(-30deg) translateZ(-100px);
+  transform-origin:center center;
+}
+@keyframes pirateReferenceGrid{
+  0%{transform:translate(-50%,-50%) rotateX(60deg) rotateZ(-30deg) translateZ(-100px)}
+  100%{transform:translate(-50%,-50%) rotateX(60deg) rotateZ(-390deg) translateZ(-100px)}
+}
+#pirateGame>.pirate-grid-backdrop span{background:transparent!important}
+.pirate-board{background:transparent}
+.pirate-square{background:rgba(10,17,24,.18)}
+.pirate-square:hover:not(.marked){background:rgba(74,105,132,.2)}
+.pirate-square.marked{background:rgba(10,17,24,.28)}
+
+
+
+#pirateGame .pirate-save-panel{flex:0 1 auto!important}
+#pirateGame .pirate-save-list{width:min(900px,100%)!important;max-height:min(55vh,480px)!important;flex:0 1 auto!important;align-self:center!important;align-content:start!important;grid-auto-rows:max-content!important}
+#pirateGame .pirate-save-item{min-height:58px!important;height:auto!important;flex:none!important;align-self:start!important}
+#pirateGame .pirate-save-empty{align-self:start!important}
+
+
+
+#pirateGame .pirate-big-card{font-family:Arial,Helvetica,sans-serif!important;font-weight:700!important;letter-spacing:.02em!important}
+#pirateGame .pirate-toast{opacity:1;transform:translate(-50%,0);transition:opacity .45s ease,transform .45s ease}
+#pirateGame .pirate-toast.fading{opacity:0;transform:translate(-50%,-14px);pointer-events:none}
+#pirateGame .pirate-player{cursor:grab;transition:background .15s,opacity .15s,transform .15s}
+#pirateGame .pirate-player:active{cursor:grabbing}
+#pirateGame .pirate-player.dragging{opacity:.35}
+#pirateGame .pirate-player.drag-over{background:#263b4b;outline:1px dashed #ffd700}
+#pirateGame .pirate-tools{gap:7px!important;justify-content:flex-end}
+#pirateGame .pirate-random-button{width:clamp(32px,4vh,42px)!important;min-width:clamp(32px,4vh,42px)!important;height:clamp(32px,4vh,42px)!important;padding:0!important;justify-content:center!important;gap:0!important}
+#pirateGame .pirate-dice-icon{width:19px!important;height:19px!important;flex:none}
+#pirateGame .pirate-icon{flex:0 0 clamp(32px,4vh,42px)}
+#pirateGame .pirate-more-button{font-size:1rem!important;padding:9px 22px!important;letter-spacing:2px!important;min-width:0!important}
+#pirateGame .pirate-intro-actions>#pirateNewGame{animation-delay:2.3s}
+#pirateGame .pirate-intro-actions>#pirateLoadGame{animation-delay:2.85s}
+#pirateGame .pirate-more-button{animation-delay:3.4s}
+#pirateGame.pirate-intro-active .pirate-intro-actions{gap:clamp(18px,3.5vh,32px)!important}
+@media(max-width:620px){#pirateGame .pirate-tools{gap:5px!important}}
+
+
+
+body.pirate-on{overflow:hidden!important}
+#pirateGame{overflow:hidden!important;isolation:isolate;perspective:1000px}
+#pirateGame>.pirate-grid-backdrop{
+  position:absolute!important;
+  top:50%!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:700px!important;
+  height:700px!important;
+  max-width:90vw;
+  max-height:90vw;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  grid-template-rows:repeat(7,minmax(0,1fr))!important;
+  border:2px solid #4a6984!important;
+  background:transparent!important;
+  background-image:none!important;
+  opacity:.22!important;
+  transform:translate(-50%,-50%) rotateX(65deg) rotateZ(0deg) translateZ(-100px);
+  transform-origin:center center;
+  animation:pirateGridCentered 24s linear infinite!important;
+  will-change:transform;
+  pointer-events:none!important;
+}
+#pirateGame>.pirate-grid-backdrop .pirate-grid-cell{
+  min-width:0;
+  min-height:0;
+  border:1px dashed #4a6984;
+  background:transparent!important;
+}
+@keyframes pirateGridCentered{
+  0%{transform:translate(-50%,-50%) rotateX(65deg) rotateZ(0deg) translateZ(-100px)}
+  100%{transform:translate(-50%,-50%) rotateX(65deg) rotateZ(-360deg) translateZ(-100px)}
+}
+#pirateGame.pirate-returning .pirate-layout{
+  animation:pirateGameBoardExit .65s cubic-bezier(.65,0,.85,.35) both;
+  pointer-events:none;
+}
+@keyframes pirateGameBoardExit{
+  0%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+  100%{opacity:0;transform:translateY(55px) scale(.88);filter:blur(8px)}
+}
+#pirateGame.pirate-intro-active .pirate-intro-content{overflow:hidden!important}
+#pirateGame.pirate-intro-active .pirate-save-panel{overflow:hidden}
+#pirateGame.pirate-intro-active .pirate-save-list{overflow-y:auto;overflow-x:hidden}
+#pirateGame .pirate-intro{overflow:hidden!important}
+@media(max-width:700px){
+  #pirateGame>.pirate-grid-backdrop{width:90vw!important;height:90vw!important}
+}
+
+
+
+#pirateGame,#pirateGame *{-webkit-user-select:none!important;user-select:none!important}
+#pirateGame input{user-select:text!important;-webkit-user-select:text!important}
+#pirateGame .pirate-intro{position:absolute!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;overflow:visible!important}
+#pirateGame .pirate-intro-content{position:relative!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;box-sizing:border-box!important;padding:clamp(24px,5vh,56px) 24px 100px!important;overflow:visible!important;justify-content:center!important}
+#pirateGame .pirate-intro-title-wrap,#pirateGame .pirate-intro-title{overflow:visible!important}
+#pirateGame .pirate-intro-actions{position:static!important;flex:none!important}
+#pirateGame .pirate-save-panel{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:none!important;box-sizing:border-box!important;margin:0!important;padding:clamp(24px,5vh,56px) clamp(16px,5vw,64px)!important;overflow:visible!important;justify-content:center!important}
+#pirateGame .pirate-save-list{width:min(900px,100%)!important;max-height:none!important;flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:visible!important;align-self:center!important}
+#pirateGame .pirate-intro-content.pirate-load-view .pirate-credits,#pirateGame .pirate-intro-content.pirate-load-view .pirate-intro-title-wrap{display:none!important}
+#pirateGame .pirate-save-panel h2{margin:0 0 18px!important}
+#pirateGame .pirate-save-panel .pirate-back-intro{align-self:center!important;flex:none!important}
+#pirateGame .pirate-intro-actions{pointer-events:none}
+#pirateGame.pirate-intro-ready .pirate-intro-actions{pointer-events:auto}
+#pirateGame .pirate-play-button{pointer-events:none}
+#pirateGame.pirate-intro-ready .pirate-play-button{pointer-events:auto}
+#pirateGame .pirate-more-button{position:absolute;left:50%;bottom:clamp(18px,4vh,38px);margin:0;animation:pirateMoreEntrance .8s 2.6s ease-out forwards}
+@keyframes pirateMoreEntrance{from{opacity:0;transform:translate(-50%,30px)}to{opacity:1;transform:translate(-50%,0)}}
+#pirateGame .pirate-conditional-control{flex:0 0 0;width:0;height:0;padding:0;margin:0;border:0;opacity:0;overflow:hidden;transform:scale(.65);pointer-events:none;transition:flex-basis .28s ease,width .28s ease,height .28s ease,opacity .22s ease,transform .28s ease}
+#pirateGame .pirate-conditional-control.is-visible{flex-basis:clamp(32px,4vh,42px);width:clamp(32px,4vh,42px);height:clamp(32px,4vh,42px);margin:0;padding:0;border:1px solid #ffd700;opacity:1;overflow:visible;transform:scale(1);pointer-events:auto}
+#pirateGame .pirate-random-button{display:flex;align-items:center;flex:none;gap:7px;white-space:nowrap;height:clamp(32px,4vh,42px);padding:0 9px;border:1px solid #ffd700;border-radius:3px;background:linear-gradient(135deg,#8b0000,#500);color:#ffd700;font:700 clamp(10px,1.55vh,14px) "Share Tech Mono",monospace;box-shadow:0 0 12px #8b000077,inset 0 0 8px #ffd70022;cursor:pointer}
+#pirateGame .pirate-dice-icon{width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#pirateGame .pirate-tools{gap:6px}
+#pirateGame .pirate-random-button{gap:7px}
+#pirateGame .pirate-random-button:active{transform:translateY(1px)}
+#pirateGame .pirate-toast{z-index:39}
+body.pirate-on #moreMenu:not([hidden]){display:flex!important;position:fixed!important;inset:0!important;z-index:1000!important}
+body.pirate-on #moreMenu[hidden]{display:none!important}
+#pirateGame .pirate-big-pop{z-index:40}
+#pirateGame .pirate-big-card{font-family:"Pirata One",Georgia,serif;letter-spacing:0}
+#pirateGame:not(.pirate-intro-active)>.pirate-grid-backdrop{opacity:.055!important}
+@media(max-width:620px){
+ #pirateGame .pirate-random-button{height:27px;padding:0 5px;gap:3px;font-size:9px}
+ #pirateGame .pirate-conditional-control.is-visible{flex-basis:27px;width:27px;height:27px;margin:0}
+}
+
+
+
+body,body *{-webkit-user-select:none!important;user-select:none!important}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;user-select:text!important}
+#pirateGame .pirate-square.last-selected{border:2px solid #ffd700!important;box-shadow:inset 0 0 13px #ffd70088,0 0 14px #ffd700aa!important;z-index:2}
+#pirateGame .pirate-play-button{animation-duration:.55s!important}
+#pirateGame .pirate-more-button{animation-duration:.55s!important}
+
+
+
+#pirateGame .pirate-intro-actions>#pirateNewGame{animation-delay:2.3s!important}
+#pirateGame .pirate-intro-actions>#pirateLoadGame{animation-delay:2.85s!important}
+#pirateGame .pirate-more-button{animation:pirateMoreEntrance .8s 3.4s ease-out forwards!important}
+
+
+html:not(.route-ready) body{visibility:hidden!important}
+
+</style>
 </head>
 <body>
-<iframe title="Real Time" src="/app.html?screen=time" allow="autoplay"></iframe>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="arrowGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".45" stop-color="#cdcdcd"/>
+      <stop offset="1" stop-color="#6a6a6a"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="page" id="page">
+  <section class="sounds" aria-label="Alarm sound">
+    <label class="opt"><input type="radio" name="alarm" value="none"><span class="dot"></span><span>None</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="clarabelle.MP3" checked><span class="dot"></span><span>Cow Moo</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="among-us.mp3"><span class="dot"></span><span>Among Us</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="bruh.mp3"><span class="dot"></span><span>Bruh</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="chicken-scream.mp3"><span class="dot"></span><span>Chicken Scream</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="correct.mp3"><span class="dot"></span><span>Correct</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="disapearing-scream.mp3"><span class="dot"></span><span>Disappearing Scream</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="dog-bark.mp3"><span class="dot"></span><span>Dog Bark</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="fahhh.mp3"><span class="dot"></span><span>Fahhh</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="flash-bang.mp3"><span class="dot"></span><span>Flash Bang</span></label>
+    <label class="opt"><input type="radio" name="alarm" value="get-out.mp3"><span class="dot"></span><span>Get Out</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="halloween-call.mp3"><span class="dot"></span><span>Halloween Call</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="huh-cat.mp3"><span class="dot"></span><span>Huh Cat</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="metal-pipe.mp3"><span class="dot"></span><span>Metal Pipe</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="noot-noot.mp3"><span class="dot"></span><span>Noot Noot</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="nope.mp3"><span class="dot"></span><span>Nope</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="normal-call.mp3"><span class="dot"></span><span>Normal Call</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="school-bell.mp3"><span class="dot"></span><span>School Bell</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="teleport.mp3"><span class="dot"></span><span>Teleport</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="train-wistle.mp3"><span class="dot"></span><span>Train Whistle</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="vine-boom.mp3"><span class="dot"></span><span>Vine Boom</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="violin-screech.mp3"><span class="dot"></span><span>Violin Screech</span></label>
+    <label class="opt hidden-sound"><input type="radio" name="alarm" value="you-win.mp3"><span class="dot"></span><span>You Win</span></label>
+    <button class="show-more" id="showMore" type="button" aria-expanded="false">Show More</button>
+  </section>
+
+  <section class="timer-wrap" aria-label="Timer display">
+    <div id="realDate" aria-live="off"></div>
+    <div class="display" id="display" role="timer" aria-label="00 hours, 00 minutes, 00 seconds, 00 hundredths"></div>
+  </section>
+
+  <div class="controls">
+    <button class="ctl" id="start" aria-label="Start" title="Start"></button>
+    <button class="ctl" id="reset" aria-label="Reset" title="Reset"></button>
+  </div>
+
+  <button class="mode" id="mode" type="button">MORE</button>
+
+</div>
+
+<div class="menu-overlay" id="moreMenu" hidden>
+  <div class="menu-panel" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+    <h1 class="menu-title" id="menuTitle">More</h1>
+    <button class="menu-option" type="button" data-choice="timer">Timer</button>
+    <button class="menu-option" type="button" data-choice="stopwatch">Stopwatch</button>
+    <button class="menu-option" type="button" data-choice="realtime">Real Time</button>
+    <button class="menu-option" type="button" data-choice="pirate">Pirate Game</button>
+  </div>
+</div>
+
+
+<script>
+
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const page=$("page"),display=$("display"),startButton=$("start"),resetButton=$("reset"),modeButton=$("mode"),moreMenu=$("moreMenu");
+const routeScreen=location.pathname.split("/").filter(Boolean)[0]||"timer";
+const routeTitles={timer:"Cow Chalk Timer",more:"More",time:"Real Time",stopwatch:"Stopwatch",pirate:"Pirate Game"};
+document.title=routeTitles[routeScreen]||"Cow Chalk Timer";
+const embedded=window.self!==window.top;
+function goRoute(screen){if(embedded){window.parent.location.href="/"+screen;return}location.href="/"+screen;}
+
+const ICON_PLAY='<svg viewBox="0 0 50 50" aria-hidden="true"><polygon points="10,2 48,25 10,48" fill="#000"/></svg>';
+const ICON_PAUSE='<svg viewBox="0 0 50 50" aria-hidden="true"><rect x="8" y="3" width="13" height="44" fill="#000"/><rect x="29" y="3" width="13" height="44" fill="#000"/></svg>';
+const ICON_RESET='<svg viewBox="0 0 50 50" aria-hidden="true"><rect x="2" y="3" width="10" height="44" fill="#000"/><polygon points="48,3 48,47 16,25" fill="#000"/></svg>';
+const ARROW='<svg viewBox="0 0 76 76" aria-hidden="true"><polygon points="38,2 74,72 2,72" fill="#050505" stroke="#050505" stroke-width="2" stroke-linejoin="round"/><polygon points="38,14 63,64 13,64" fill="url(#arrowGrad)"/></svg>';
+if(resetButton)resetButton.innerHTML=ICON_RESET;
+if(startButton)startButton.innerHTML=ICON_PLAY;
+
+/* Tall slanted segments with pointed ends (like the real digits) */
+const segmentPolys={
+  a:"12,9 21,0 51,0 60,9 51,18 21,18",
+  b:"63,12 72,21 72,68 63,77 54,68 54,21",
+  c:"63,83 72,92 72,139 63,148 54,139 54,92",
+  d:"12,151 21,142 51,142 60,151 51,160 21,160",
+  e:"9,83 18,92 18,139 9,148 0,139 0,92",
+  f:"9,12 18,21 18,68 9,77 0,68 0,21",
+  g:"12,80 21,71 51,71 60,80 51,89 21,89"
+};
+const digitSegments={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
+const digitSVG='<svg viewBox="-10 0 92 160" preserveAspectRatio="none" aria-hidden="true"><g transform="translate(9.8 0) skewX(-7)">'+
+  Object.entries(segmentPolys).map(([k,p])=>'<polygon class="segment" data-segment="'+k+'" points="'+p+'"></polygon>').join("")+'</g></svg>';
+
+/* Units: hours is one pair of digits with ONE pair of arrows; every other digit has its own. */
+const units=[{first:0,count:2},{first:2,count:1},{first:3,count:1},{first:4,count:1},{first:5,count:1},{first:6,count:1},{first:7,count:1}];
+const digits=[];
+if(display)units.forEach(u=>{
+  if([2,4,6].includes(u.first)){
+    const sep=document.createElement("div");
+    sep.className="separator"+(u.first===6?" decimal":"");
+    sep.innerHTML=u.first===6?"<i></i>":"<i></i><i></i>";
+    display.append(sep);
+  }
+  const unit=document.createElement("div");
+  unit.className="unit"+(u.count===2?" wide":"");
+  for(let k=0;k<u.count;k++){
+    const d=document.createElement("div");d.className="digit";d.innerHTML=digitSVG;
+    unit.append(d);digits[u.first+k]=d;
+  }
+  const up=document.createElement("button"),down=document.createElement("button");
+  up.className="arrow up";down.className="arrow down";
+  up.type=down.type="button";up.innerHTML=down.innerHTML=ARROW;
+  up.setAttribute("aria-label","Increase");down.setAttribute("aria-label","Decrease");
+  up.addEventListener("click",()=>adjust(u,1));down.addEventListener("click",()=>adjust(u,-1));
+  unit.append(up,down);display.append(unit);
+});
+
+let values=[0,0,0,0,0,0,0,0],running=false,stopwatchMode=false,realTimeMode=false,remaining=0,elapsed=0,lastTick=0,timerId=0,clockId=0,audioContext=null,alarmAudio=null,alarmTimeout=0;
+
+function render(){
+  if(!display)return;
+  digits.forEach((el,i)=>{const v=String(values[i]);el.querySelectorAll(".segment").forEach(s=>s.classList.toggle("on",digitSegments[v].includes(s.dataset.segment)))});
+  display.setAttribute("aria-label",values.slice(0,2).join("")+" hours, "+values.slice(2,4).join("")+" minutes, "+values.slice(4,6).join("")+" seconds, "+values.slice(6,8).join("")+" hundredths");
+}
+function adjust(u,delta){
+  if(running||stopwatchMode)return;
+  if(u.count===2){let n=values[0]*10+values[1];n=(n+delta+100)%100;values[0]=Math.floor(n/10);values[1]=n%10}
+  else values[u.first]=(values[u.first]+delta+10)%10;
+  render();
+}
+function totalFromDigits(){return((values[0]*10+values[1])*3600+(values[2]*10+values[3])*60+(values[4]*10+values[5]))*1000+(values[6]*10+values[7])*10}
+function setFromMilliseconds(ms){
+  ms=Math.max(0,Math.min(359999990,Math.floor(ms)));
+  const h=Math.floor(ms/3600000);ms%=3600000;
+  const m=Math.floor(ms/60000);ms%=60000;
+  const s=Math.floor(ms/1000);
+  const c=Math.floor(ms%1000/10);
+  values=(String(h).padStart(2,"0")+String(m).padStart(2,"0")+String(s).padStart(2,"0")+String(c).padStart(2,"0")).split("").map(Number);
+  render();
+}
+function stopLoop(){running=false;clearInterval(timerId)}
+function tick(){
+  if(!running)return;
+  const now=performance.now(),diff=now-lastTick;lastTick=now;
+  if(stopwatchMode){elapsed+=diff;setFromMilliseconds(elapsed)}
+  else{
+    remaining-=diff;setFromMilliseconds(Math.max(0,remaining));
+    if(remaining<=0){stopLoop();setRunningUI();ringAlarm()}
+  }
+}
+function setRunningUI(){
+  if(!startButton)return;
+  startButton.innerHTML=running?ICON_PAUSE:ICON_PLAY;
+  startButton.setAttribute("aria-label",running?"Pause":"Start");startButton.title=running?"Pause":"Start";
+}
+function startPause(){
+  clearAlarm();
+  if(running){stopLoop();setRunningUI();return}
+  const total=totalFromDigits();
+  if(stopwatchMode)elapsed=total;
+  else{if(total<=0)return;remaining=total}
+  running=true;lastTick=performance.now();setRunningUI();
+  timerId=setInterval(tick,10);
+}
+function reset(){stopLoop();clearAlarm();remaining=0;elapsed=0;values=[0,0,0,0,0,0,0,0];setRunningUI();render()}
+function toggleMode(){
+  stopwatchMode=!stopwatchMode;
+  realTimeMode=false;
+  document.body.classList.remove("realtime-on");
+  page.classList.toggle("stopwatch-on",stopwatchMode);
+  modeButton.textContent="MORE";
+  if(stopwatchMode&&showMoreButton.getAttribute("aria-expanded")==="true"){
+    document.querySelectorAll(".sounds .opt").forEach((option,index)=>{if(index>=11)option.classList.add("hidden-sound")});
+    showMoreButton.setAttribute("aria-expanded","false");
+    showMoreButton.textContent="Show More";
+  }
+  reset();
+}
+
+/* ---------- sound ---------- */
+function chosen(){return document.querySelector('input[name="alarm"]:checked').value}
+function getAudio(){
+  if(!audioContext)audioContext=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioContext.state==="suspended")audioContext.resume();
+  return audioContext;
+}
+function fallbackMoo(){
+  try{
+    const ctx=getAudio(),t=ctx.currentTime,osc=ctx.createOscillator(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();
+    osc.type="sawtooth";osc.frequency.setValueAtTime(130,t);osc.frequency.exponentialRampToValueAtTime(80,t+1.2);
+    filter.type="lowpass";filter.frequency.value=600;
+    gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.2,t+.15);gain.gain.exponentialRampToValueAtTime(.0001,t+1.3);
+    osc.connect(filter);filter.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+1.4);
+  }catch(e){}
+}
+function ringAlarm(){
+  clearAlarm();
+  const choice=chosen();if(choice==="none")return;
+  const audio=new Audio("https://raw.githubusercontent.com/MrMoo-213/cow-chalk/main/assets/sounds/"+choice);audio.loop=false;alarmAudio=audio;
+  audio.play().catch(fallbackMoo);
+  alarmTimeout=setTimeout(clearAlarm,15000);
+}
+function clearAlarm(){
+  clearTimeout(alarmTimeout);
+  if(alarmAudio){alarmAudio.pause();alarmAudio.currentTime=0;alarmAudio=null}
+}
+document.querySelectorAll('input[name="alarm"]').forEach(r=>r.addEventListener("change",()=>{
+  clearAlarm();
+  try{localStorage.setItem("cowChalkSound",r.value)}catch(e){}
+}));
+const showMoreButton=$("showMore");
+if(showMoreButton)showMoreButton.addEventListener("click",()=>{
+  const expanded=showMoreButton.getAttribute("aria-expanded")==="true";
+  document.querySelectorAll(".sounds .opt").forEach((option,index)=>{if(index>=11)option.classList.toggle("hidden-sound",expanded)});
+  showMoreButton.setAttribute("aria-expanded",String(!expanded));
+  showMoreButton.textContent=expanded?"Show More":"Show Less";
+});
+
+
+if(startButton)startButton.addEventListener("click",startPause);
+if(resetButton)resetButton.addEventListener("click",reset);
+function showMenu(){goRoute("more")}
+function hideMenu(){goRoute("timer")}
+function showRealTime(){
+  stopLoop();clearAlarm();realTimeMode=true;stopwatchMode=false;
+  document.body.classList.add("realtime-on");page.classList.remove("stopwatch-on");
+  modeButton.textContent="MORE";
+  function updateClock(){
+    const now=new Date();
+    $("realDate").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    const hours=String(now.getHours()).padStart(2,"0");
+    const minutes=String(now.getMinutes()).padStart(2,"0");
+    const seconds=String(now.getSeconds()).padStart(2,"0");
+    const hundredths=String(Math.floor(now.getMilliseconds()/10)).padStart(2,"0");
+    values=(hours+minutes+seconds+hundredths).split("").map(Number);
+    render();
+  }
+  clearInterval(clockId);updateClock();clockId=setInterval(updateClock,10);
+}
+function selectOption(choice){
+  if(choice==="pirate"){goRoute("pirate");return}
+  if(choice==="realtime"){goRoute("time");return}
+  if(choice==="stopwatch"){goRoute("stopwatch");return}
+  goRoute("timer");
+}
+if(modeButton)modeButton.addEventListener("click",showMenu);
+if(moreMenu){
+  moreMenu.addEventListener("click",event=>{if(event.target===moreMenu)hideMenu();});
+  moreMenu.querySelectorAll("[data-choice]").forEach(button=>button.addEventListener("click",()=>selectOption(button.dataset.choice)));
+}
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&moreMenu&&!moreMenu.hidden)hideMenu();});
+
+const pirateBoard=$("pirateBoard");
+if(pirateBoard){
+const piratePlayers=$("piratePlayers"),pirateTurn=$("pirateTurn"),pirateToast=$("pirateToast"),pirateBigPop=$("pirateBigPop");
+let pirateNames=[],pirateMoves=[],pirateRedoMoves=[],pirateMarks={},pirateLastRemoved=null,piratePopTimer=0,piratePopFadeTimer=0,pirateSaves=[],activePirateSaveId=null,pirateEditingIndex=null;
+const pirateLetters="ABCDEFG",pirateStorageKey="cowChalkPirateGame";
+function pirateSnapshot(){return {names:[...pirateNames],moves:[...pirateMoves],redo:[...pirateRedoMoves],marks:{...pirateMarks},lastRemoved:pirateLastRemoved}}
+function applyPirateSnapshot(data){
+  pirateNames=Array.isArray(data.names)?data.names.filter(n=>typeof n==="string").slice(0,50):[];
+  pirateMoves=Array.isArray(data.moves)?data.moves.slice(-5):[];
+  pirateRedoMoves=Array.isArray(data.redo)?data.redo.slice(-5):[];
+  pirateMarks=data.marks&&typeof data.marks==="object"?data.marks:{};
+  pirateLastRemoved=typeof data.lastRemoved==="string"?data.lastRemoved:null;
+}
+function savePirateState(){
+  if(!activePirateSaveId)return;
+  try{
+    const save=pirateSaves.find(item=>item.id===activePirateSaveId);
+    if(!save)return;
+    save.updatedAt=Date.now();save.state=pirateSnapshot();
+    localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:activePirateSaveId}));
+  }catch(e){}
+}
+function loadPirateState(saveId){
+  try{
+    const data=JSON.parse(localStorage.getItem(pirateStorageKey)||"{}");
+    if(Array.isArray(data.saves)){
+      const cutoff=Date.now()-30*24*60*60*1000;
+      pirateSaves=data.saves.filter(item=>{
+        if(!item||typeof item.id!=="string"||!item.state)return false;
+        const state=item.state,updated=item.updatedAt||item.createdAt||0;
+        const blank=(!Array.isArray(state.names)||state.names.length===0)&&(!state.marks||Object.keys(state.marks).length===0);
+        return updated>=cutoff&&!blank;
+      }).sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
+    }else if(Array.isArray(data.names)||data.marks){
+      const now=Date.now(),id="save-"+now;
+      const legacyState={names:data.names||[],moves:data.moves||[],redo:data.redo||[],marks:data.marks||{},lastRemoved:data.lastRemoved||null};
+      const legacyBlank=legacyState.names.length===0&&Object.keys(legacyState.marks).length===0;
+      pirateSaves=legacyBlank?[]:[{id,createdAt:now,updatedAt:now,state:legacyState}];
+      localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:null}));
+    }else pirateSaves=[];
+    localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:data.activeId||null}));
+    const selected=pirateSaves.find(item=>item.id===saveId);
+    if(selected){activePirateSaveId=selected.id;applyPirateSnapshot(selected.state)}
+    else{activePirateSaveId=null;applyPirateSnapshot({})}
+  }catch(e){pirateSaves=[];activePirateSaveId=null;applyPirateSnapshot({})}
+}
+function createPirateSave(){
+  const now=Date.now(),id="save-"+now+"-"+Math.random().toString(36).slice(2,7);
+  const save={id,createdAt:now,updatedAt:now,state:pirateSnapshot()};
+  pirateSaves.unshift(save);activePirateSaveId=id;
+  try{localStorage.setItem(pirateStorageKey,JSON.stringify({version:2,saves:pirateSaves,activeId:activePirateSaveId}))}catch(e){}
+}
+function formatPirateSaveDate(timestamp){
+  return new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(timestamp));
+}
+function renderPirateSaves(){
+  const list=$("pirateSaveList");list.innerHTML="";
+  const sorted=[...pirateSaves].sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));
+  if(!sorted.length){const empty=document.createElement("div");empty.className="pirate-save-empty";empty.textContent="No autosaves yet";list.append(empty);return}
+  sorted.forEach((save,index)=>{
+    const button=document.createElement("button");button.type="button";button.className="pirate-save-item";button.style.animationDelay=Math.min(index*.045,.4)+"s";
+    const label=document.createElement("strong");label.textContent="Autosave: "+formatPirateSaveDate(save.updatedAt||save.createdAt);
+    const detail=document.createElement("small");detail.textContent=(save.state.names||[]).length+" players · "+Object.keys(save.state.marks||{}).length+" squares";
+    button.append(label,detail);button.addEventListener("click",()=>startPirateSave(save.id));list.append(button);
+  });
+}
+let pirateIntroReadyTimer=0;
+function setPirateIntroReady(delay=3900){clearTimeout(pirateIntroReadyTimer);$("pirateGame").classList.remove("pirate-intro-ready");pirateIntroReadyTimer=setTimeout(()=>$("pirateGame").classList.add("pirate-intro-ready"),delay)}
+function showPirateIntro(quick=false){
+  setPirateIntroReady(quick?450:3900);
+  $("pirateGame").classList.add("pirate-intro-active");
+  $("pirateGame").classList.remove("pirate-launching","pirate-returning");
+  $("pirateSavePanel").hidden=true;$("pirateIntroActions").hidden=false;
+  $("pirateIntroContent").classList.remove("pirate-load-view");
+  renderPirateSaves();
+}
+function returnToPirateIntro(){
+  if($("pirateGame").classList.contains("pirate-intro-active"))return;
+  savePirateState();
+  clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);
+  pirateBigPop.hidden=true;pirateToast.hidden=true;
+  $("pirateGame").classList.add("pirate-returning");
+  setTimeout(()=>{
+    $("pirateGame").classList.remove("pirate-returning");
+    showPirateIntro(true);
+    const animated=[$("pirateIntroContent").querySelector(".pirate-credits"),$("pirateIntroContent").querySelector(".pirate-intro-title"),$("pirateIntroContent").querySelector(".pirate-intro-subtitle"),$("pirateNewGame"),$("pirateLoadGame"),$("pirateIntroMore")];
+    animated.forEach((element,index)=>{if(!element)return;element.style.animation="none";void element.offsetWidth;element.style.animation="";element.style.setProperty("animation-delay",["0s",".08s",".16s",".24s",".38s",".52s"][index],"important")});
+  },680);
+}
+function startPirateSave(saveId){
+  loadPirateState(saveId);
+  $("pirateGame").classList.add("pirate-launching");
+  $("pirateIntroActions").hidden=true;$("pirateSavePanel").hidden=true;
+  setTimeout(()=>{
+    $("pirateGame").classList.remove("pirate-intro-active","pirate-launching");
+    renderPirate();if(pirateLastRemoved){$("pirateToastText").textContent=pirateLastRemoved+" was removed";pirateToast.hidden=false}
+  },780);
+}
+function startNewPirateGame(){
+  hidePirateToast();
+  pirateNames=[];pirateMoves=[];pirateRedoMoves=[];pirateMarks={};pirateLastRemoved=null;
+  clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);pirateBigPop.hidden=true;
+  createPirateSave();startPirateSave(activePirateSaveId);
+}
+function openPirateSaveList(){
+  $("pirateIntroActions").hidden=true;$("pirateSavePanel").hidden=false;
+  $("pirateIntroContent").classList.add("pirate-load-view");renderPirateSaves();
+}
+function buildPirateBoard(){
+  pirateBoard.innerHTML="";
+  pirateBoard.append(document.createElement("div"));
+  pirateLetters.split("").forEach(letter=>{const axis=document.createElement("div");axis.className="pirate-axis";axis.textContent=letter;pirateBoard.append(axis)});
+  for(let row=1;row<=7;row++){
+    const axis=document.createElement("div");axis.className="pirate-axis";axis.textContent=row;pirateBoard.append(axis);
+    for(let col=0;col<7;col++){
+      const coordinate=pirateLetters[col]+row,button=document.createElement("button");
+      button.type="button";button.className="pirate-square";button.dataset.coordinate=coordinate;
+      button.setAttribute("role","gridcell");button.setAttribute("aria-label",coordinate);
+      button.addEventListener("click",()=>choosePirateSquare(coordinate));
+      pirateBoard.append(button);
+    }
+  }
+}
+function updatePirateBoard(animateCoordinate=null){
+  const latestCoordinate=pirateMoves.length?pirateMoves[pirateMoves.length-1].coordinate:null;
+  pirateBoard.querySelectorAll(".pirate-square").forEach(button=>{
+    const coordinate=button.dataset.coordinate,marked=!!pirateMarks[coordinate],wasMarked=button.classList.contains("marked");
+    button.classList.toggle("marked",marked);button.classList.toggle("last-selected",coordinate===latestCoordinate);button.disabled=marked;
+    button.setAttribute("aria-label",coordinate+(marked?", selected":""));
+    if(marked&&!wasMarked){
+      button.innerHTML='<svg class="pirate-cross" viewBox="0 0 100 100" aria-hidden="true"><path d="M13 13 L87 87 M87 13 L13 87"/></svg>';
+      if(coordinate===animateCoordinate){button.classList.remove("just-marked");void button.offsetWidth;button.classList.add("just-marked")}
+    }else if(!marked&&wasMarked){button.innerHTML="";button.classList.remove("just-marked")}
+  });
+}
+function renderPirate(){
+  updatePirateBoard();piratePlayers.innerHTML="";
+  pirateNames.forEach((name,index)=>{
+    const li=document.createElement("li");li.className="pirate-player";li.draggable=true;li.dataset.playerIndex=index;
+    li.addEventListener("dragstart",event=>{if(event.target.closest("button")){event.preventDefault();return}event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",String(index));li.classList.add("dragging")});
+    li.addEventListener("dragend",()=>li.classList.remove("dragging"));
+    li.addEventListener("dragover",event=>{event.preventDefault();event.dataTransfer.dropEffect="move";li.classList.add("drag-over")});
+    li.addEventListener("dragleave",()=>li.classList.remove("drag-over"));
+    li.addEventListener("drop",event=>{event.preventDefault();li.classList.remove("drag-over");const from=Number(event.dataTransfer.getData("text/plain")),to=Number(li.dataset.playerIndex);if(!Number.isInteger(from)||from===to||from<0||from>=pirateNames.length)return;const moved=pirateNames.splice(from,1)[0];pirateNames.splice(to,0,moved);renderPirate();savePirateState()});
+    const label=document.createElement("span");label.className="pirate-player-name";label.textContent=(index===0?"▶ ":"")+name;
+    const actions=document.createElement("span");actions.className="pirate-player-actions";
+    const edit=document.createElement("button");edit.type="button";edit.className="pirate-player-action";edit.setAttribute("aria-label","Edit "+name);edit.title="Edit name";edit.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5 4 4M4 20l4.2-.9L19 8.3a2.12 2.12 0 0 0-3-3L5.2 16.1 4 20Z"/></svg>';
+    edit.addEventListener("click",()=>{pirateEditingIndex=index;const form=$("pirateAddForm");form.classList.add("open");$("pirateName").value=name;const submit=form.querySelector('[type="submit"]');if(submit)submit.textContent="Save";$("pirateName").focus()});
+    const remove=document.createElement("button");remove.type="button";remove.className="pirate-player-action";remove.setAttribute("aria-label","Remove "+name);remove.title="Remove player";remove.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>';
+    remove.addEventListener("click",()=>{pirateNames.splice(index,1);renderPirate();savePirateState()});
+    actions.append(edit,remove);li.append(label,actions);piratePlayers.append(li);
+  });
+  pirateTurn.textContent=pirateNames.length?pirateNames[0]+" is choosing the next square":"";
+  $("pirateUndo").classList.toggle("is-visible",pirateMoves.length>0);
+  $("pirateRedo").classList.toggle("is-visible",pirateRedoMoves.length>0);
+  $("pirateReset").classList.toggle("is-visible",pirateMoves.length>0||pirateNames.length>0);
+}
+function openPirateGame(quick=false){
+  stopLoop();clearInterval(clockId);clearAlarm();
+  document.body.classList.remove("realtime-on");document.body.classList.add("pirate-on");
+  moreMenu.hidden=true;showPirateIntro(quick);
+}
+function closePirateGame(){goRoute("more")}
+let pirateToastTimer=0;
+function hidePirateToast(){clearTimeout(pirateToastTimer);pirateToast.classList.remove("fading");pirateToast.hidden=true;pirateLastRemoved=null;savePirateState()}
+function showPirateToast(name){
+  clearTimeout(pirateToastTimer);pirateToast.classList.remove("fading");
+  $("pirateToastText").textContent=name+" was removed";
+  pirateToast.hidden=false;pirateLastRemoved=name;savePirateState();
+  pirateToastTimer=setTimeout(()=>{pirateToast.classList.add("fading");setTimeout(()=>{if(pirateToast.classList.contains("fading"))hidePirateToast()},450)},8550);
+}
+function showPiratePop(coordinate,duration=3000){
+  clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);
+  $("pirateBigCard").textContent=coordinate;
+  pirateBigPop.hidden=false;pirateBigPop.classList.remove("fading");
+  $("pirateBigCard").style.animation="none";void $("pirateBigCard").offsetWidth;$("pirateBigCard").style.animation="";
+  piratePopTimer=setTimeout(()=>{pirateBigPop.classList.add("fading");piratePopFadeTimer=setTimeout(()=>{pirateBigPop.hidden=true;pirateBigPop.classList.remove("fading")},450)},duration+380);
+}
+function choosePirateSquare(coordinate){
+  if(pirateMarks[coordinate])return;
+  hidePirateToast();
+  const before={marks:{...pirateMarks},players:[...pirateNames]},player=pirateNames.shift()||null;
+  pirateMarks[coordinate]=true;
+  pirateMoves.push({coordinate,player,before,after:{marks:{...pirateMarks},players:[...pirateNames]}});
+  if(pirateMoves.length>5)pirateMoves.shift();
+  pirateRedoMoves=[];
+  updatePirateBoard(coordinate);renderPirate();
+  if(player)showPirateToast(player);
+  savePirateState();showPiratePop(coordinate);
+}
+function addPiratePlayer(name){
+  name=name.trim().replace(/\s+/g," ").toLocaleLowerCase().replace(/(^|[\s'-])([a-z])/g,(match,prefix,letter)=>prefix+letter.toLocaleUpperCase());
+  if(!name)return;
+  if(pirateEditingIndex!==null){if(pirateEditingIndex<pirateNames.length)pirateNames[pirateEditingIndex]=name;pirateEditingIndex=null}else pirateNames.push(name);
+  $("pirateName").value="";$("pirateAddForm").classList.remove("open");
+  const submit=$("pirateAddForm").querySelector('[type="submit"]');if(submit)submit.textContent="Add";
+  renderPirate();savePirateState();
+}
+function undoPirateMove(){
+  if(!pirateMoves.length)return;
+  hidePirateToast();clearTimeout(piratePopTimer);pirateBigPop.hidden=true;
+  const move=pirateMoves.pop();pirateRedoMoves.push(move);
+  pirateMarks={...move.before.marks};pirateNames=[...move.before.players];
+  renderPirate();savePirateState();
+}
+function redoPirateMove(){
+  if(!pirateRedoMoves.length)return;
+  hidePirateToast();const move=pirateRedoMoves.pop();pirateMoves.push(move);
+  pirateMarks={...move.after.marks};pirateNames=[...move.after.players];
+  renderPirate();savePirateState();showPiratePop(move.coordinate,1000);
+}
+function flashPirateKey(key){
+  const button=$("pirateKeyboard").querySelector('button[data-key="'+CSS.escape(key)+'"]');
+  if(!button)return;
+  button.classList.remove("pressed");
+  void button.offsetWidth;
+  button.classList.add("pressed");
+  setTimeout(()=>button.classList.remove("pressed"),180);
+}
+function enterPirateKey(action){
+  const input=$("pirateName"),value=input.value;
+  if(action==="backspace")input.value=value.slice(0,-1);
+  else if(action==="clear")input.value="";
+  else if(action==="space"){if(value.length&&!value.endsWith(" "))input.value=value+" "}
+  else if(value.length<24)input.value=value+action;
+  input.dispatchEvent(new Event("input",{bubbles:true}));
+}
+$("pirateAddToggle").addEventListener("click",()=>{
+  const form=$("pirateAddForm");form.classList.toggle("open");
+  if(form.classList.contains("open")){pirateEditingIndex=null;$("pirateName").value="";const submit=form.querySelector('[type="submit"]');if(submit)submit.textContent="Add";$("pirateName").blur()}
+});
+$("pirateKeyboard").addEventListener("click",event=>{
+  const key=event.target.closest("button[data-key]");if(!key)return;
+  const action=key.dataset.key;
+  flashPirateKey(action);
+  enterPirateKey(action);
+});
+document.addEventListener("keydown",event=>{
+  const form=$("pirateAddForm");
+  if(!document.body.classList.contains("pirate-on")||!form.classList.contains("open")||event.ctrlKey||event.altKey||event.metaKey)return;
+  const input=$("pirateName"),focused=document.activeElement===input;
+  let action=null;
+  if(event.key==="Backspace")action="backspace";
+  else if(event.key===" ")action="space";
+  else if(event.key==="Enter"){event.preventDefault();form.requestSubmit();return}
+  else if(event.key.length===1&&/[a-z0-9]/i.test(event.key))action=event.key.toLowerCase();
+  if(!action)return;
+  flashPirateKey(action);
+  if(!focused){event.preventDefault();enterPirateKey(action)}
+});
+$("pirateAddForm").addEventListener("submit",event=>{event.preventDefault();addPiratePlayer($("pirateName").value)});
+$("pirateToastUndo").addEventListener("click",()=>{
+  if(!pirateLastRemoved)return;
+  pirateNames.unshift(pirateLastRemoved);hidePirateToast();renderPirate();savePirateState();
+});
+$("pirateUndo").addEventListener("click",undoPirateMove);
+$("pirateRandom").addEventListener("click",()=>{const available=[];for(let row=1;row<=7;row++)for(const letter of pirateLetters){const coordinate=letter+row;if(!pirateMarks[coordinate])available.push(coordinate)}if(available.length)choosePirateSquare(available[Math.floor(Math.random()*available.length)])});
+$("pirateRedo").addEventListener("click",redoPirateMove);
+$("pirateReset").addEventListener("click",()=>{
+  pirateMarks={};pirateMoves=[];pirateRedoMoves=[];pirateNames=[];pirateLastRemoved=null;hidePirateToast();clearTimeout(piratePopTimer);clearTimeout(piratePopFadeTimer);pirateBigPop.hidden=true;pirateBigPop.classList.remove("fading");renderPirate();savePirateState();
+});
+$("pirateBack").addEventListener("click",returnToPirateIntro);
+$("pirateNewGame").addEventListener("click",startNewPirateGame);
+$("pirateLoadGame").addEventListener("click",openPirateSaveList);
+$("pirateLoadBack").addEventListener("click",()=>showPirateIntro(true));
+$("pirateIntroMore").addEventListener("click",()=>{showMenu()});
+loadPirateState();
+window.addEventListener("pagehide",savePirateState);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")savePirateState()});
+buildPirateBoard();
+renderPirate();
+if(pirateLastRemoved){$("pirateToastText").textContent=pirateLastRemoved+" was removed";pirateToast.hidden=false;}
+if(routeScreen==="pirate")openPirateGame();
+}
+if(display)render();
+try{
+  const savedSound=localStorage.getItem("cowChalkSound");
+  if(savedSound){
+    const soundOption=document.querySelector('input[name="alarm"][value="'+CSS.escape(savedSound)+'"]');
+    if(soundOption)soundOption.checked=true;
+  }
+  }catch(e){}
+if(routeScreen==="more"&&moreMenu)moreMenu.hidden=false;
+else if(routeScreen==="time"&&display)showRealTime();
+else if(routeScreen==="stopwatch"&&display){stopwatchMode=true;page.classList.add("stopwatch-on")}
+
+})();
+
+;
+
+(()=>{const grid=document.querySelector("#pirateGame>.pirate-grid-backdrop");if(grid&&!grid.children.length){const fragment=document.createDocumentFragment();for(let i=0;i<49;i++){const cell=document.createElement("div");cell.className="pirate-grid-cell";fragment.appendChild(cell)}grid.appendChild(fragment)}})();
+
+
+document.documentElement.classList.add('route-ready');
+
+</script>
 </body>
 </html>
