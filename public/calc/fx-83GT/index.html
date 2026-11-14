@@ -159,7 +159,9 @@ function renderExpression(raw,caret){
  return s.replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−").replaceAll("pi","π");
 }
 function renderAnswer(){
- if(answer===null)return "";
+ if(answer===null)return answerDisplay?escapeHtml(answerDisplay):"";
+ const mixed=String(answerDisplay).match(/^(-?\d+) (\d+)\/(\d+)$/);
+ if(mixed)return escapeHtml(mixed[1])+' <span class="frac"><span class="numerator">'+escapeHtml(mixed[2])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(mixed[3])+'</span></span>';
  if(typeof answerDisplay==="string" && /^-?\d+\/\d+$/.test(answerDisplay)){
   const p=answerDisplay.split("/");
   return '<span class="frac"><span class="numerator">'+escapeHtml(p[0])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(p[1])+'</span></span>';
@@ -565,6 +567,17 @@ function primeFactors(n){
  const factors=[];for(let d=2;d*d<=n;d++){let count=0;while(n%d===0){n/=d;count++;}if(count)factors.push(d+(count>1?"^"+count:""));}
  if(n>1)factors.push(String(n));return factors.join(" × ")||"1";
 }
+function standardFormMenu(){
+ if(typeof answer!=="number"||!Number.isFinite(answer))return;
+ openMenu("",[{label:"Standard Form"},{label:"Engineering Notation"}],v=>{
+  if(v.label==="Standard Form")answerDisplay=answer.toExponential(3).replace("e"," × 10^");
+  else{
+   const exp=Math.floor(Math.log10(Math.abs(answer))/3)*3;
+   answerDisplay=fmt(answer/Math.pow(10,exp))+" × 10^"+exp;
+  }
+  render();
+ });
+}
 function formatMenu(){
  if(typeof answer!=="number"||!Number.isFinite(answer))return;
  const [num,den]=fractionParts(answer);
@@ -598,21 +611,23 @@ function applyShift(label){
  const variableMap={"4":"A","5":"B","6":"C","1":"D","2":"E","3":"F","0":"x",".":"y","×10ˣ":"z"};
  if(variableMap[label]){append(variableMap[label]);return true;}
  if(label==="7"){append("pi");return true;}
- if(label==="8"){append("npr(");return true;}
- if(label==="9"){append("ncr(");return true;}
+ if(label==="8"){append("e");return true;}
  if(label==="sin"){insertFunction("asin");return true;}
  if(label==="cos"){insertFunction("acos");return true;}
  if(label==="tan"){insertFunction("atan");return true;}
  if(label==="SQUARE ROOT"){insertFunction("cbrt");return true;}
  if(label==="SQUARE"){append("^3");return true;}
  if(label==="POWER"){append("^(-1)");return true;}
- if(label==="LOG"){insertFunction("tenpow");return true;}
+ if(label==="LOG"){insertFunction("ln");return true;}
  if(label==="FRACTION"){insertFraction();return true;}
  if(label==="CATALOG"){shiftedCatalogMenu();return true;}
- if(label==="FORMAT"){formatMenu();return true;}
+ if(label==="FORMAT"){standardFormMenu();return true;}
+ if(label==="x"){openMenu("",[{label:"Display QR Code"},{label:"QR Code settings"}],()=>{});return true;}
+ if(label==="DELETE"){overwriteMode=!overwriteMode;return true;}
  if(label==="AC"){powerOff=true;expression="";answer=null;answerDisplay="";render();return true;}
- if(label==="("){append("(-");return true;}
- if(label===")"){append(",");return true;}
+ if(label==="("){append(",");return true;}
+ if(label===")"){append(";");return true;}
+ if(label==="−"){append("(-");return true;}
  return false;
 }
 function press(label){
@@ -695,15 +710,22 @@ panelEl.addEventListener("click",e=>{
  if(row&&menu){menuIndex=Number(row.dataset.index);chooseMenu(menuIndex);}
 });
 document.addEventListener("keydown",e=>{
- if(e.key==="Enter"||e.key==="="){e.preventDefault();press("EXE");}
+ if(e.key==="Shift"){press("SHIFT");}
+ else if(e.key==="Enter"||e.key==="="){e.preventDefault();press("EXE");}
  else if(e.key==="Escape"){press("BACK");}
  else if(e.key==="Backspace"){e.preventDefault();press("DELETE");}
  else if(e.key==="ArrowLeft"){e.preventDefault();press("LEFT");}
  else if(e.key==="ArrowRight"){e.preventDefault();press("RIGHT");}
  else if(e.key==="ArrowUp"){e.preventDefault();press("UP");}
  else if(e.key==="ArrowDown"){e.preventDefault();press("DOWN");}
- else if(/^[0-9.+*/()%-]$/.test(e.key)){e.preventDefault();append(e.key);}
- else if(e.key==="^"){e.preventDefault();append("^(");}
+ else if(/^[0-9]$/.test(e.key)){e.preventDefault();press(e.key);}
+ else if(e.key==="."){e.preventDefault();press(".");}
+ else if(e.key==="*"){e.preventDefault();press("×");}
+ else if(e.key==="/"){e.preventDefault();press("÷");}
+ else if(e.key==="+"){e.preventDefault();press("+");}
+ else if(e.key==="-"){e.preventDefault();press("−");}
+ else if(e.key==="("||e.key===")"){e.preventDefault();press(e.key);}
+ else if(e.key==="^"){e.preventDefault();press("POWER");}
 });
 render();
 
