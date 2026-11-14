@@ -290,14 +290,14 @@ function renderRich(s,from,to,caretPos){
    if(close>=0){
     const bodyStart=open+1,bodyEnd=close;
     if(found==="sqrt"){
-     out+='<span class="root"><span class="radical">√</span><span class="radicand">'+(bodyStart===bodyEnd?'<span class="rootBox">□'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,bodyEnd,caretPos))+'</span></span>';
+     out+='<span class="root"><span class="radical">√</span><span class="radicand">'+(bodyStart===bodyEnd?'<span class="rootBox">'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,bodyEnd,caretPos))+'</span></span>';
     }else if(found==="root"){
      const comma=findTopComma(s,bodyStart,bodyEnd);
-     if(comma>=0)out+='<span class="customRoot"><span class="rootIndex">'+(bodyStart===comma?'<span class="rootBox">□'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="radical">√</span><span class="radicand">'+(comma+1===bodyEnd?'<span class="rootBox">□'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
+     if(comma>=0)out+='<span class="customRoot"><span class="rootIndex">'+(bodyStart===comma?'<span class="rootBox">'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="radical">√</span><span class="radicand">'+(comma+1===bodyEnd?'<span class="rootBox">'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
      else out+='root('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
     }else if(found==="frac"){
      const comma=findTopComma(s,bodyStart,bodyEnd);
-     if(comma>=0)out+='<span class="frac"><span class="numerator">'+(bodyStart===comma?'<span class="fracBox">□'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="fraction-bar"></span><span class="denominator">'+(comma+1===bodyEnd?'<span class="fracBox">□'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
+     if(comma>=0)out+='<span class="frac"><span class="numerator">'+(bodyStart===comma?'<span class="fracBox">'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="fraction-bar"></span><span class="denominator">'+(comma+1===bodyEnd?'<span class="fracBox">'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
      else out+='frac('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
     }else if(found==="randint"){
      out+='<span>RanInt#('+renderRich(s,bodyStart,bodyEnd,caretPos)+')</span>';
@@ -314,7 +314,7 @@ function renderRich(s,from,to,caretPos){
   }
   if(s[i]==="^"&&s[i+1]==="("){
    const close=matchingParen(s,i+1,to);
-   if(close>=0){const exponent=close===i+2?'<span class="powerBox">□'+(caretPos===i+2?'<span class="caret"></span>':'')+'</span>':renderRich(s,i+2,close,caretPos);out+='<sup>'+exponent+'</sup>';i=close+1;continue;}
+   if(close>=0){const exponent=close===i+2?'<span class="powerBox">'+(caretPos===i+2?'<span class="caret"></span>':'')+'</span>':renderRich(s,i+2,close,caretPos);out+='<sup>'+exponent+'</sup>';i=close+1;continue;}
   }
   const ch=s[i];
   if(ch==="~"||ch==="-")out+="−";
