@@ -487,6 +487,9 @@ function deleteAtom(){
     if(["randint","sqrt","root","frac","rec","ran"].includes(name)||body===""){
      deleteWhole(start,close+1);render();return;
     }
+    if(close===cursor-1){
+     cursor=close;activeTemplate=null;deleteAtom();return;
+    }
    }
    start=start>0?prefix.lastIndexOf(name+"(",start-1):-1;
   }
