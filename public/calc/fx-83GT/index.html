@@ -29,7 +29,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 .homeApp.selected{outline:0;background:#17201d;color:#fff}.homeApp.selected .homeIcon{color:#fff}.homeLabel{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 #menuRows{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding-right:2%}
 .menuTitle{display:none}
-.menuRow{height:25%;min-height:0;flex:1 1 0;display:flex;align-items:center;gap:2%;padding:0 1%;white-space:nowrap;overflow:hidden;font-family:ui-monospace,Consolas,monospace;font-size:1em;font-weight:600;cursor:pointer}
+.menuRow{height:25%;min-height:0;flex:0 0 25%;display:flex;align-items:center;padding:0 2%;white-space:nowrap;overflow:hidden;font-family:ui-monospace,Consolas,monospace;font-size:1em;font-weight:500;cursor:pointer}.menuRow.blank{visibility:hidden;pointer-events:none}
 .menuRow.selected{background:#17201d;color:#fff;outline:0}
 .menuNumber{width:8%;flex:none;text-align:center;font-size:.82em}
 .menuLabel{flex:1;overflow:hidden;text-overflow:ellipsis}
@@ -43,9 +43,9 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 @media(hover:hover){.key:hover{background:#2388ff18}}
 
 .homeIcon .glyph{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter}
-.menuNumber{width:9%;flex:none;text-align:left;font-size:.9em}
+.menuNumber{display:none}
 .menuLabel{flex:1;overflow:hidden;text-overflow:ellipsis}
-.menuValue{max-width:26%;overflow:hidden;text-overflow:ellipsis;text-align:right;font-size:.76em;font-weight:500}
+.menuValue{max-width:30%;overflow:hidden;text-overflow:ellipsis;text-align:right;font-size:.76em;font-weight:500}
 .menuArrow{width:7%;text-align:right;flex:none}
 .menuRow.selected .menuNumber,.menuRow.selected .menuArrow{color:#fff}
 .menuThumb{position:absolute;left:0;right:0;background:#53645a;border-radius:2px}
@@ -55,16 +55,21 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 .root{display:inline-flex;align-items:stretch;vertical-align:middle;white-space:nowrap}
 .root .radical{font-size:1.15em;line-height:1}
 .root .radicand{border-top:1px solid currentColor;padding:0 .08em 0 .02em;min-width:.3em}
-.caret{display:inline-block;width:.075em;height:1em;background:#17201d;vertical-align:-.12em;animation:blink 1s step-end infinite}
+.caret{display:inline-block;width:.075em;height:1em;background:#17201d;vertical-align:-.12em;animation:blink 1s step-end infinite}.powerBox,.rootBox,.fracBox{display:inline-block;min-width:.52em;min-height:.72em;border:1px solid #34433c;vertical-align:middle;text-align:center;line-height:.68em}.powerBox{font-size:.72em;vertical-align:super;min-width:.48em;height:.72em}.rootBox{font-size:.68em;min-width:.55em}.customRoot{display:inline-flex;align-items:stretch;vertical-align:middle}.customRoot .rootIndex{font-size:.55em;align-self:flex-start;margin-right:-.05em}.customRoot .radical{font-size:1.3em;line-height:1}.customRoot .radicand{border-top:1px solid currentColor;padding:0 .1em}.fractionBar{height:1px;background:currentColor;width:100%}.recurringDigits{text-decoration:overline}.off{filter:brightness(.75)}
 @keyframes blink{50%{opacity:0}}
 #screenPanel .homeApp:active,#screenPanel .menuRow:active{filter:brightness(.9)}
 
+#brand{position:absolute;left:14%;top:9.3%;width:31%;height:2.8%;display:flex;align-items:center;color:#1a2520;font:700 3.3cqw/1 Arial,sans-serif;letter-spacing:.02em;pointer-events:none;z-index:1}
+#screen.powered-off{background:#7e8882;color:#7e8882}
+#screen.powered-off #indicators{visibility:hidden}
+#screen.powered-off #screenMain{visibility:hidden}
+#screenPanel .menuRow.blank{visibility:hidden}
 </style>
 </head>
 <body>
 <a id="back" href="/calc/" aria-label="Back to calculators">‹</a>
 <div id="calculator" aria-label="Casio fx-83GT CW+ calculator">
-<img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Casio fx-83GT CW+ calculator">
+<img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Cow Chalk fx-83GT CW+ calculator"><div id="brand">Cow Chalk</div>
 <div id="screen" aria-live="polite">
 <div id="indicators"><img class="indicator" id="shiftIndicator" alt=""><img class="indicator" id="mathIndicator" src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003F.png" alt="Natural input"><img class="indicator" id="angleIndicator" src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003b.png" alt="Degrees"><span class="indicator text" id="historyIndicator"></span><span class="indicator text" id="formatIndicator"></span></div>
 <div id="screenMain"><div id="expression"></div><div id="answer">0</div><div id="screenPanel"></div></div>
@@ -85,22 +90,24 @@ const keyLayout=[
 ["0",62,851],[".",140,850],["×10ˣ",218,850],["FORMAT",296,850],["EXE",374,850]
 ];
 
-const container=document.getElementById("keys");
-const expressionEl=document.getElementById("expression");
-const answerEl=document.getElementById("answer");
-const mainEl=document.getElementById("screenMain");
-const shiftEl=document.getElementById("shiftIndicator");
-const angleEl=document.getElementById("angleIndicator");
-const historyEl=document.getElementById("historyIndicator");
-const formatEl=document.getElementById("formatIndicator");
-const panelEl=document.getElementById("screenPanel");
+const $=id=>document.getElementById(id);
+const container=$("keys"),expressionEl=$("expression"),answerEl=$("answer"),mainEl=$("screenMain");
+const shiftEl=$("shiftIndicator"),angleEl=$("angleIndicator"),historyEl=$("historyIndicator"),formatEl=$("formatIndicator");
+const panelEl=$("screenPanel"),screenEl=$("screen");
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const escapeHtml=s=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+const KEY="cowChalkFx83GTState";
 
 let expression="";
 let answer=null;
 let answerDisplay="";
 let ansMemory=0;
 let lastExpression="";
+let lastWasResult=false;
+let cursor=0;
+let activeTemplate=null;
 let shift=false;
+let powerOff=false;
 let angleMode="DEG";
 let inputMode="MathI/MathO";
 let resultMode="Norm 2";
@@ -109,34 +116,59 @@ let sciDigits=3;
 let fractionResult="Improper Fraction";
 let decimalMark="Dot";
 let digitSeparator="On";
-let multilineFont="Normal Font";
-let autoPowerOff="10 Min.";
-let qrVersion="Version 11";
-let contrast=0;
-let menu=null;
-let menuStack=[];
-let homeOpen=false;
-let homeIndex=0;
-let menuIndex=0;
-let menuScroll=0;
+let formatKeyMode="Format Menu";
 let memory=0;
-let variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};
+let variables={A:0,B:0,C:0,D:0,E:0,F:0,x:0,y:0,z:0};
+let functions={f:"",g:""};
 let history=[];
 let historyCursor=-1;
-let lastWasResult=false;
-let cursor=0;
+let menu=null;
+let menuFrames=[];
+let menuIndex=0;
+let menuScroll=0;
+let homeOpen=false;
+let homeIndex=0;
+let editor=null;
+let editorReturn=null;
 let undoStack=[];
-let overwriteMode=false;
-let powerOff=false;
-const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-const escapeHtml=s=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
 
+function loadState(){
+ try{
+  const match=String(document.cookie||"").split("; ").find(v=>v.startsWith(KEY+"="));
+  if(!match)return;
+  const data=JSON.parse(decodeURIComponent(match.slice(KEY.length+1)));
+  if(data.variables)variables={...variables,...data.variables};
+  if(data.functions)functions={...functions,...data.functions};
+  if(data.settings){
+   angleMode=data.settings.angleMode||angleMode;inputMode=data.settings.inputMode||inputMode;
+   resultMode=data.settings.resultMode||resultMode;fixDigits=data.settings.fixDigits??fixDigits;
+   sciDigits=data.settings.sciDigits??sciDigits;fractionResult=data.settings.fractionResult||fractionResult;
+   decimalMark=data.settings.decimalMark||decimalMark;digitSeparator=data.settings.digitSeparator||digitSeparator;
+   formatKeyMode=data.settings.formatKeyMode||formatKeyMode;
+  }
+  ansMemory=Number.isFinite(data.ansMemory)?data.ansMemory:0;
+  memory=Number.isFinite(data.memory)?data.memory:0;
+  if(Array.isArray(data.history))history=data.history.slice(0,50);
+  if(typeof data.expression==="string")expression=data.expression;
+  if(typeof data.answer==="number"&&Number.isFinite(data.answer)){answer=data.answer;answerDisplay=data.answerDisplay||standardResult(answer);lastExpression=expression;lastWasResult=true;cursor=expression.length;}
+ }catch(e){}
+}
+function persist(){
+ try{
+  const data={
+   variables,functions,ansMemory,memory,history:history.slice(0,50),expression,
+   answer:typeof answer==="number"?answer:null,answerDisplay,
+   settings:{angleMode,inputMode,resultMode,fixDigits,sciDigits,fractionResult,decimalMark,digitSeparator,formatKeyMode}
+  };
+  document.cookie=KEY+"="+encodeURIComponent(JSON.stringify(data))+"; path=/; max-age=31536000; SameSite=Lax";
+ }catch(e){}
+}
 function fmt(n){
  if(typeof n!=="number"||!Number.isFinite(n))return String(n);
  if(Math.abs(n)<1e-12)n=0;
  let out;
  if(resultMode==="Fix")out=n.toFixed(fixDigits);
- else if(resultMode==="Sci")out=n.toExponential(sciDigits-1).replace("e","E");
+ else if(resultMode==="Sci")out=n.toExponential(Math.max(0,sciDigits-1)).replace("e","E");
  else if(Number.isInteger(n)&&Math.abs(n)<1e13)out=String(n);
  else out=Number(n.toPrecision(12)).toString();
  if(decimalMark==="Comma")out=out.replace(".",",");
@@ -149,39 +181,133 @@ function fmt(n){
  }
  return out;
 }
-function displayExpr(s){
- return String(s)
- .replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−")
- .replaceAll("pi","π").replaceAll("sqrt(","√(").replaceAll("cbrt(","∛(")
- .replaceAll("^2","²").replaceAll("^3","³").replaceAll("^(-1)","⁻¹");
-}
-function renderExpression(raw,caret){
- let s=raw.slice(0,caret)+"\uE000"+raw.slice(caret);
- s=s.replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−").replaceAll("pi","π");
- s=escapeHtml(s);
- s=s.replace(/frac\(([^,()]*)\,([^()]*)\)/g,'<span class="frac"><span class="numerator">$1</span><span class="fraction-bar"></span><span class="denominator">$2</span></span>');
- s=s.replace(/sqrt\(([^()]*)\)/g,'<span class="root"><span class="radical">√</span><span class="radicand">$1</span></span>');
- s=s.replace(/cbrt\(([^()]*)\)/g,'<span class="root"><span class="radical">∛</span><span class="radicand">$1</span></span>');
- s=s.replace(/\^\(([^()]*)\)/g,'<sup>$1</sup>');
- s=s.replace(/\^([0-9]+)/g,'<sup>$1</sup>');
- return s.replaceAll("\uE000",'<span class="caret"></span>');
-}
-function renderAnswer(){
- if(answer===null)return answerDisplay?escapeHtml(answerDisplay):"";
- const mixed=String(answerDisplay).match(/^(-?\d+) (\d+)\/(\d+)$/);
- if(mixed)return escapeHtml(mixed[1])+' <span class="frac"><span class="numerator">'+escapeHtml(mixed[2])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(mixed[3])+'</span></span>';
- if(typeof answerDisplay==="string" && /^-?\d+\/\d+$/.test(answerDisplay)){
-  const p=answerDisplay.split("/");
-  return '<span class="frac"><span class="numerator">'+escapeHtml(p[0])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(p[1])+'</span></span>';
+function fractionParts(value){
+ const sign=value<0?-1:1;value=Math.abs(value);
+ let h1=1,h2=0,k1=0,k2=1,b=value;
+ for(let i=0;i<32;i++){
+  const a=Math.floor(b),h=a*h1+h2,k=a*k1+k2;
+  if(k>100000||Math.abs(value-h/k)<1e-10)return [sign*h,k];
+  h2=h1;h1=h;k2=k1;k1=k;
+  const f=b-a;if(f===0)break;b=1/f;
  }
- return escapeHtml(answerDisplay||fmt(answer)).replaceAll("*","×").replaceAll("-","−");
+ return [sign*Math.round(value*100000),100000];
 }
-function indicatorRender(){
- shiftEl.src=shift?"https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003a.png":"";
- shiftEl.style.display=shift?"block":"none";
- angleEl.src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/"+(angleMode==="DEG"?"003b":angleMode==="RAD"?"003c":"003d")+".png";
- historyEl.textContent=history.length>1?(historyCursor>0?"↑":historyCursor===0?"↓":"↕"):"";
- formatEl.textContent=resultMode==="Fix"?"FIX":resultMode==="Sci"?"SCI":"";
+function standardResult(value){
+ if(!Number.isFinite(value))return String(value);
+ const [n,d]=fractionParts(value);
+ if(d===1)return fmt(value);
+ if(Math.abs(n/d-value)<1e-10)return n+"/"+d;
+ return fmt(value);
+}
+function mixedFraction(value){
+ const [n,d]=fractionParts(value),whole=Math.trunc(n/d),rem=Math.abs(n%d);
+ if(!rem)return String(whole);
+ return (whole?whole+" ":"")+(rem+"/"+d);
+}
+function recurringDecimal(value){
+ const [signedNum,den]=fractionParts(value),sign=signedNum<0?"−":"";
+ const num=Math.abs(signedNum),whole=Math.floor(num/den);
+ let remainder=num%den,digits="",seen={};
+ while(remainder&&digits.length<30){
+  if(seen[remainder]!==undefined){
+   const split=seen[remainder];digits=digits.slice(0,split)+"("+digits.slice(split)+")";break;
+  }
+  seen[remainder]=digits.length;remainder*=10;
+  digits+=String(Math.floor(remainder/den));remainder%=den;
+ }
+ return digits?sign+whole+"."+digits:sign+whole;
+}
+function primeFactors(n){
+ const sign=n<0?"−":"";n=Math.abs(Math.trunc(n));if(!n)return "0";
+ const factors=[];
+ for(let d=2;d*d<=n;d++){let count=0;while(n%d===0){n/=d;count++;}if(count)factors.push(d+(count>1?"^"+count:""));}
+ if(n>1)factors.push(String(n));return sign+(factors.join(" × ")||"1");
+}
+function sexagesimal(value){
+ const sign=value<0?"−":"";let n=Math.abs(value);
+ const d=Math.floor(n);n=(n-d)*60;const m=Math.floor(n);const s=(n-m)*60;
+ return sign+d+"° "+m+"′ "+Number(s.toFixed(3))+"″";
+}
+function renderRich(s,from,to,caretPos){
+ let out="",i=from;
+ const names=["randint","sqrt","root","frac","asin","acos","atan","sinh","cosh","tanh","sin","cos","tan","log","ln","exp","abs","floor","ceil","round","f","g","rec","ran"];
+ while(i<to){
+  if(caretPos===i)out+='<span class="caret"></span>';
+  let found=null;
+  for(const name of names){
+   const prefix=name+"(";
+   if(s.slice(i,i+prefix.length).toLowerCase()===prefix){found=name;break;}
+  }
+  if(found){
+   const open=i+found.length,close=matchingParen(s,open,to);
+   if(close>=0){
+    const bodyStart=open+1,bodyEnd=close;
+    if(found==="sqrt"){
+     out+='<span class="root"><span class="radical">√</span><span class="radicand">'+renderRich(s,bodyStart,bodyEnd,caretPos)+'</span></span>';
+    }else if(found==="root"){
+     const comma=findTopComma(s,bodyStart,bodyEnd);
+     if(comma>=0)out+='<span class="customRoot"><span class="rootIndex">'+renderRich(s,bodyStart,comma,caretPos)+'</span><span class="radical">√</span><span class="radicand">'+renderRich(s,comma+1,bodyEnd,caretPos)+'</span></span>';
+     else out+='root('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
+    }else if(found==="frac"){
+     const comma=findTopComma(s,bodyStart,bodyEnd);
+     if(comma>=0)out+='<span class="frac"><span class="numerator">'+renderRich(s,bodyStart,comma,caretPos)+'</span><span class="fraction-bar"></span><span class="denominator">'+renderRich(s,comma+1,bodyEnd,caretPos)+'</span></span>';
+     else out+='frac('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
+    }else if(found==="randint"){
+     out+='<span>RanInt#('+renderRich(s,bodyStart,bodyEnd,caretPos)+')</span>';
+    }else if(found==="ran"){
+     out+='<span>Ran#</span>';
+    }else if(found==="rec"){
+     out+='<span class="recurringDigits">'+renderRich(s,bodyStart,bodyEnd,caretPos)+'</span>';
+    }else{
+     const label={asin:"sin⁻¹",acos:"cos⁻¹",atan:"tan⁻¹",sinh:"sinh",cosh:"cosh",tanh:"tanh",sin:"sin",cos:"cos",tan:"tan",log:"log",ln:"ln",exp:"exp",abs:"Abs",floor:"floor",ceil:"ceil",round:"Rnd",f:"f",g:"g"}[found]||found;
+     out+=escapeHtml(label)+"("+renderRich(s,bodyStart,bodyEnd,caretPos)+")";
+    }
+    i=close+1;continue;
+   }
+  }
+  if(s[i]==="^"&&s[i+1]==="("){
+   const close=matchingParen(s,i+1,to);
+   if(close>=0){out+='<sup>'+renderRich(s,i+2,close,caretPos)+'</sup>';i=close+1;continue;}
+  }
+  const ch=s[i];
+  if(ch==="~"||ch==="-")out+="−";
+  else if(ch==="*")out+="×";
+  else if(ch==="/")out+="÷";
+  else if(ch==="p"&&s.slice(i,i+2)==="pi"){out+="π";i+=2;continue;}
+  else if(s.slice(i,i+3).toLowerCase()==="ans"){out+="Ans";i+=3;continue;}
+  else if(ch===",")out+=",";
+  else out+=escapeHtml(ch);
+  i++;
+ }
+ if(caretPos===to)out+='<span class="caret"></span>';
+ return out;
+}
+function matchingParen(s,open,end){
+ let depth=0;
+ for(let i=open;i<end;i++){if(s[i]==="(")depth++;else if(s[i]===")"&&--depth===0)return i;}
+ return -1;
+}
+function findTopComma(s,start,end){
+ let depth=0;
+ for(let i=start;i<end;i++){if(s[i]==="(")depth++;else if(s[i]===")")depth--;else if(s[i]===","&&depth===0)return i;}
+ return -1;
+}
+function renderMenu(){
+ const count=menu.items.length;
+ if(menuIndex<menuScroll)menuScroll=menuIndex;
+ if(menuIndex>=menuScroll+4)menuScroll=menuIndex-3;
+ const rows=[];
+ for(let i=0;i<4;i++){
+  const index=menuScroll+i,item=menu.items[index];
+  if(!item){rows.push('<div class="menuRow blank" aria-hidden="true"></div>');continue;}
+  rows.push('<div class="menuRow '+(index===menuIndex?"selected":"")+'" data-index="'+index+'"><span class="menuLabel">'+escapeHtml(item.label)+'</span><span class="menuValue">'+escapeHtml(item.value||"")+'</span><span class="menuArrow">'+(item.children?"›":"")+'</span></div>');
+ }
+ const thumbHeight=count>4?Math.max(14,400/count):100;
+ const thumbTop=count>4?(100*menuScroll/Math.max(1,count)):0;
+ panelEl.innerHTML='<div id="menuRows">'+rows.join("")+'</div>'+(count>4?'<div class="menuScroll"><div class="menuThumb" style="height:'+thumbHeight+'%;top:'+thumbTop+'%"></div></div>':"");
+}
+function renderHome(){
+ panelEl.innerHTML=homeApps.map((app,i)=>'<div class="homeApp '+(i===homeIndex?"selected":"")+'" data-home="'+i+'"><span class="homeIcon">'+app.icon+'</span><span class="homeLabel">'+app.label+'</span></div>').join("");
 }
 const homeApps=[
  {label:"Calculate",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M8 8h24v24H8zM13 14h4m-2-2v4m8 0h4M13 22h4m-2-2v4m8 0h4M13 29h4m8 0h4"/></svg>'},
@@ -190,207 +316,251 @@ const homeApps=[
  {label:"Ratio",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M4 10h13v20H4zM23 10h13v20H23zM18 15h4m-4 10h4"/></svg>'},
  {label:"Math Box",icon:'<svg viewBox="0 0 40 40"><rect class="glyph" x="5" y="5" width="13" height="13" rx="2"/><rect class="glyph" x="22" y="22" width="13" height="13" rx="2"/><circle cx="11.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="26" cy="26" r="1.7" fill="currentColor"/><circle cx="31" cy="31" r="1.7" fill="currentColor"/></svg>'}
 ];
-
-function renderMenu(){
- const visible=Math.min(4,menu.items.length);
- if(menuIndex<menuScroll)menuScroll=menuIndex;
- if(menuIndex>=menuScroll+visible)menuScroll=menuIndex-visible+1;
- const rows=menu.items.slice(menuScroll,menuScroll+visible).map((item,i)=>{
-  const index=menuScroll+i;
-  const label=escapeHtml(item.label);
-  const value=item.value!==undefined?escapeHtml(item.value):"";
-  const selected=item.selected===true?"●":"";
-  const arrow=item.children||item.hasChildren?"›":"";
-  return '<div class="menuRow '+(index===menuIndex?"selected":"")+'" data-index="'+index+'"><span class="menuNumber">'+(i+1)+'</span><span class="menuLabel">'+label+'</span><span class="menuValue">'+(selected||value)+'</span><span class="menuArrow">'+arrow+'</span></div>';
- }).join("");
- const maxStart=Math.max(0,menu.items.length-visible);
- const thumbHeight=menu.items.length>visible?Math.max(14,100*visible/menu.items.length):100;
- const thumbTop=maxStart?100*menuScroll/menu.items.length:0;
- panelEl.innerHTML='<div id="menuRows">'+rows+'</div>'+(menu.items.length>visible?'<div class="menuScroll"><div class="menuThumb" style="height:'+thumbHeight+'%;top:'+thumbTop+'%"></div></div>':"");
+function renderAnswer(value){
+ if(typeof value!=="number"||!Number.isFinite(value))return escapeHtml(answerDisplay);
+ const shown=answerDisplay||standardResult(value);
+ const frac=shown.match(/^(-?\d+)\/(\d+)$/);
+ if(frac)return '<span class="frac"><span class="numerator">'+escapeHtml(frac[1])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(frac[2])+'</span></span>';
+ const mixed=shown.match(/^(-?\d+) (\d+)\/(\d+)$/);
+ if(mixed)return escapeHtml(mixed[1])+' <span class="frac"><span class="numerator">'+escapeHtml(mixed[2])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(mixed[3])+'</span></span>';
+ return escapeHtml(shown).replaceAll("-","−").replaceAll("*","×");
 }
 function render(){
- indicatorRender();
+ shiftEl.src=shift?"https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003a.png":"";
+ shiftEl.style.display=shift?"block":"none";
+ angleEl.src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/"+(angleMode==="DEG"?"003b":angleMode==="RAD"?"003c":"003d")+".png";
+ historyEl.textContent=history.length>1?"↕":"";
+ formatEl.textContent=resultMode==="Fix"?"FIX":resultMode==="Sci"?"SCI":"";
+ screenEl.classList.toggle("powered-off",powerOff);
  panelEl.className="";
  panelEl.innerHTML="";
  expressionEl.style.display="";
  answerEl.style.display="";
  mainEl.classList.remove("menu","home");
- if(powerOff){
-  expressionEl.style.display="none";answerEl.style.display="none";
+ if(powerOff){expressionEl.style.display="none";answerEl.style.display="none";return;}
+ if(homeOpen){mainEl.classList.add("home");expressionEl.style.display="none";answerEl.style.display="none";panelEl.className="visible home";renderHome();return;}
+ if(menu){mainEl.classList.add("menu");expressionEl.style.display="none";answerEl.style.display="none";panelEl.className="visible";renderMenu();return;}
+ if(editor){
+  const prefix=editor.prefix;
+  expressionEl.innerHTML=escapeHtml(prefix)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>');
+  answerEl.innerHTML="";
   return;
  }
- if(homeOpen){
-  mainEl.classList.add("home");
-  expressionEl.style.display="none";answerEl.style.display="none";
-  panelEl.className="visible home";
-  panelEl.innerHTML=homeApps.map((app,i)=>'<div class="homeApp '+(i===homeIndex?"selected":"")+'" data-home="'+i+'"><span class="homeIcon">'+app.icon+'</span><span class="homeLabel">'+app.label+'</span></div>').join("");
-  return;
- }
- if(menu){
-  mainEl.classList.add("menu");
-  expressionEl.style.display="none";answerEl.style.display="none";
-  panelEl.className="visible";
-  renderMenu();
-  return;
- }
- let shownExpression=expression;
- let shownAnswer=answer;
- if(historyCursor>0&&history[historyCursor]){
-  shownExpression=history[historyCursor].expression;
-  shownAnswer=history[historyCursor].result;
- }
- expressionEl.innerHTML=shownExpression?renderExpression(shownExpression,historyCursor>0?shownExpression.length:cursor):"";
- if(historyCursor>0&&history[historyCursor])answerEl.innerHTML=renderAnswerValue(shownAnswer);
- else answerEl.innerHTML=renderAnswer();
+ let shownExpression=expression,shownAnswer=answer;
+ if(historyCursor>=0&&history[historyCursor]){shownExpression=history[historyCursor].expression;shownAnswer=history[historyCursor].result;}
+ if(shownExpression){
+  const caret=(historyCursor<0&&!lastWasResult&&answer===null)?cursor:-1;
+  expressionEl.innerHTML=renderRich(shownExpression,0,shownExpression.length,caret);
+ }else if(answer===null)expressionEl.innerHTML='<span class="caret"></span>';
+ else expressionEl.innerHTML="";
+ answerEl.innerHTML=shownAnswer!==null?renderAnswer(shownAnswer):"";
 }
-function renderAnswerValue(value){
- const text=standardResult(value);
- const fraction=text.match(/^(-?\d+)\/(\d+)$/);
- if(fraction)return '<span class="frac"><span class="numerator">'+escapeHtml(fraction[1])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(fraction[2])+'</span></span>';
- return escapeHtml(text).replaceAll("-","−");
+function pushUndo(){undoStack.push({expression,answer,answerDisplay,cursor,lastWasResult});if(undoStack.length>80)undoStack.shift();}
+function startNewFromAnswer(value){
+ if(lastWasResult){
+  if(/^[0-9.(]/.test(value)||value==="sqrt()"||value==="frac(,)")expression="";
+  else expression=String(ansMemory);
+  cursor=expression.length;lastWasResult=false;
+ }
 }
-
-function tokenize(source){
+function append(value){
+ if(menu||homeOpen||powerOff)return;
+ if(editor){expression=expression.slice(0,cursor)+value+expression.slice(cursor);cursor+=value.length;answer=null;answerDisplay="";render();return;}
+ if(historyCursor>=0){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ startNewFromAnswer(value);
+ pushUndo();
+ expression=expression.slice(0,cursor)+value+expression.slice(cursor);
+ if(activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end)activeTemplate.end+=value.length;
+ cursor+=value.length;answer=null;answerDisplay="";render();
+}
+function insertTemplate(raw,kind,offset){
+ if(lastWasResult){expression="";cursor=0;lastWasResult=false;}
+ pushUndo();
+ const start=cursor;
+ expression=expression.slice(0,cursor)+raw+expression.slice(cursor);
+ cursor=start+offset;activeTemplate={kind,start,end:start+raw.length};
+ answer=null;answerDisplay="";render();
+}
+function insertFunction(name){insertTemplate(name+"()",name,name.length+1);}
+function insertFraction(){insertTemplate("frac(,)","fraction",5);}
+function insertSquareRoot(){insertTemplate("sqrt()","sqrt",5);}
+function insertPower(){insertTemplate("^()","power",2);}
+function insertNthRoot(){insertTemplate("root(,)","root",5);}
+function insertRecurring(){insertTemplate("rec()","recurring",4);}
+function insertRanInt(){insertTemplate("randint(,)","randint",8);}
+function moveCursor(d){
+ if(editor){cursor=clamp(cursor+d,0,expression.length);render();return;}
+ if(historyCursor>=0){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ if(d>0&&activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end){
+  const start=activeTemplate.start,kind=activeTemplate.kind;
+  if(kind==="fraction"||kind==="root"||kind==="randint"){
+   const comma=expression.indexOf(",",start);
+   const close=expression.indexOf(")",comma);
+   if(comma>=0&&cursor<=comma){cursor=comma+1;render();return;}
+   if(close>=0&&cursor<=close){cursor=close+1;activeTemplate=null;render();return;}
+  }else{
+   const close=expression.indexOf(")",start);
+   if(close>=0&&cursor<=close){cursor=close+1;activeTemplate=null;render();return;}
+  }
+ }
+ cursor=clamp(cursor+d,0,expression.length);
+ if(activeTemplate&&(cursor<activeTemplate.start||cursor>activeTemplate.end))activeTemplate=null;
+ render();
+}
+function moveTemplateVertical(direction){
+ if(!activeTemplate)return false;
+ const start=activeTemplate.start,kind=activeTemplate.kind;
+ if(kind==="fraction"||kind==="root"||kind==="randint"){
+  const comma=expression.indexOf(",",start);
+  if(comma<0)return false;
+  if(direction==="DOWN"&&cursor<=comma){cursor=comma+1;render();return true;}
+  if(direction==="UP"&&cursor>comma){cursor=start+(kind==="fraction"?5:kind==="root"?5:8);render();return true;}
+ }
+ return false;
+}
+function deleteWhole(start,end){
+ expression=expression.slice(0,start)+expression.slice(end);
+ cursor=start;activeTemplate=null;answer=null;answerDisplay="";
+}
+function deleteAtom(){
+ if(menu||homeOpen||powerOff)return;
+ if(editor){if(cursor>0){expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor--;render();}return;}
+ if(historyCursor>=0){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ if(lastWasResult){expression=lastExpression;cursor=expression.length;lastWasResult=false;}
+ if(cursor<=0)return;
+ pushUndo();
+ if(activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end){
+  const t=activeTemplate;
+  if(t.kind==="fraction"||t.kind==="power"||t.kind==="root"||t.kind==="sqrt"||t.kind==="randint"||t.kind==="recurring"||t.kind==="sin"||t.kind==="cos"||t.kind==="tan"||t.kind==="asin"||t.kind==="acos"||t.kind==="atan"||t.kind==="log"||t.kind==="ln"){deleteWhole(t.start,t.end);render();return;}
+ }
+ const prefix=expression.slice(0,cursor);
+ const atomic=prefix.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)\($/i);
+ if(atomic){const start=cursor-atomic[0].length;const close=expression.indexOf(")",cursor);if(close>=0){deleteWhole(start,close+1);render();return;}deleteWhole(start,cursor);render();return;}
+ const word=prefix.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)$/i);
+ if(word){deleteWhole(cursor-word[0].length,cursor);render();return;}
+ if(prefix.endsWith("pi")){deleteWhole(cursor-2,cursor);render();return;}
+ expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor--;activeTemplate=null;answer=null;answerDisplay="";render();
+}
+function clearEntry(){expression="";answer=null;answerDisplay="";lastExpression="";lastWasResult=false;cursor=0;historyCursor=-1;activeTemplate=null;undoStack=[];persist();render();}
+function powerOn(){
+ powerOff=false;shift=false;expression="";answer=null;answerDisplay="";lastExpression="";lastWasResult=false;cursor=0;activeTemplate=null;history=[];historyCursor=-1;menu=null;menuFrames=[];homeOpen=false;undoStack=[];persist();render();
+}
+function powerDown(){powerOff=true;shift=false;menu=null;menuFrames=[];homeOpen=false;editor=null;render();}
+function calculate(){
+ if(editor){
+  if(!expression.trim())return;
+  try{
+   const v=evaluate(expression);
+   if(editor.kind==="variable")variables[editor.name]=v;
+   else functions[editor.name]=expression;
+   persist();
+   if(editor.kind==="variable"){
+    const ret=editorReturn;editor=null;expression="";answer=null;answerDisplay="";lastWasResult=false;cursor=0;
+    menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;
+   }else{
+    const ret=editorReturn;editor=null;expression=ret.expression;cursor=ret.cursor;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;
+   }
+   render();return;
+  }catch(e){answerDisplay=e.message||"Math ERROR";answer=null;render();return;}
+ }
+ if(!expression.trim())return;
+ try{
+  const result=evaluate(expression);
+  lastExpression=expression;history.unshift({expression,result});history=history.slice(0,50);
+  answer=result;answerDisplay=standardResult(result);ansMemory=result;lastWasResult=true;historyCursor=-1;cursor=expression.length;activeTemplate=null;undoStack=[];
+  persist();render();
+ }catch(e){
+  answer=null;answerDisplay=e.message||"Math ERROR";render();
+  const msg=answerDisplay;setTimeout(()=>{if(answerDisplay===msg){answerDisplay="";render();}},1400);
+ }
+}
+function evaluate(source){
  const s=source.replaceAll("×","*").replaceAll("÷","/").replaceAll("−","-").replaceAll("π","pi");
  const tokens=[];let i=0;
  while(i<s.length){
   if(/\s/.test(s[i])){i++;continue;}
   const rest=s.slice(i);
-  const num=rest.match(/^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/i);
-  if(num){tokens.push({type:"number",value:Number(num[0])});i+=num[0].length;continue;}
+  const number=rest.match(/^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/i);
+  if(number){tokens.push({type:"number",value:Number(number[0])});i+=number[0].length;continue;}
   const id=rest.match(/^[a-zA-Z]+/);
   if(id){tokens.push({type:"id",value:id[0].toLowerCase()});i+=id[0].length;continue;}
-  if("+-*/^!%(),".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
+  if("+-*/^!%(),~°".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
   throw Error("Syntax ERROR");
  }
  const out=[];
  for(let j=0;j<tokens.length;j++){
   const a=tokens[j],b=tokens[j+1];out.push(a);
-  if(b&&((a.type==="number"||a.type==="id"||a.type===")"||a.type==="!"||a.type==="%")&&(b.type==="number"||b.type==="id"||b.type==="("))){
-   if(!(a.type==="id"&&["sin","cos","tan","asin","acos","atan","sinh","cosh","tanh","sqrt","cbrt","log","ln","abs","floor","ceil","round","exp","frac","tenpow","gcd","lcm","npr","ncr","randint"].includes(a.value)&&b.type==="("))out.push({type:"*",value:"*"});
+  if(b&&((a.type==="number"||a.type==="id"||a.type===")"||a.type==="!"||a.type==="%"||a.type==="°")&&(b.type==="number"||b.type==="id"||b.type==="("))){
+   if(!(a.type==="id"&&b.type==="("))out.push({type:"*",value:"*"});
   }
  }
- return out;
-}
-function evaluate(source){
- const t=tokenize(source);let p=0;
- const peek=()=>t[p];
- const take=()=>t[p++];
- const expect=type=>{if(!peek()||peek().type!==type)throw Error("Syntax ERROR");return take();};
- const factorial=n=>{if(n<0||!Number.isInteger(n)||n>170)throw Error("Math ERROR");let r=1;for(let i=2;i<=n;i++)r*=i;return r;};
+ let p=0;
+ const peek=()=>out[p],take=()=>out[p++];
+ const expect=t=>{if(!peek()||peek().type!==t)throw Error("Syntax ERROR");return take();};
+ const factorial=n=>{if(n<0||!Number.isInteger(n)||n>170)throw Error("Math ERROR");let r=1;for(let k=2;k<=n;k++)r*=k;return r;};
  const toRad=x=>angleMode==="DEG"?x*Math.PI/180:angleMode==="GRA"?x*Math.PI/200:x;
  const fromRad=x=>angleMode==="DEG"?x*180/Math.PI:angleMode==="GRA"?x*200/Math.PI:x;
- const gcd=(a,b)=>{a=Math.abs(Math.trunc(a));b=Math.abs(Math.trunc(b));while(b){const q=a%b;a=b;b=q;}return a;};
+ const gcd=(a,b)=>{a=Math.abs(Math.trunc(a));b=Math.abs(Math.trunc(b));while(b){const t=a%b;a=b;b=t;}return a;};
  function primary(){
   const q=peek();if(!q)throw Error("Syntax ERROR");
   if(q.type==="number"){take();return q.value;}
   if(q.type==="+"){take();return unary();}
+  if(q.type==="- "){take();return -unary();}
   if(q.type==="-"){take();return -unary();}
+  if(q.type==="~"){take();return -unary();}
   if(q.type==="("){take();const v=add();expect(")");return v;}
   if(q.type==="id"){
    const name=take().value;
    if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return ansMemory;
-   if(["x","a","b","c","d","e","f","y","z"].includes(name))return variables[name==="x"||name==="y"||name==="z"?name:name.toUpperCase()]??0;
+   if(name==="ran")return Math.floor(Math.random()*1000)/1000;
+   if(name==="a"||name==="b"||name==="c"||name==="d"||name==="e"||name==="f"||name==="x"||name==="y"||name==="z")return variables[name.toUpperCase()]??variables[name]??0;
    if(peek()&&peek().type==="("){
     take();
-    if(name==="frac"){const n=add();expect(",");const d=add();expect(")");return n/d;}
-    if(name==="gcd"||name==="lcm"||name==="npr"||name==="ncr"||name==="randint"){
+    if(name==="frac"||name==="root"||name==="randint"){
      const a=add();expect(",");const b=add();expect(")");
-     if(name==="gcd")return gcd(a,b);
-     if(name==="lcm")return Math.abs(a*b)/gcd(a,b);
-     if(name==="npr")return factorial(a)/factorial(a-b);
-     if(name==="ncr")return factorial(a)/(factorial(b)*factorial(a-b));
-     return Math.floor(Math.random()*(Math.floor(b)-Math.ceil(a)+1))+Math.ceil(a);
+     if(name==="frac")return a/b;
+     if(name==="root"){if(a===0)throw Error("Math ERROR");return Math.sign(b)*Math.pow(Math.abs(b),1/a);}
+     if(!Number.isInteger(a)||!Number.isInteger(b)||a>b)throw Error("Math ERROR");
+     return Math.floor(Math.random()*(b-a+1))+a;
+    }
+    if(name==="f"||name==="g"){
+     const value=add();expect(")");
+     if(!functions[name])throw Error("Math ERROR");
+     return evaluate(functions[name].replace(/\bx\b/gi,"("+value+")"));
     }
     const v=add();expect(")");
-    const f={sqrt:Math.sqrt,cbrt:Math.cbrt,log:Math.log10,ln:Math.log,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,exp:Math.exp,tenpow:x=>10**x,sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+    const f={sqrt:Math.sqrt,log:Math.log10,ln:Math.log,exp:Math.exp,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,rec:x=>{const d=String(Math.trunc(Math.abs(x)));return Number(d)/((10**d.length)-1);}};
     if(!f[name])throw Error("Syntax ERROR");return f[name](v);
    }
    throw Error("Syntax ERROR");
   }
   throw Error("Syntax ERROR");
  }
- function postfix(){let v=primary();while(peek()&&(peek().type==="!"||peek().type==="%")){const op=take().type;v=op==="!"?factorial(v):v/100;}return v;}
+ function postfix(){
+  let v=primary();
+  while(peek()&&["!","%","°"].includes(peek().type)){
+   const op=take().type;
+   if(op==="!")v=factorial(v);
+   else if(op==="%")v/=100;
+  }
+  return v;
+ }
  function power(){let v=postfix();if(peek()&&peek().type==="^"){take();v=Math.pow(v,unary());}return v;}
  function unary(){return power();}
- function mul(){let v=unary();while(peek()&&["*","/"].includes(peek().type)){const op=take().type;const r=unary();v=op==="*"?v*r:v/r;}return v;}
- function add(){let v=mul();while(peek()&&["+","-"].includes(peek().type)){const op=take().type;const r=mul();v=op==="+"?v+r:v-r;}return v;}
- const value=add();if(p<t.length)throw Error("Syntax ERROR");if(!Number.isFinite(value))throw Error("Math ERROR");return value;
-}
-function saveUndo(){undoStack.push({expression,answer,answerDisplay,cursor,lastWasResult});if(undoStack.length>40)undoStack.shift();}
-function append(value){
- if(menu||homeOpen||powerOff)return;
- if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
- if(lastWasResult){if(/^[0-9.(]/.test(value)||value==="frac("||value==="sqrt("||value==="cbrt(")expression="";else expression=String(ansMemory);lastWasResult=false;cursor=expression.length;}
- saveUndo();
- if(overwriteMode&&cursor<expression.length&&value.length===1){expression=expression.slice(0,cursor)+value+expression.slice(cursor+1);}
- else expression=expression.slice(0,cursor)+value+expression.slice(cursor);
- cursor+=value.length;answer=null;answerDisplay="";render();
-}
-function insertFunction(name){
- if(lastWasResult){expression="";lastWasResult=false;cursor=0;}
- append(name+"()");
- cursor=Math.max(0,cursor-1);
- render();
-}
-function insertFraction(){
- if(menu||homeOpen)return;
- if(lastWasResult){expression="";lastWasResult=false;cursor=0;}
- saveUndo();
- const part="frac(,)";
- expression=expression.slice(0,cursor)+part+expression.slice(cursor);
- cursor+=5;answer=null;answerDisplay="";render();
-}
-function moveFractionCursor(direction){
- const start=expression.lastIndexOf("frac(",Math.max(0,cursor));
- if(start<0)return false;
- const comma=expression.indexOf(",",start+5),end=expression.indexOf(")",comma);
- if(comma<0||end<0||cursor<start+5||cursor>end)return false;
- if(direction==="DOWN"&&cursor<=comma){cursor=comma+1;return true;}
- if(direction==="UP"&&cursor>comma){cursor=start+5;return true;}
- return false;
-}
-function calculate(){
- if(!expression.trim())return;
- try{
-  const result=evaluate(expression);
-  lastExpression=expression;history.unshift({expression,result});history=history.slice(0,50);
-  answer=result;answerDisplay=standardResult(result);ansMemory=result;lastWasResult=true;historyCursor=-1;cursor=expression.length;undoStack=[];
-  render();
- }catch(e){
-  answer=null;answerDisplay=e.message||"Math ERROR";lastWasResult=false;render();
-  const msg=answerDisplay;setTimeout(()=>{if(answerDisplay===msg){answerDisplay="";render();}},1300);
- }
-}
-function clearEntry(){
- saveUndo();expression="";answer=null;answerDisplay="";lastWasResult=false;historyCursor=-1;cursor=0;render();
-}
-function powerOn(){
- powerOff=false;shift=false;overwriteMode=false;expression="";answer=null;answerDisplay="";lastExpression="";history=[];historyCursor=-1;cursor=0;lastWasResult=false;undoStack=[];menu=null;menuStack=[];homeOpen=false;render();
-}
-function moveCursor(d){
- if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
- cursor=clamp(cursor+d,0,expression.length);render();
-}
-function scrollHistory(direction){
- if(history.length<2)return;
- if(direction==="UP"){
-  if(historyCursor<0)historyCursor=1;
-  else historyCursor=Math.min(history.length-1,historyCursor+1);
- }else{
-  if(historyCursor>1)historyCursor--;
-  else historyCursor=-1;
- }
- render();
+ function mul(){let v=unary();while(peek()&&["*","/"].includes(peek().type)){const op=take().type;const n=unary();v=op==="*"?v*n:v/n;}return v;}
+ function add(){let v=mul();while(peek()&&["+","-"].includes(peek().type)){const op=take().type;const n=mul();v=op==="+"?v+n:v-n;}return v;}
+ const result=add();if(p<out.length)throw Error("Syntax ERROR");if(!Number.isFinite(result))throw Error("Math ERROR");return result;
 }
 function openMenu(title,items,action){
- if(menu)menuStack.push(menu);
+ if(menu)menuFrames.push({menu,index:menuIndex,scroll:menuScroll});
+ else menuFrames=[];
  menu={title:title||"",items:items||[],action:action||null};
  menuIndex=0;menuScroll=0;render();
 }
 function closeMenu(){
- if(menuStack.length)menu=menuStack.pop();else menu=null;
- menuIndex=0;menuScroll=0;render();
+ if(menuFrames.length){const frame=menuFrames.pop();menu=frame.menu;menuIndex=frame.index;menuScroll=frame.scroll;}
+ else{menu=null;menuIndex=0;menuScroll=0;}
+ render();
 }
 function chooseMenu(index){
  if(!menu)return;
@@ -399,340 +569,250 @@ function chooseMenu(index){
  const current=menu,action=current.action;
  if(action)action(item);
  else if(item.items)openMenu("",item.items,item.action);
- if(menu===current){
-  menu=menuStack.length?menuStack.pop():null;
-  menuIndex=0;menuScroll=0;
- }
+ if(menu===current)closeMenu();
+ else render();
+}
+function moveMenu(direction){
+ if(!menu||!menu.items.length)return;
+ menuIndex=(menuIndex+(direction==="UP"?menu.items.length-1:1))%menu.items.length;
+ if(menuIndex<menuScroll)menuScroll=menuIndex;
+ if(menuIndex>=menuScroll+4)menuScroll=menuIndex-3;
  render();
 }
 function pageMenu(direction){
  if(!menu)return;
- const visible=Math.min(4,menu.items.length),maxStart=Math.max(0,menu.items.length-visible);
- if(direction==="UP"){
-  if(menuScroll===0){menuScroll=maxStart;menuIndex=menu.items.length-1;}
-  else{menuScroll=Math.max(0,menuScroll-visible);menuIndex=menuScroll;}
- }else{
-  if(menuScroll>=maxStart){menuScroll=0;menuIndex=0;}
-  else{menuScroll=Math.min(maxStart,menuScroll+visible);menuIndex=menuScroll;}
- }
+ const maxStart=Math.max(0,menu.items.length-4);
+ if(direction==="UP"){menuScroll=maxStart;menuIndex=menu.items.length-1;}
+ else{menuScroll=0;menuIndex=0;}
  render();
 }
-function openOptions(labels,current,setter,formatter){
- const opts=labels.map(label=>({label,value:formatter?formatter(label):"",selected:label===current}));
- openMenu("",opts,item=>{setter(item.label);render();});
-}
-
-function openSettingsCategory(category){
- if(category==="Calc Settings"){
-  const rows=[
-   {label:"Input/Output",value:inputMode},
-   {label:"Angle Unit",value:angleMode==="DEG"?"Degree":angleMode==="RAD"?"Radian":"Gradian"},
-   {label:"Number Format",value:resultMode},
-   {label:"Fraction Result",value:fractionResult},
-   {label:"Decimal Mark",value:decimalMark},
-   {label:"Digit Separator",value:digitSeparator}
-  ];
-  openMenu("",rows,item=>{
-   if(item.label==="Input/Output")openOptions(["MathI/MathO","MathI/DecimalO","LineI/LineO","LineI/DecimalO"],inputMode,v=>{inputMode=v;history=[];historyCursor=-1;});
-   if(item.label==="Angle Unit")openOptions(["Degree","Radian","Gradian"],angleMode==="DEG"?"Degree":angleMode==="RAD"?"Radian":"Gradian",v=>{angleMode=v==="Degree"?"DEG":v==="Radian"?"RAD":"GRA";});
-   if(item.label==="Number Format"){
-    openMenu("",["Norm 1","Norm 2","Fix","Sci"].map(label=>({label,selected:resultMode===label})),v=>{
-     if(v.label==="Fix")openMenu("",Array.from({length:10},(_,i)=>({label:String(i),selected:fixDigits===i})),d=>{fixDigits=Number(d.label);resultMode="Fix";});
-     else if(v.label==="Sci")openMenu("",Array.from({length:10},(_,i)=>({label:String(i+1),selected:sciDigits===i+1})),d=>{sciDigits=Number(d.label);resultMode="Sci";});
-     else resultMode=v.label;
-    });
-   }
-   if(item.label==="Fraction Result")openOptions(["Mixed Fraction","Improper Fraction"],fractionResult,v=>{fractionResult=v;});
-   if(item.label==="Decimal Mark")openOptions(["Dot","Comma"],decimalMark,v=>{decimalMark=v;});
-   if(item.label==="Digit Separator")openOptions(["On","Off"],digitSeparator,v=>{digitSeparator=v;});
-  });
- }else if(category==="System Settings"){
-  openMenu("",[
-   {label:"Contrast",value:String(contrast)},
-   {label:"Auto Power Off",value:autoPowerOff},
-   {label:"MultiLine Font",value:multilineFont},
-   {label:"QR Code",value:qrVersion}
-  ],item=>{
-   if(item.label==="Contrast")openOptions(Array.from({length:9},(_,i)=>String(i+1)),String(contrast||5),v=>{contrast=Number(v);});
-   if(item.label==="Auto Power Off")openOptions(["10 Min.","60 Min."],autoPowerOff,v=>{autoPowerOff=v;});
-   if(item.label==="MultiLine Font")openOptions(["Normal Font","Small Font"],multilineFont,v=>{multilineFont=v;});
-   if(item.label==="QR Code")openOptions(["Version 3","Version 11"],qrVersion,v=>{qrVersion=v;});
-  });
- }else if(category==="Reset"){
-  openMenu("",[
-   {label:"Settings & Data"},
-   {label:"Variable Memory"},
-   {label:"Initialize All"}
-  ],item=>{
-   openMenu("",[{label:"No"},{label:"Yes"}],choice=>{
-    if(choice.label!=="Yes")return;
-    if(item.label==="Variable Memory"){variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};memory=0;}
-    if(item.label==="Settings & Data"){expression="";answer=null;answerDisplay="";history=[];inputMode="MathI/MathO";angleMode="DEG";resultMode="Norm 2";fixDigits=2;sciDigits=3;fractionResult="Improper Fraction";decimalMark="Dot";digitSeparator="On";}
-    if(item.label==="Initialize All"){variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};memory=0;expression="";answer=null;answerDisplay="";history=[];inputMode="MathI/MathO";angleMode="DEG";resultMode="Norm 2";fixDigits=2;sciDigits=3;fractionResult="Improper Fraction";decimalMark="Dot";digitSeparator="On";}
-    historyCursor=-1;cursor=0;lastWasResult=false;
-   });
-  });
- }else{
-  openMenu("",[{label:"Get Started"},{label:"User Guide"}],()=>{});
- }
+function openOptions(labels,current,setter){
+ openMenu("",labels.map(label=>({label,value:label===current?"✓":""})),item=>{setter(item.label);persist();});
 }
 function settingsMenu(){
- if(homeOpen){openMenu("",[{label:"Get Started"},{label:"HOME"}],v=>{if(v.label==="HOME"){menu=null;homeOpen=true;render();}});return;}
- openMenu("",[
-  {label:"Calc Settings",hasChildren:true},
-  {label:"System Settings",hasChildren:true},
-  {label:"Reset",hasChildren:true},
-  {label:"Get Started"}
- ],item=>{
-  if(["Calc Settings","System Settings","Reset"].includes(item.label))openSettingsCategory(item.label);
-  else openMenu("",[{label:"CASIO fx-83GT CW"},{label:"User Guide"}],()=>{});
+ openMenu("",[{label:"Calc Settings",children:true},{label:"System Settings",children:true},{label:"Reset",children:true}],item=>{
+  if(item.label==="Calc Settings")openMenu("",[
+   {label:"Input/Output",value:inputMode},{label:"Angle Unit",value:angleMode==="DEG"?"Degree":angleMode==="RAD"?"Radian":"Gradian"},
+   {label:"Number Format",value:resultMode},{label:"Fraction Result",value:fractionResult},
+   {label:"Decimal Mark",value:decimalMark},{label:"Digit Separator",value:digitSeparator},{label:"FORMAT Key",value:formatKeyMode}
+  ],choice=>{
+   if(choice.label==="Input/Output")openOptions(["MathI/MathO","MathI/DecimalO","LineI/LineO","LineI/DecimalO"],inputMode,v=>{inputMode=v;});
+   if(choice.label==="Angle Unit")openOptions(["Degree","Radian","Gradian"],angleMode==="DEG"?"Degree":angleMode==="RAD"?"Radian":"Gradian",v=>{angleMode=v==="Degree"?"DEG":v==="Radian"?"RAD":"GRA";});
+   if(choice.label==="Number Format")openOptions(["Norm 1","Norm 2","Fix","Sci"],resultMode,v=>{resultMode=v;});
+   if(choice.label==="Fraction Result")openOptions(["Improper Fraction","Mixed Fraction"],fractionResult,v=>{fractionResult=v;});
+   if(choice.label==="Decimal Mark")openOptions(["Dot","Comma"],decimalMark,v=>{decimalMark=v;});
+   if(choice.label==="Digit Separator")openOptions(["On","Off"],digitSeparator,v=>{digitSeparator=v;});
+   if(choice.label==="FORMAT Key")openOptions(["Format Menu","S↔D Decimal"],formatKeyMode,v=>{formatKeyMode=v;});
+  });
+  if(item.label==="System Settings")openMenu("",[
+   {label:"Contrast"},{label:"Auto Power Off",value:"10 Min."},{label:"MultiLine Font",value:"Normal Font"},{label:"QR Code",value:"Version 11"}
+  ],v=>{
+   if(v.label==="Auto Power Off")openOptions(["10 Min.","60 Min."],"10 Min.",()=>{});
+   else if(v.label==="MultiLine Font")openOptions(["Normal Font","Small Font"],"Normal Font",()=>{});
+   else if(v.label==="QR Code")openOptions(["Version 3","Version 11"],"Version 11",()=>{});
+   else openOptions(["1","2","3","4","5","6","7","8","9"],"5",()=>{});
+  });
+  if(item.label==="Reset")openMenu("",[{label:"Settings & Data"},{label:"Variable Memory"},{label:"Initialize All"}],v=>{
+   openMenu("",[{label:"No"},{label:"Yes"}],confirm=>{
+    if(confirm.label!=="Yes")return;
+    if(v.label!=="Settings & Data"){variables={A:0,B:0,C:0,D:0,E:0,F:0,x:0,y:0,z:0};memory=0;}
+    if(v.label!=="Variable Memory"){angleMode="DEG";inputMode="MathI/MathO";resultMode="Norm 2";fractionResult="Improper Fraction";decimalMark="Dot";digitSeparator="On";formatKeyMode="Format Menu";history=[];expression="";answer=null;answerDisplay="";}
+    functions={f:"",g:""};persist();
+   });
+  });
  });
 }
-function homeMenu(){menu=null;menuStack=[];homeOpen=true;homeIndex=0;history=[];historyCursor=-1;expression="";answer=null;answerDisplay="";lastExpression="";cursor=0;lastWasResult=false;shift=false;render();}
-function chooseHome(){
- const app=homeApps[homeIndex]?.label;
- homeOpen=false;menu=null;menuStack=[];
- if(app==="Calculate"){expression="";answer=null;answerDisplay="";history=[];historyCursor=-1;cursor=0;lastWasResult=false;render();return;}
- const items=app==="Statistics"?["1-Variable","2-Variable","Regression","Data Editor"]:
-  app==="Table"?["Define f(x)/g(x)","Table Type","Start","End","Step"]:
-  app==="Ratio"?["A:B = C:D","Solve A","Solve B","Solve C","Solve D"]:
-  ["Dice Roll","Coin Toss","Number Line","Circle"];
- openMenu("",items.map(label=>({label,hasChildren:true})),item=>{
-  openMenu("",[{label:item.label},{label:"This app uses its own calculation screen"}],()=>{});
- });
+function beginEditor(kind,name){
+ const returnState={
+  expression,answer,answerDisplay,lastExpression,lastWasResult,cursor,
+  menu,frames:menuFrames.slice(),index:menuIndex,scroll:menuScroll
+ };
+ editorReturn=returnState;
+ editor={kind,name,prefix:kind==="variable"?name+" = ":""+name+"(x) = "};
+ expression="";answer=null;answerDisplay="";lastWasResult=false;cursor=0;activeTemplate=null;menu=null;menuFrames=[];
+ render();
 }
 function variableMenu(){
- openMenu("",Object.keys(variables).map(label=>({label:label+" = "+fmt(variables[label]),name:label})),v=>append(v.name));
+ const names=["A","B","C","D","E","F","x","y","z"];
+ openMenu("",names.map(name=>({label:name+" =",value:fmt(variables[name]||0),name})),item=>{
+  const options=[{label:"Recall"},{label:"Edit"}];
+  if(answer!==null&&typeof answer==="number")options.push({label:"Store"});
+  openMenu("",options,choice=>{
+   if(choice.label==="Recall"){
+    menu=null;menuFrames=[];append(item.name);render();
+   }else if(choice.label==="Edit")beginEditor("variable",item.name);
+   else if(choice.label==="Store"){
+    variables[item.name]=ansMemory;persist();menu=null;menuFrames=[];render();
+   }
+  });
+ });
+}
+function functionMenu(){
+ openMenu("",[{label:"Define f(x)"},{label:"Define g(x)"},{label:"f(x)"},{label:"g(x)"}],item=>{
+  if(item.label==="Define f(x)")beginEditor("function","f");
+  else if(item.label==="Define g(x)")beginEditor("function","g");
+  else{menu=null;menuFrames=[];insertFunction(item.label[0]);render();}
+ });
 }
 function catalogMenu(){
- const categories=["Func Analysis","Probability","Numeric Calc","Angle/Coord/Sexa","Hyperbolic/Trig","Others"];
- const data={
-  "Func Analysis":["logab(","log(","ln("],
-  "Probability":["%","!","nPr(","nCr(","rand(","randInt("],
-  "Numeric Calc":["gcd(","lcm(","abs(","round(","floor(","ceil(","Rnd("],
-  "Angle/Coord/Sexa":["°","r","g","Rec(","Pol(","DMS"],
-  "Hyperbolic/Trig":["sin(","cos(","tan(","asin(","acos(","atan(","sinh(","cosh(","tanh("],
-  "Others":["Ans","π","e","√(","∛(","x√(","x⁻¹","x²","x³","^(","−",",","(",")"]
- };
- openMenu("",categories.map(label=>({label,hasChildren:true})),item=>{
-  const commands=data[item.label].map(label=>({label}));
-  openMenu("",commands,v=>{
-   menu=null;menuStack=[];
-   if(v.label==="Ans")append("ans");
-   else if(v.label==="π")append("pi");
-   else if(v.label==="e")append("e");
-   else if(v.label==="√(")insertFunction("sqrt");
-   else if(v.label==="∛(")insertFunction("cbrt");
-   else if(v.label==="x⁻¹")append("^(-1)");
-   else if(v.label==="x²")append("^2");
-   else if(v.label==="x³")append("^3");
-   else if(v.label==="^(")append("^(");
-   else if(v.label==="x√(")append("root(");
-   else if(v.label==="DMS")append("dms(");
-   else append(v.label);
+ const groups=[
+  {label:"Basic Math",values:["√(","∛(","log(","ln(","π","e","Ans"]},
+  {label:"Probability",values:["Ran#","RanInt#(","nPr(","nCr("]},
+  {label:"Numeric Calc",values:["Abs(","Rnd(","gcd(","lcm("]},
+  {label:"Angle/Coord",values:["°","sin(","cos(","tan(","sin⁻¹(","cos⁻¹(","tan⁻¹("]},
+  {label:"Hyperbolic/Trig",values:["sinh(","cosh(","tanh("]},
+  {label:"Others",values:["f(x)","g(x)","!","%"]}
+ ];
+ openMenu("",groups.map(g=>({label:g.label,children:true,items:g.values.map(label=>({label}))})),group=>{
+  openMenu("",group.items,item=>{
+   const v=item.label;menu=null;menuFrames=[];
+   if(v==="√(")insertSquareRoot();else if(v==="∛(")insertNthRoot();
+   else if(v==="Ran#")insertTemplate("ran()","ran",5);
+   else if(v==="RanInt#(")insertRanInt();
+   else if(v==="Ans")append("ans");
+   else if(v==="π")append("pi");
+   else if(v==="°")append("°");
+   else if(v==="sin⁻¹(")insertFunction("asin");
+   else if(v==="cos⁻¹(")insertFunction("acos");
+   else if(v==="tan⁻¹(")insertFunction("atan");
+   else if(v==="f(x)"||v==="g(x)")insertFunction(v[0]);
+   else append(v.replace("(","")+"()");
    render();
   });
  });
 }
-function shiftedCatalogMenu(){
- const common=["π","e","sqrt(","cbrt(","sin(","cos(","tan(","log(","ln(","gcd(","lcm(","nPr(","nCr("];
- openMenu("",common.map(label=>({label})),v=>append(v.label==="π"?"pi":v.label));
+function formatMenu(){
+ if(answer===null||typeof answer!=="number")return;
+ const options=["Standard","Decimal","Recurring Decimal","Improper Fraction","Mixed Fraction","ENG Notation","Sexagesimal"];
+ openMenu("",options.map(label=>({label,value:""})),item=>{
+  if(item.label==="Standard")answerDisplay=standardResult(answer);
+  if(item.label==="Decimal")answerDisplay=fmt(answer);
+  if(item.label==="Recurring Decimal")answerDisplay=recurringDecimal(answer);
+  if(item.label==="Improper Fraction"){const p=fractionParts(answer);answerDisplay=p[0]+"/"+p[1];}
+  if(item.label==="Mixed Fraction")answerDisplay=mixedFraction(answer);
+  if(item.label==="ENG Notation"){
+   const exponent=Number.isFinite(answer)&&answer!==0?Math.floor(Math.log10(Math.abs(answer))/3)*3:0;
+   answerDisplay=fmt(answer/Math.pow(10,exponent))+" × 10^"+exponent;
+  }
+  if(item.label==="Sexagesimal")answerDisplay=sexagesimal(answer);
+  menu=null;menuFrames=[];persist();render();
+ });
 }
 function memoryMenu(){
- openMenu("",[
-  {label:"M = "+fmt(memory)},
-  {label:"M+"},
-  {label:"M−"},
-  {label:"MR"},
-  {label:"MC"}
- ],v=>{
-  if(v.label==="M+")memory+=Number(ansMemory);
-  if(v.label==="M−")memory-=Number(ansMemory);
-  if(v.label==="MR")append(String(memory));
+ openMenu("",[{label:"M = "+fmt(memory)},{label:"M+"},{label:"M−"},{label:"MR"},{label:"MC"}],v=>{
+  if(v.label==="M+")memory+=ansMemory;
+  if(v.label==="M−")memory-=ansMemory;
+  if(v.label==="MR"){menu=null;menuFrames=[];append(String(memory));}
   if(v.label==="MC")memory=0;
+  persist();render();
  });
 }
 function toolsMenu(){
- openMenu("",[{label:"Undo"}],()=>{
-  const old=undoStack.pop();
-  if(old){expression=old.expression;answer=old.answer;answerDisplay=old.answerDisplay;cursor=old.cursor;lastWasResult=old.lastWasResult;}
+ openMenu("",[{label:"Undo"},{label:"Memory"},{label:"Variable List"}],v=>{
+  if(v.label==="Undo"){const old=undoStack.pop();if(old){expression=old.expression;answer=old.answer;answerDisplay=old.answerDisplay;cursor=old.cursor;lastWasResult=old.lastWasResult;}}
+  if(v.label==="Memory")memoryMenu();
+  if(v.label==="Variable List")variableMenu();
  });
 }
-function standardResult(value){
- if(!Number.isFinite(value))return String(value);
- const parts=fractionParts(value);
- if(parts[1]===1)return fmt(value);
- if(Math.abs(parts[0]/parts[1]-value)<1e-10)return parts[0]+"/"+parts[1];
- return fmt(value);
+function historyMove(direction){
+ if(!history.length)return;
+ if(direction==="UP")historyCursor=historyCursor<0?0:Math.min(history.length-1,historyCursor+1);
+ else historyCursor=historyCursor<=0?-1:historyCursor-1;
+ render();
 }
-function fractionParts(value){
- const sign=value<0?-1:1;value=Math.abs(value);
- let h1=1,h2=0,k1=0,k2=1,b=value;
- for(let i=0;i<24;i++){
-  const a=Math.floor(b),h=a*h1+h2,k=a*k1+k2;
-  if(k>100000||Math.abs(value-h/k)<1e-10)return [sign*h,k];
-  h2=h1;h1=h;k2=k1;k1=k;
-  const f=b-a;if(f===0)break;b=1/f;
- }
- return [sign*Math.round(value*100000),100000];
-}
-function recurringDecimal(value){
- const [signedNum,den]=fractionParts(value);
- const sign=signedNum<0?"−":"";
- const num=Math.abs(signedNum),whole=Math.floor(num/den);
- let remainder=num%den,digits="",seen={};
- while(remainder&&digits.length<40){
-  if(seen[remainder]!==undefined){
-   const split=seen[remainder];
-   digits=digits.slice(0,split)+"("+digits.slice(split)+")";
-   break;
-  }
-  seen[remainder]=digits.length;
-  remainder*=10;
-  digits+=String(Math.floor(remainder/den));
-  remainder%=den;
- }
- if(!digits)return sign+whole;
- return sign+whole+"."+digits;
-}
-function primeFactors(n){
- const sign=n<0?"−":"";
- n=Math.abs(Math.trunc(n));if(!n)return "0";
- const factors=[];for(let d=2;d*d<=n;d++){let count=0;while(n%d===0){n/=d;count++;}if(count)factors.push(d+(count>1?"^"+count:""));}
- if(n>1)factors.push(String(n));return sign+(factors.join(" × ")||"1");
-}
-function standardFormMenu(){
- if(typeof answer!=="number"||!Number.isFinite(answer))return;
- openMenu("",[{label:"Standard Form"},{label:"Engineering Notation"}],v=>{
-  if(v.label==="Standard Form")answerDisplay=answer.toExponential(3).replace("e"," × 10^");
-  else{
-   const exp=Math.floor(Math.log10(Math.abs(answer))/3)*3;
-   answerDisplay=fmt(answer/Math.pow(10,exp))+" × 10^"+exp;
-  }
-  render();
- });
-}
-function formatMenu(){
- if(typeof answer!=="number"||!Number.isFinite(answer))return;
- const [num,den]=fractionParts(answer);
- const items=[{label:"Standard"},{label:"Decimal"},{label:"Standard Form"},{label:"ENG Notation"},{label:"Sexagesimal"}];
- if(Number.isInteger(answer))items.push({label:"Prime Factor"});
- if(Math.abs(num/den-answer)<1e-8){
-  items.push({label:"Recurring Decimal"},{label:"Improper Fraction"},{label:"Mixed Fraction"});
- }
- openMenu("",items,v=>{
-  if(v.label==="Standard")answerDisplay=standardResult(answer);
-  if(v.label==="Decimal")answerDisplay=fmt(answer);
-  if(v.label==="Standard Form")answerDisplay=answer.toExponential(3).replace("e"," × 10^");
-  if(v.label==="Prime Factor")answerDisplay=primeFactors(answer);
-  if(v.label==="Recurring Decimal")answerDisplay=recurringDecimal(answer);
-  if(v.label==="Improper Fraction")answerDisplay=num+"/"+den;
-  if(v.label==="Mixed Fraction"){
-   const whole=Math.trunc(num/den),rem=Math.abs(num%den);
-   answerDisplay=rem?whole+" "+rem+"/"+den:String(whole);
-  }
-  if(v.label==="ENG Notation"){
-   const exp=Math.floor(Math.log10(Math.abs(answer))/3)*3;
-   answerDisplay=fmt(answer/Math.pow(10,exp))+" × 10^"+exp;
-  }
-  if(v.label==="Sexagesimal"){
-   const sign=answer<0?"−":"";const a=Math.abs(answer),d=Math.floor(a),mFloat=(a-d)*60,m=Math.floor(mFloat),s=(mFloat-m)*60;
-   answerDisplay=sign+d+"° "+m+"′ "+Number(s.toFixed(3))+"″";
-  }
-  render();
- });
+function homeMenu(){menu=null;menuFrames=[];homeOpen=true;homeIndex=0;shift=false;render();}
+function chooseHome(){
+ const app=homeApps[homeIndex].label;homeOpen=false;
+ if(app==="Calculate"){expression="";answer=null;answerDisplay="";lastExpression="";lastWasResult=false;historyCursor=-1;cursor=0;activeTemplate=null;render();return;}
+ openMenu("",[{label:"This app is not available in Calculate mode"}],()=>{});
 }
 function applyShift(label){
- const variableMap={"4":"A","5":"B","6":"C","1":"D","2":"E","3":"F","0":"x",".":"y","×10ˣ":"z"};
- if(variableMap[label]){append(variableMap[label]);return true;}
+ if(label==="AC"){powerDown();return true;}
+ if(label==="sin"||label==="cos"||label==="tan"){insertFunction({sin:"asin",cos:"acos",tan:"atan"}[label]);return true;}
+ if(label==="SQUARE ROOT"){insertNthRoot();return true;}
+ if(label==="SQUARE"){insertRecurring();return true;}
+ if(label==="LOG"){insertFunction("ln");return true;}
+ if(label==="−"){append("~");return true;}
+ if(label==="+"){append("°");return true;}
+ if(label==="POWER"){append("^(-1)");return true;}
  if(label==="7"){append("pi");return true;}
  if(label==="8"){append("e");return true;}
- if(label==="sin"){insertFunction("asin");return true;}
- if(label==="cos"){insertFunction("acos");return true;}
- if(label==="tan"){insertFunction("atan");return true;}
- if(label==="SQUARE ROOT"){insertFunction("cbrt");return true;}
- if(label==="SQUARE"){append("^3");return true;}
- if(label==="POWER"){append("^(-1)");return true;}
- if(label==="LOG"){insertFunction("ln");return true;}
+ if(label==="5"||label==="4"||label==="6"||label==="1"||label==="2"||label==="3"||label==="0"||label==="."){
+  const vars={"5":"B","4":"A","6":"C","1":"D","2":"E","3":"F","0":"x",".":"y"};
+  append(vars[label]);return true;
+ }
+ if(label==="×10ˣ"){append("z");return true;}
  if(label==="FRACTION"){insertFraction();return true;}
- if(label==="CATALOG"){shiftedCatalogMenu();return true;}
+ if(label==="CATALOG"){catalogMenu();return true;}
  if(label==="FORMAT"){formatMenu();return true;}
- if(label==="x"){openMenu("",[{label:"Display QR Code"},{label:"QR Code settings"}],()=>{});return true;}
- if(label==="DELETE"){overwriteMode=!overwriteMode;return true;}
- if(label==="AC"){powerOff=true;expression="";answer=null;answerDisplay="";render();return true;}
- if(label==="("){append(",");return true;}
- if(label===")"){append(";");return true;}
- if(label==="−"){append("(-");return true;}
  return false;
 }
 function press(label){
  if(label==="SHIFT"){shift=!shift;render();return;}
  const shifted=shift;shift=false;
+ if(powerOff){if(label==="ON")powerOn();return;}
  if(shifted&&applyShift(label)){render();return;}
- if(powerOff&&label!=="ON")return;
  if(label==="ON"){powerOn();return;}
+ if(editor){
+  if(label==="EXE"||label==="OK"){calculate();return;}
+  if(label==="AC"){expression="";cursor=0;render();return;}
+  if(label==="DELETE"){deleteAtom();return;}
+  if(label==="LEFT"){moveCursor(-1);return;}
+  if(label==="RIGHT"){moveCursor(1);return;}
+  if(/^[0-9]$/.test(label)||[".","+","−","×","÷","(",")"].includes(label)){append(label==="−"?"-":label==="×"?"*":label==="÷"?"/":label);return;}
+  if(label==="FRACTION"){insertFraction();return;}
+  if(label==="POWER"){insertPower();return;}
+  if(label==="SQUARE ROOT"){insertSquareRoot();return;}
+  if(label==="sin"||label==="cos"||label==="tan"){insertFunction(label);return;}
+  return;
+ }
  if(homeOpen){
-  if(label==="LEFT")homeIndex=Math.max(0,homeIndex-1);
-  else if(label==="RIGHT")homeIndex=Math.min(4,homeIndex+1);
-  else if(label==="UP")homeIndex=Math.max(0,homeIndex-3);
-  else if(label==="DOWN")homeIndex=Math.min(4,homeIndex+3);
+  if(label==="LEFT")homeIndex=(homeIndex+4)%5;
+  else if(label==="RIGHT")homeIndex=(homeIndex+1)%5;
+  else if(label==="UP")homeIndex=(homeIndex+3)%5;
+  else if(label==="DOWN")homeIndex=(homeIndex+2)%5;
   else if(label==="OK"||label==="EXE")chooseHome();
   else if(label==="HOME"||label==="BACK"||label==="AC"){homeOpen=false;render();}
   render();return;
  }
  if(menu){
   if(label==="HOME"){homeMenu();return;}
-  if(label==="UP")menuIndex=clamp(menuIndex-1,0,menu.items.length-1);
-  else if(label==="DOWN")menuIndex=clamp(menuIndex+1,0,menu.items.length-1);
+  if(label==="UP")moveMenu("UP");
+  else if(label==="DOWN")moveMenu("DOWN");
   else if(label==="SCROLL UP")pageMenu("UP");
   else if(label==="SCROLL DOWN")pageMenu("DOWN");
   else if(label==="LEFT"||label==="BACK"||label==="AC")closeMenu();
   else if(label==="RIGHT"||label==="OK"||label==="EXE")chooseMenu();
-  else if(/^[1-4]$/.test(label))chooseMenu(menuScroll+Number(label)-1);
-  render();return;
+  return;
  }
  if(label==="HOME"){homeMenu();return;}
  if(label==="SETTINGS"){settingsMenu();return;}
- if(label==="BACK"){if(expression){saveUndo();expression=expression.slice(0,Math.max(0,cursor-1))+expression.slice(cursor);cursor=Math.max(0,cursor-1);answer=null;}else clearEntry();render();return;}
- if(label==="UP"){if(moveFractionCursor("UP"))render();else scrollHistory("UP");return;}
- if(label==="DOWN"){if(moveFractionCursor("DOWN"))render();else scrollHistory("DOWN");return;}
+ if(label==="BACK"){if(historyCursor>=0){historyCursor=-1;render();}return;}
+ if(label==="UP"){if(moveTemplateVertical("UP"))return;historyMove("UP");return;}
+ if(label==="DOWN"){if(moveTemplateVertical("DOWN"))return;historyMove("DOWN");return;}
  if(label==="LEFT"){moveCursor(-1);return;}
  if(label==="RIGHT"){moveCursor(1);return;}
  if(label==="VARIABLE"){variableMenu();return;}
+ if(label==="FUNCTION"){functionMenu();return;}
  if(label==="CATALOG"){catalogMenu();return;}
  if(label==="TOOLS"){toolsMenu();return;}
- if(label==="FUNCTION"){openMenu("",[{label:"f(x)"},{label:"g(x)"}],v=>{openMenu("",[{label:"Enter defining equation for "+v.label}],()=>{});});return;}
  if(label==="OK"||label==="EXE"){calculate();return;}
  if(label==="AC"){clearEntry();return;}
- if(label==="DELETE"){
-  if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;}
-  saveUndo();if(lastWasResult){expression=lastExpression;lastWasResult=false;cursor=expression.length;}
-  if(overwriteMode&&cursor<expression.length)expression=expression.slice(0,cursor)+expression.slice(cursor+1);
-  else{expression=expression.slice(0,Math.max(0,cursor-1))+expression.slice(cursor);cursor=Math.max(0,cursor-1);}
-  answer=null;answerDisplay="";render();return;
- }
- if(label==="FORMAT"){
-  if(typeof answer!=="number")return;
-  const [n,d]=fractionParts(answer);
-  if(answerDisplay===fmt(answer)||answerDisplay===String(answer))answerDisplay=(d===1?fmt(answer):n+"/"+d);
-  else answerDisplay=fmt(answer);
-  render();return;
- }
+ if(label==="DELETE"){deleteAtom();return;}
+ if(label==="FORMAT"){if(formatKeyMode==="S↔D Decimal"&&answer!==null){answerDisplay=answerDisplay===fmt(answer)?standardResult(answer):fmt(answer);render();}else formatMenu();return;}
  if(label==="FRACTION"){insertFraction();return;}
- if(label==="SQUARE ROOT"){insertFunction("sqrt");return;}
- if(label==="POWER"){
-  if(lastWasResult){expression=String(ansMemory);cursor=expression.length;lastWasResult=false;}
-  append("^()");cursor=Math.max(0,cursor-1);render();return;
- }
+ if(label==="SQUARE ROOT"){insertSquareRoot();return;}
+ if(label==="POWER"){insertPower();return;}
  if(label==="SQUARE"){append("^2");return;}
  if(label==="LOG"){insertFunction("log");return;}
  if(label==="sin"||label==="cos"||label==="tan"){insertFunction(label);return;}
  if(label==="ANS"){append("ans");return;}
  if(label==="x"){append("x");return;}
- if(label==="×10ˣ"){append("×10^");return;}
- if(label==="×"||label==="÷"||label==="+"||label==="−"||label==="("||label===")"||label==="."||/^[0-9]$/.test(label)){append(label);return;}
+ if(label==="×10ˣ"){append("*10^");return;}
+ if(label==="("||label===")"||label==="."||label==="+"||label==="−"||label==="×"||label==="÷"||/^[0-9]$/.test(label)){
+  append(label==="×"?"*":label==="÷"?"/":label==="−"?"-":label);return;
+ }
 }
-
 for(const [label,x,y] of keyLayout){
  const button=document.createElement("button");button.type="button";button.className="key";button.setAttribute("aria-label",label);button.title=label;
  button.style.left=(x/435*100)+"%";button.style.top=(y/913*100)+"%";
@@ -765,6 +845,7 @@ document.addEventListener("keydown",e=>{
  else if(e.key==="("||e.key===")"){e.preventDefault();press(e.key);}
  else if(e.key==="^"){e.preventDefault();press("POWER");}
 });
+loadState();
 render();
 
 </script>
