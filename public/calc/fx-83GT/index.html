@@ -162,6 +162,7 @@ function renderExpression(raw,caret){
  s=s.replace(/frac\(([^,()]*)\,([^()]*)\)/g,'<span class="frac"><span class="numerator">$1</span><span class="fraction-bar"></span><span class="denominator">$2</span></span>');
  s=s.replace(/sqrt\(([^()]*)\)/g,'<span class="root"><span class="radical">√</span><span class="radicand">$1</span></span>');
  s=s.replace(/cbrt\(([^()]*)\)/g,'<span class="root"><span class="radical">∛</span><span class="radicand">$1</span></span>');
+ s=s.replace(/\^\(([^()]*)\)/g,'<sup>$1</sup>');
  s=s.replace(/\^([0-9]+)/g,'<sup>$1</sup>');
  return s.replaceAll("\uE000",'<span class="caret"></span>');
 }
@@ -575,10 +576,30 @@ function fractionParts(value){
  }
  return [sign*Math.round(value*100000),100000];
 }
+function recurringDecimal(value){
+ const [signedNum,den]=fractionParts(value);
+ const sign=signedNum<0?"−":"";
+ const num=Math.abs(signedNum),whole=Math.floor(num/den);
+ let remainder=num%den,digits="",seen={};
+ while(remainder&&digits.length<40){
+  if(seen[remainder]!==undefined){
+   const split=seen[remainder];
+   digits=digits.slice(0,split)+"("+digits.slice(split)+")";
+   break;
+  }
+  seen[remainder]=digits.length;
+  remainder*=10;
+  digits+=String(Math.floor(remainder/den));
+  remainder%=den;
+ }
+ if(!digits)return sign+whole;
+ return sign+whole+"."+digits;
+}
 function primeFactors(n){
+ const sign=n<0?"−":"";
  n=Math.abs(Math.trunc(n));if(!n)return "0";
  const factors=[];for(let d=2;d*d<=n;d++){let count=0;while(n%d===0){n/=d;count++;}if(count)factors.push(d+(count>1?"^"+count:""));}
- if(n>1)factors.push(String(n));return factors.join(" × ")||"1";
+ if(n>1)factors.push(String(n));return sign+(factors.join(" × ")||"1");
 }
 function standardFormMenu(){
  if(typeof answer!=="number"||!Number.isFinite(answer))return;
@@ -604,7 +625,7 @@ function formatMenu(){
   if(v.label==="Decimal")answerDisplay=fmt(answer);
   if(v.label==="Standard Form")answerDisplay=answer.toExponential(3).replace("e"," × 10^");
   if(v.label==="Prime Factor")answerDisplay=primeFactors(answer);
-  if(v.label==="Recurring Decimal")answerDisplay=fmt(answer);
+  if(v.label==="Recurring Decimal")answerDisplay=recurringDecimal(answer);
   if(v.label==="Improper Fraction")answerDisplay=num+"/"+den;
   if(v.label==="Mixed Fraction"){
    const whole=Math.trunc(num/den),rem=Math.abs(num%den);
