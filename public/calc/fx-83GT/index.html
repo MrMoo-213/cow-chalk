@@ -203,7 +203,7 @@ function fractionParts(value){
 }
 function exactFraction(value,maxDen=100000){
  const [n,d]=fractionParts(value);
- return Math.abs(n/d-value)<1e-10&&d<=maxDen?[n,d]:null;
+ return Math.abs(n/d-value)<1e-12&&d<=maxDen?[n,d]:null;
 }
 function coefficientText(n,d){
  const sign=n<0?"−":"",abs=Math.abs(n);
