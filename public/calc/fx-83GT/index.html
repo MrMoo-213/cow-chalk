@@ -201,11 +201,36 @@ function fractionParts(value){
  }
  return [sign*Math.round(value*100000),100000];
 }
+function exactFraction(value,maxDen=100000){
+ const [n,d]=fractionParts(value);
+ return Math.abs(n/d-value)<1e-10&&d<=maxDen?[n,d]:null;
+}
+function coefficientText(n,d){
+ const sign=n<0?"−":"",abs=Math.abs(n);
+ if(d===1)return sign+(abs===1?"":abs);
+ if(abs===1)return sign+"1/"+d;
+ return sign+abs+"/"+d;
+}
 function standardResult(value){
  if(!Number.isFinite(value))return String(value);
- const [n,d]=fractionParts(value);
- if(d===1)return fmt(value);
- if(Math.abs(n/d-value)<1e-10)return n+"/"+d;
+ const rational=exactFraction(value);
+ if(rational){
+  if(rational[1]===1)return fmt(value);
+  return fractionResult==="Mixed Fraction"?mixedFraction(value):rational[0]+"/"+rational[1];
+ }
+ const piCoefficient=exactFraction(value/Math.PI,1000);
+ if(piCoefficient&&Math.abs(piCoefficient[0])<=1000){
+  const n=piCoefficient[0],d=piCoefficient[1],coefficient=Math.abs(n)===1?"":Math.abs(n);
+  if(d===1)return (n<0?"−":"")+coefficient+"π";
+  return (n<0?"−":"")+coefficient+"π/"+d;
+ }
+ for(let radicand=2;radicand<=1000;radicand++){
+  const coefficient=exactFraction(value/Math.sqrt(radicand),100);
+  if(coefficient&&Math.abs(coefficient[0])<=1000){
+   const coeff=coefficientText(coefficient[0],coefficient[1]);
+   return (coeff==="1"?"":coeff==="−1"?"−":coeff)+"√"+radicand;
+  }
+ }
  return fmt(value);
 }
 function mixedFraction(value){
