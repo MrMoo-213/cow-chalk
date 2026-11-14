@@ -76,6 +76,9 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 #screen.powered-off #indicators{visibility:hidden}
 #screen.powered-off #screenMain{visibility:hidden}
 #screenPanel .menuRow.blank{visibility:hidden}
+#screenPanel.statsEditor{bottom:25%}
+#brand{flex-direction:column;gap:2px}
+#brand span{font:400 clamp(5px,.75vw,8px)/1 Arial,sans-serif;letter-spacing:.02em}
 </style>
 </head>
 <body>
@@ -466,15 +469,25 @@ function runMathBoxSimulation(){
 }
 function handleAppArrow(label){
  if(appState.type==="Statistics"){
-  if(label==="LEFT"||label==="RIGHT"){appState.column=appState.paired?(label==="RIGHT"?1:0):0;appState.row=0;appState.inputPrompt=(appState.column===0?"x":"y")+"1 = ";appState.inputTarget="stats";}
-  else if(label==="UP"){appState.row=Math.max(0,appState.row-1);appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
-  else if(label==="DOWN"){appState.row++;appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
+  if(label==="LEFT"||label==="RIGHT"){appState.column=appState.paired?(label==="RIGHT"?1:0):0;appState.row=0;appState.rowStart=0;appState.inputPrompt=(appState.column===0?"x":"y")+"1 = ";appState.inputTarget="stats";}
+  else if(label==="UP"){appState.row=Math.max(0,appState.row-1);if(appState.row<appState.rowStart)appState.rowStart=appState.row;appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
+  else if(label==="DOWN"){appState.row++;if(appState.row>=appState.rowStart+4)appState.rowStart=appState.row-3;appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
   render();return;
  }
  if(appState.type==="Math Box"&&appState.mode==="Number Line"&&label==="RIGHT"&&appState.lines.length<3){beginAppInput("Inequality "+(appState.lines.length+1)+" = ","line");return;}
-  if(appState.type==="Table"&&appState.generated&&(label==="UP"||label==="DOWN")){appState.tableRow=clamp((appState.tableRow||0)+(label==="DOWN"?1:-1),0,Math.max(0,appState.rows.length-1));render();return;}
-  if(appState.type==="Math Box"&&appState.result&&(label==="UP"||label==="DOWN")){let max=appState.rows.length-1;if(appState.resultType==="Relative Freq"){const heads=appState.rows.map(r=>r.reduce((a,b)=>a+b,0));max=new Set(heads).size-1;}appState.tableRow=clamp((appState.tableRow||0)+(label==="DOWN"?1:-1),0,Math.max(0,max));render();return;}
+ if(appState.type==="Table"&&appState.generated&&(label==="UP"||label==="DOWN")){
+  const max=appState.rows.length-1;
+  if(max>=0){appState.tableRow=(appState.tableRow+(label==="DOWN"?1:-1)+max+1)%(max+1);if(appState.tableRow<appState.tableStart)appState.tableStart=appState.tableRow;else if(appState.tableRow>=appState.tableStart+4)appState.tableStart=appState.tableRow-3;}
+  render();return;
+ }
+ if(appState.type==="Math Box"&&appState.result&&(label==="UP"||label==="DOWN")){
+  let max=appState.rows.length-1;
+  if(appState.resultType==="Relative Freq"){const heads=appState.rows.map(r=>r.reduce((a,b)=>a+b,0));max=new Set(heads).size-1;}
+  if(max>=0){appState.tableRow=(appState.tableRow+(label==="DOWN"?1:-1)+max+1)%(max+1);if(appState.tableRow<appState.tableStart)appState.tableStart=appState.tableRow;else if(appState.tableRow>=appState.tableStart+4)appState.tableStart=appState.tableRow-3;}
+  render();return;
+ }
 }
+
 function handleAppBack(){
  if(appState.type==="Math Box"&&appState.result){appState.result=false;openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{menu=null;menuFrames=[];appState.resultType=item.label;appState.result=true;render();});return;}
  if(appState.type==="Math Box"){
@@ -490,7 +503,7 @@ function startMathBox(mode){
  expression="";render();
 }
 function renderAppScreen(){
- expressionEl.style.display="";answerEl.style.display="";panelEl.className="visible app";
+ expressionEl.style.display="";answerEl.style.display="";panelEl.className="visible app"+(appState.type==="Statistics"&&!appState.showResults?" statsEditor":"");
  expressionEl.innerHTML=appState.inputPrompt?escapeHtml(appState.inputPrompt)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):appState.type==="Statistics"?"":appState.type==="Ratio"?"":appState.type==="Math Box"&&appState.mode==="Circle"?"Angle = "+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):"";
  answerEl.innerHTML="";
  let html="";
@@ -571,7 +584,8 @@ function render(){
  if(editor){
   const prefix=editor.prefix;
   expressionEl.innerHTML=escapeHtml(prefix)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>');
-  answerEl.innerHTML="";
+  expressionEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?"":(input||(appState.type==="Math Box"&&appState.mode==="Circle"?"Angle = "+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):""));
+  answerEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?input:"";
   return;
  }
  let shownExpression=expression,shownAnswer=answer;
@@ -647,13 +661,16 @@ function moveTemplateVertical(direction){
  if(!activeTemplate)return false;
  const start=activeTemplate.start,kind=activeTemplate.kind;
  if(kind==="fraction"||kind==="root"||kind==="randint"){
-  const comma=expression.indexOf(",",start);
+  const open=start+kind.length,close=matchingParen(expression,open,expression.length);
+  if(close<0)return false;
+  const comma=findTopComma(expression,open+1,close);
   if(comma<0)return false;
   if(direction==="DOWN"&&cursor<=comma){cursor=comma+1;render();return true;}
-  if(direction==="UP"&&cursor>comma){cursor=start+(kind==="fraction"?5:kind==="root"?5:8);render();return true;}
+  if(direction==="UP"&&cursor>comma){cursor=comma;render();return true;}
  }
  return false;
 }
+
 function deleteWhole(start,end){
  expression=expression.slice(0,start)+expression.slice(end);
  cursor=start;activeTemplate=null;answer=null;answerDisplay="";
