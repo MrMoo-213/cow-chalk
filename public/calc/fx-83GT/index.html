@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Casio fx-83GT CW+</title>
+<link rel="icon" href="/assets/pictures/favicon1.png">
+<style>
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#fff;overscroll-behavior:none}
+body{display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+#calculator{position:relative;display:block;height:min(100dvh,calc(100vw * 899 / 435));width:min(100vw,calc(100dvh * 435 / 899));aspect-ratio:435/899;flex:none}
+#calculator img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
+#screen{position:absolute;left:12.4%;top:14.8%;width:77.5%;height:15.9%;display:flex;align-items:center;justify-content:center;padding:4px;background:#101010;color:#fff;font:600 clamp(10px,2.4vw,18px)/1.2 Arial,sans-serif;text-align:center;overflow:hidden;pointer-events:none}
+#keys{position:absolute;inset:0}
+.key{position:absolute;transform:translate(-50%,-50%);border:0;border-radius:50%;padding:0;background:transparent;color:transparent;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.key:focus-visible{outline:2px solid #2388ff;background:#2388ff33}
+.key:active{background:#2388ff55}
+</style>
+</head>
+<body>
+<div id="calculator" aria-label="Casio fx-83GT CW+ calculator">
+<img src="/assets/pictures/fx-83GT.png" alt="Casio fx-83GT CW+ calculator">
+<div id="screen" aria-live="polite">Press a button</div>
+<div id="keys"></div>
+</div>
+<script>
+const keys=[
+["ON",55,351],["HOME",122,355],["UP",249,357],["SCROLL UP",377,358],
+["SETTINGS",55,418],["BACK",121,418],["LEFT",185,418],["OK",249,418],["RIGHT",314,418],["SCROLL DOWN",377,418],
+["SHIFT",55,482],["VARIABLE",121,482],["FUNCTION",185,482],["DOWN",250,482],["CATALOG",314,482],["TOOLS",377,482],
+["x",55,539],["FRACTION",121,539],["SQUARE ROOT",185,539],["POWER",250,539],["SQUARE",314,539],["LOG",377,539],
+["ANS",55,595],["sin",121,595],["cos",185,595],["tan",250,595],["(",314,595],[")",377,595],
+["7",55,656],["8",140,656],["9",218,656],["DELETE",296,656],["AC",375,656],
+["4",55,722],["5",140,722],["6",218,722],["×",296,722],["÷",375,722],
+["1",55,786],["2",140,786],["3",218,786],["+",296,786],["−",375,786],
+["0",55,851],[".",140,851],["×10ˣ",218,851],["FORMAT",296,851],["EXE",375,851]
+];
+const container=document.getElementById("keys");
+const screen=document.getElementById("screen");
+for(const [label,x,y] of keys){
+ const button=document.createElement("button");
+ button.type="button";
+ button.className="key";
+ button.setAttribute("aria-label",label);
+ button.title=label;
+ button.style.left=(x/435*100)+"%";
+ button.style.top=(y/899*100)+"%";
+ button.style.width=(label==="SCROLL UP"||label==="SCROLL DOWN"?"12":"13")+"%";
+ button.style.height=(label==="SCROLL UP"||label==="SCROLL DOWN"?"7":"6.5")+"%";
+ button.addEventListener("click",()=>{screen.textContent=label+" pressed";});
+ container.appendChild(button);
+}
+</script>
+</body>
+</html>
