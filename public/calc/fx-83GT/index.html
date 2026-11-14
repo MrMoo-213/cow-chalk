@@ -497,15 +497,15 @@ function handleAppBack(){
  appState=null;expression="";homeMenu();
 }
 function startMathBox(mode){
- if(mode==="Dice Roll"||mode==="Coin Toss")appState={type:"Math Box",mode,count:1,attempts:5,rows:[],result:false};
+if(mode==="Dice Roll"||mode==="Coin Toss")appState={type:"Math Box",mode,count:1,attempts:5,rows:[],result:false,tableRow:0,tableStart:0};
  else if(mode==="Number Line")appState={type:"Math Box",mode,lines:[],input:true};
  else appState={type:"Math Box",mode,input:true};
  expression="";render();
 }
 function renderAppScreen(){
  expressionEl.style.display="";answerEl.style.display="";panelEl.className="visible app"+(appState.type==="Statistics"&&!appState.showResults?" statsEditor":"");
- expressionEl.innerHTML=appState.inputPrompt?escapeHtml(appState.inputPrompt)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):appState.type==="Statistics"?"":appState.type==="Ratio"?"":appState.type==="Math Box"&&appState.mode==="Circle"?"Angle = "+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):"";
- answerEl.innerHTML="";
+   expressionEl.innerHTML=escapeHtml(prefix)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>');
+   answerEl.innerHTML="";
  let html="";
  if(appState.type==="Statistics"){
   if(appState.showResults){
@@ -513,11 +513,11 @@ function renderAppScreen(){
   }else{
    const cols=appState.paired?["x","y"]:["x"],rows=[];
    for(let i=0;i<Math.max(4,appState.x.length,appState.y.length);i++)rows.push('<tr><td>'+(i+1)+'</td>'+cols.map((col,j)=>'<td class="'+(appState.row===i&&appState.column===j?"selected":"")+'">'+(appState[col][i]===undefined?"":escapeHtml(fmt(appState[col][i])))+'</td>').join("")+'</tr>');
-   html='<div class="appTitle">Statistics Editor</div><table class="appTable"><tr><th></th>'+cols.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.slice(Math.max(0,appState.row-3),Math.max(0,appState.row-3)+4).join("")+'</table><div class="appNote">Enter a value, then EXE. '+(appState.paired?"Use LEFT/RIGHT to change column.":"")+'</div>';
+    const start=appState.rowStart||0;html='<table class="appTable"><tr><th></th>'+cols.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.slice(start,start+4).map((row,i)=>row.replace("<tr>","<tr class="'+(appState.row===start+i?"selected":"")+'">')).join("")+'</table>';
   }
  }else if(appState.type==="Table"){
   const rows=appState.rows||[];
-  html='<div class="appTitle">Table</div><table class="appTable"><tr><th>x</th>'+(appState.tableType!=="g(x)"?'<th>f(x)</th>':"")+(appState.tableType!=="f(x)"?'<th>g(x)</th>':"")+'</tr>'+rows.slice(Math.max(0,(appState.tableRow||0)-3),Math.max(0,(appState.tableRow||0)-3)+4).map((r,i)=>'<tr class="'+(appState.tableRow===Math.max(0,(appState.tableRow||0)-3)+i?"selected":"")+'"><td>'+fmt(r.x)+'</td>'+(appState.tableType!=="g(x)"?'<td>'+r.f+'</td>':"")+(appState.tableType!=="f(x)"?'<td>'+r.g+'</td>':"")+'</tr>').join("")+'</table><div class="appNote">'+(rows.length?"TOOLS → Table Range / Define f(x)/g(x)":"TOOLS → Define f(x), then Table Range and Generate")+'</div>';
+   const start=appState.tableStart||0;html='<table class="appTable"><tr><th>x</th>'+(appState.tableType!=="g(x)"?'<th>f(x)</th>':"")+(appState.tableType!=="f(x)"?'<th>g(x)</th>':"")+'</tr>'+rows.slice(start,start+4).map((r,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+fmt(r.x)+'</td>'+(appState.tableType!=="g(x)"?'<td>'+r.f+'</td>':"")+(appState.tableType!=="f(x)"?'<td>'+r.g+'</td>':"")+'</tr>').join("")+'</table>';
  }else if(appState.type==="Ratio"){
   const form=appState.equation||"A:B=X:D";
   const labels=form==="A:B=X:D"?["A","B","D"]:["A","B","C"];
@@ -529,8 +529,8 @@ function renderAppScreen(){
     const heads=appState.rows.map(r=>r.reduce((a,b)=>a+b,0));
     if(appState.resultType==="Relative Freq"){
     const counts={};heads.forEach(v=>counts[v]=(counts[v]||0)+1);
-    const entries=Object.keys(counts).sort((a,b)=>Number(a)-Number(b));const start=Math.max(0,(appState.tableRow||0)-3);html+='<table class="appTable"><tr><th>'+(appState.mode==="Dice Roll"?"Sum":"Heads")+'</th><th>Freq</th><th>Rel Fr</th></tr>'+entries.slice(start,start+4).map((k,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+k+'</td><td>'+counts[k]+'</td><td>'+fmt(counts[k]/appState.attempts)+'</td></tr>').join("")+'</table>';
-   }else {const start=Math.max(0,(appState.tableRow||0)-3);html+='<table class="appTable"><tr><th>#</th>'+appState.rows[0].map((_,i)=>'<th>'+String.fromCharCode(65+i)+'</th>').join("")+'<th>'+ (appState.mode==="Dice Roll"?"Sum":"Heads")+'</th></tr>'+appState.rows.slice(start,start+4).map((r,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+(start+i+1)+'</td>'+r.map(v=>'<td>'+(appState.mode==="Dice Roll"?v:v?"●":"○")+'</td>').join("")+'<td>'+heads[start+i]+'</td></tr>').join("")+'</table>';}
+     const entries=Object.keys(counts).sort((a,b)=>Number(a)-Number(b));const start=appState.tableStart||0;html+='<table class="appTable"><tr><th>'+(appState.mode==="Dice Roll"?"Sum":"Heads")+'</th><th>Freq</th><th>Rel Fr</th></tr>'+entries.slice(start,start+4).map((k,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+k+'</td><td>'+counts[k]+'</td><td>'+fmt(counts[k]/appState.attempts)+'</td></tr>').join("")+'</table>';
+    }else {const start=appState.tableStart||0;html+='<table class="appTable"><tr><th>#</th>'+appState.rows[0].map((_,i)=>'<th>'+String.fromCharCode(65+i)+'</th>').join("")+'<th>'+ (appState.mode==="Dice Roll"?"Sum":"Heads")+'</th></tr>'+appState.rows.slice(start,start+4).map((r,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+(start+i+1)+'</td>'+r.map(v=>'<td>'+(appState.mode==="Dice Roll"?v:v?"●":"○")+'</td>').join("")+'<td>'+heads[start+i]+'</td></tr>').join("")+'</table>';}
     
    }else html+='<div class="appResult">'+(appState.mode==="Dice Roll"?"Dice":"Coins")+' = '+appState.count+'<br>Attempts = '+appState.attempts+'<br>Select TOOLS → Execute.</div>';
   }else if(appState.mode==="Circle"){
@@ -1081,15 +1081,15 @@ function chooseHome(){
  const app=homeApps[homeIndex].label;homeOpen=false;appState=null;expression="";answer=null;answerDisplay="";lastExpression="";lastWasResult=false;historyCursor=-1;cursor=0;activeTemplate=null;
  if(app==="Calculate"){render();return;}
  if(app==="Statistics"){
-  openMenu("",[{label:"1-Variable"},{label:"2-Variable"}],item=>{appState={type:"Statistics",paired:item.label==="2-Variable",x:[],y:[],column:0,row:0,showResults:false,inputPrompt:"x1 = ",inputTarget:"stats"};expression="";render();});return;
+paired:item.label==="2-Variable",x:[],y:[],column:0,row:0,rowStart:0,showResults:false
  }
- if(app==="Table"){appState={type:"Table",start:-5,end:5,step:1,tableType:"f(x)",rows:[],tableRow:0};render();return;}
+tableType:"f(x)",rows:[],tableRow:0,tableStart:0}
  if(app==="Ratio"){
   openMenu("",[{label:"A:B=X:D"},{label:"A:B=C:X"}],item=>{appState={type:"Ratio",equation:item.label,values:[],solved:false,inputPrompt:"A = ",inputTarget:"ratio"};expression="";render();});return;
  }
  if(app==="Math Box"){
   openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>{
-   if(item.label==="Dice Roll"||item.label==="Coin Toss"){appState={type:"Math Box",mode:item.label,count:1,attempts:5,rows:[],result:false,tableRow:0};toolsMenu();menuIndex=2;render();return;}
+result:false,tableRow:0,tableStart:0}
    else if(item.label==="Number Line")appState={type:"Math Box",mode:item.label,lines:[],input:true};
    else appState={type:"Math Box",mode:item.label,input:true};
    expression="";if(item.label==="Circle")beginAppInput("Angle = ","angle");else if(item.label==="Number Line")beginAppInput("Inequality 1 = ","line");else render();
