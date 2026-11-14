@@ -243,14 +243,14 @@ function renderRich(s,from,to,caretPos){
    if(close>=0){
     const bodyStart=open+1,bodyEnd=close;
     if(found==="sqrt"){
-     out+='<span class="root"><span class="radical">√</span><span class="radicand">'+renderRich(s,bodyStart,bodyEnd,caretPos)+'</span></span>';
+     out+='<span class="root"><span class="radical">√</span><span class="radicand">'+(bodyStart===bodyEnd?'<span class="rootBox">□</span>':renderRich(s,bodyStart,bodyEnd,caretPos))+'</span></span>';
     }else if(found==="root"){
      const comma=findTopComma(s,bodyStart,bodyEnd);
-     if(comma>=0)out+='<span class="customRoot"><span class="rootIndex">'+renderRich(s,bodyStart,comma,caretPos)+'</span><span class="radical">√</span><span class="radicand">'+renderRich(s,comma+1,bodyEnd,caretPos)+'</span></span>';
+     if(comma>=0)out+='<span class="customRoot"><span class="rootIndex">'+(bodyStart===comma?'<span class="rootBox">□</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="radical">√</span><span class="radicand">'+(comma+1===bodyEnd?'<span class="rootBox">□</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
      else out+='root('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
     }else if(found==="frac"){
      const comma=findTopComma(s,bodyStart,bodyEnd);
-     if(comma>=0)out+='<span class="frac"><span class="numerator">'+renderRich(s,bodyStart,comma,caretPos)+'</span><span class="fraction-bar"></span><span class="denominator">'+renderRich(s,comma+1,bodyEnd,caretPos)+'</span></span>';
+     if(comma>=0)out+='<span class="frac"><span class="numerator">'+(bodyStart===comma?'<span class="fracBox">□</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="fraction-bar"></span><span class="denominator">'+(comma+1===bodyEnd?'<span class="fracBox">□</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
      else out+='frac('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
     }else if(found==="randint"){
      out+='<span>RanInt#('+renderRich(s,bodyStart,bodyEnd,caretPos)+')</span>';
@@ -267,7 +267,7 @@ function renderRich(s,from,to,caretPos){
   }
   if(s[i]==="^"&&s[i+1]==="("){
    const close=matchingParen(s,i+1,to);
-   if(close>=0){out+='<sup>'+renderRich(s,i+2,close,caretPos)+'</sup>';i=close+1;continue;}
+   if(close>=0){const exponent=close===i+2?'<span class="powerBox">□</span>':renderRich(s,i+2,close,caretPos);out+='<sup>'+exponent+'</sup>';i=close+1;continue;}
   }
   const ch=s[i];
   if(ch==="~"||ch==="-")out+="−";
@@ -358,7 +358,7 @@ function render(){
 function pushUndo(){undoStack.push({expression,answer,answerDisplay,cursor,lastWasResult});if(undoStack.length>80)undoStack.shift();}
 function startNewFromAnswer(value){
  if(lastWasResult){
-  if(/^[0-9.(]/.test(value)||value==="sqrt()"||value==="frac(,)")expression="";
+  if(/^[0-9.(]/.test(value)||value==="sqrt()"||value==="frac(,)"||value==="ans"||/^[A-Za-z]$/.test(value))expression="";
   else expression=String(ansMemory);
   cursor=expression.length;lastWasResult=false;
  }
@@ -384,13 +384,17 @@ function insertTemplate(raw,kind,offset){
 function insertFunction(name){insertTemplate(name+"()",name,name.length+1);}
 function insertFraction(){insertTemplate("frac(,)","fraction",5);}
 function insertSquareRoot(){insertTemplate("sqrt()","sqrt",5);}
-function insertPower(){insertTemplate("^()","power",2);}
+function insertPower(){
+ if(lastWasResult){expression=String(ansMemory);cursor=expression.length;lastWasResult=false;}
+ insertTemplate("^()","power",2);
+}
 function insertNthRoot(){insertTemplate("root(,)","root",5);}
 function insertRecurring(){insertTemplate("rec()","recurring",4);}
 function insertRanInt(){insertTemplate("randint(,)","randint",8);}
 function moveCursor(d){
  if(editor){cursor=clamp(cursor+d,0,expression.length);render();return;}
  if(historyCursor>=0){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ if(lastWasResult){lastWasResult=false;cursor=expression.length;answer=null;answerDisplay="";}
  if(d>0&&activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end){
   const start=activeTemplate.start,kind=activeTemplate.kind;
   if(kind==="fraction"||kind==="root"||kind==="randint"){
@@ -431,7 +435,8 @@ function deleteAtom(){
  pushUndo();
  if(activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end){
   const t=activeTemplate;
-  if(t.kind==="fraction"||t.kind==="power"||t.kind==="root"||t.kind==="sqrt"||t.kind==="randint"||t.kind==="recurring"||t.kind==="sin"||t.kind==="cos"||t.kind==="tan"||t.kind==="asin"||t.kind==="acos"||t.kind==="atan"||t.kind==="log"||t.kind==="ln"){deleteWhole(t.start,t.end);render();return;}
+  if(t.kind==="fraction"||t.kind==="power"||t.kind==="root"||t.kind==="sqrt"||t.kind==="randint"||t.kind==="ran"||t.kind==="recurring"){deleteWhole(t.start,t.end);render();return;}
+  if(["sin","cos","tan","asin","acos","atan","log","ln"].includes(t.kind)&&expression.slice(t.start+t.kind.length+1,t.end-1)===""){deleteWhole(t.start,t.end);render();return;}
  }
  const prefix=expression.slice(0,cursor);
  const atomic=prefix.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)\($/i);
@@ -512,10 +517,11 @@ function evaluate(source){
   if(q.type==="id"){
    const name=take().value;
    if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return ansMemory;
-   if(name==="ran")return Math.floor(Math.random()*1000)/1000;
+   if(name==="ran"&&!peek())return Math.floor(Math.random()*1000)/1000;
    if(name==="a"||name==="b"||name==="c"||name==="d"||name==="e"||name==="f"||name==="x"||name==="y"||name==="z")return variables[name.toUpperCase()]??variables[name]??0;
    if(peek()&&peek().type==="("){
     take();
+    if(name==="ran"){expect(")");return Math.floor(Math.random()*1000)/1000;}
     if(name==="frac"||name==="root"||name==="randint"){
      const a=add();expect(",");const b=add();expect(")");
      if(name==="frac")return a/b;
