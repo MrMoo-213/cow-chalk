@@ -126,6 +126,7 @@ let historyCursor=-1;
 let lastWasResult=false;
 let cursor=0;
 let undoStack=[];
+let overwriteMode=false;
 let powerOff=false;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const escapeHtml=s=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
@@ -313,7 +314,9 @@ function append(value){
  if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
  if(lastWasResult){if(/^[0-9.(]/.test(value)||value==="frac("||value==="sqrt("||value==="cbrt(")expression="";else expression=String(ansMemory);lastWasResult=false;cursor=expression.length;}
  saveUndo();
- expression=expression.slice(0,cursor)+value+expression.slice(cursor);cursor+=value.length;answer=null;answerDisplay="";render();
+ if(overwriteMode&&cursor<expression.length&&value.length===1){expression=expression.slice(0,cursor)+value+expression.slice(cursor+1);}
+ else expression=expression.slice(0,cursor)+value+expression.slice(cursor);
+ cursor+=value.length;answer=null;answerDisplay="";render();
 }
 function insertFunction(name){
  if(lastWasResult){expression="";lastWasResult=false;cursor=0;}
@@ -354,7 +357,7 @@ function clearEntry(){
  saveUndo();expression="";answer=null;answerDisplay="";lastWasResult=false;historyCursor=-1;cursor=0;render();
 }
 function powerOn(){
- powerOff=false;shift=false;expression="";answer=null;answerDisplay="";lastExpression="";history=[];historyCursor=-1;cursor=0;lastWasResult=false;undoStack=[];menu=null;menuStack=[];homeOpen=false;render();
+ powerOff=false;shift=false;overwriteMode=false;expression="";answer=null;answerDisplay="";lastExpression="";history=[];historyCursor=-1;cursor=0;lastWasResult=false;undoStack=[];menu=null;menuStack=[];homeOpen=false;render();
 }
 function moveCursor(d){
  if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
@@ -581,7 +584,7 @@ function standardFormMenu(){
 function formatMenu(){
  if(typeof answer!=="number"||!Number.isFinite(answer))return;
  const [num,den]=fractionParts(answer);
- const items=[{label:"Standard"},{label:"Decimal"},{label:"ENG Notation"},{label:"Sexagesimal"}];
+ const items=[{label:"Standard"},{label:"Decimal"},{label:"Standard Form"},{label:"ENG Notation"},{label:"Sexagesimal"}];
  if(Number.isInteger(answer))items.push({label:"Prime Factor"});
  if(Math.abs(num/den-answer)<1e-8){
   items.push({label:"Recurring Decimal"},{label:"Improper Fraction"},{label:"Mixed Fraction"});
@@ -589,6 +592,7 @@ function formatMenu(){
  openMenu("",items,v=>{
   if(v.label==="Standard")answerDisplay=standardResult(answer);
   if(v.label==="Decimal")answerDisplay=fmt(answer);
+  if(v.label==="Standard Form")answerDisplay=answer.toExponential(3).replace("e"," × 10^");
   if(v.label==="Prime Factor")answerDisplay=primeFactors(answer);
   if(v.label==="Recurring Decimal")answerDisplay=fmt(answer);
   if(v.label==="Improper Fraction")answerDisplay=num+"/"+den;
@@ -621,7 +625,7 @@ function applyShift(label){
  if(label==="LOG"){insertFunction("ln");return true;}
  if(label==="FRACTION"){insertFraction();return true;}
  if(label==="CATALOG"){shiftedCatalogMenu();return true;}
- if(label==="FORMAT"){standardFormMenu();return true;}
+ if(label==="FORMAT"){formatMenu();return true;}
  if(label==="x"){openMenu("",[{label:"Display QR Code"},{label:"QR Code settings"}],()=>{});return true;}
  if(label==="DELETE"){overwriteMode=!overwriteMode;return true;}
  if(label==="AC"){powerOff=true;expression="";answer=null;answerDisplay="";render();return true;}
@@ -671,7 +675,9 @@ function press(label){
  if(label==="DELETE"){
   if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;}
   saveUndo();if(lastWasResult){expression=lastExpression;lastWasResult=false;cursor=expression.length;}
-  expression=expression.slice(0,Math.max(0,cursor-1))+expression.slice(cursor);cursor=Math.max(0,cursor-1);answer=null;answerDisplay="";render();return;
+  if(overwriteMode&&cursor<expression.length)expression=expression.slice(0,cursor)+expression.slice(cursor+1);
+  else{expression=expression.slice(0,Math.max(0,cursor-1))+expression.slice(cursor);cursor=Math.max(0,cursor-1);}
+  answer=null;answerDisplay="";render();return;
  }
  if(label==="FORMAT"){
   if(typeof answer!=="number")return;
