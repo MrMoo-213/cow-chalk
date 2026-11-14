@@ -60,7 +60,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 #screenPanel .homeApp:active,#screenPanel .menuRow:active{filter:brightness(.9)}
 
 #brand{position:absolute;left:29%;top:20.3%;width:42%;height:4%;display:none;align-items:center;justify-content:center;color:#18231e;background:transparent;font:700 clamp(8px,1.5vw,15px)/1 Arial,sans-serif;letter-spacing:.04em;pointer-events:none;z-index:3}
-#screen.powered-off{background:#929d97;color:#18231e}
+#screen.powered-off{background:#c2ccc8;color:#17201d}
 #screen.powered-off #brand{display:flex}
 .root .radicand:has(.rootBox),.customRoot .radicand:has(.rootBox){border-top:0}
 .appTable{width:100%;border-collapse:collapse;font-size:3.1cqw;line-height:1.25;text-align:right}
@@ -458,7 +458,7 @@ function handleAppArrow(label){
  if(appState.type==="Math Box"&&appState.mode==="Number Line"&&label==="RIGHT"&&appState.lines.length<3){beginAppInput("Inequality "+(appState.lines.length+1)+" = ","line");return;}
 }
 function handleAppBack(){
- if(appState.type==="Math Box"&&appState.result){appState.result=false;appState.rows=[];openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{menu=null;menuFrames=[];appState.resultType=item.label;appState.result=true;render();});return;}
+ if(appState.type==="Math Box"&&appState.result){appState.result=false;openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{menu=null;menuFrames=[];appState.resultType=item.label;appState.result=true;render();});return;}
  if(appState.type==="Math Box"){
   appState=null;openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>startMathBox(item.label));return;
  }
@@ -725,7 +725,7 @@ function evaluate(source){
   if(number){tokens.push({type:"number",value:Number(number[0])});i+=number[0].length;continue;}
   const id=rest.match(/^[a-zA-Z]+/);
   if(id){tokens.push({type:"id",value:id[0]});i+=id[0].length;continue;}
-  if("+-*/^!%(),~°".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
+  if("+-*/^!%(),~°ʳᵍ".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
   throw Error("Syntax ERROR");
  }
  const out=[];
@@ -791,6 +791,8 @@ function evaluate(source){
    if(op==="!")v=factorial(v);
    else if(op==="%")v/=100;
    else if(op==="°"){if(angleMode==="RAD")v*=Math.PI/180;else if(angleMode==="GRA")v*=200/180;}
+   else if(op==="ʳ"){if(angleMode==="DEG")v*=180/Math.PI;else if(angleMode==="GRA")v*=200/Math.PI;}
+   else if(op==="ᵍ"){if(angleMode==="DEG")v*=.9;else if(angleMode==="RAD")v*=Math.PI/200;}
   }
   return v;
  }
@@ -934,8 +936,8 @@ function catalogMenu(){
    else if(v==="Recurring Decimal")insertRecurring();
    else if(v==="Round Off")insertTemplate("round(,)","round",6);
    else if(v==="Degrees")append("°");
-   else if(v==="Radians")append("pi/180");
-   else if(v==="Gradians")append("pi/200");
+   else if(v==="Radians")append("ʳ");
+   else if(v==="Gradians")append("ᵍ");
    else if(v==="Rect to Polar")insertTemplate("pol(,)","pol",4);
    else if(v==="Polar to Rect")insertTemplate("rect(,)","rect",5);
    else if(v==="Degs Mins Secs")append("°");
