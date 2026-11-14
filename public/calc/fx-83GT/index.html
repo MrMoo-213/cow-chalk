@@ -452,9 +452,27 @@ function deleteAtom(){
   if(["sin","cos","tan","asin","acos","atan","log","ln"].includes(t.kind)&&expression.slice(t.start+t.kind.length+1,t.end-1)===""){deleteWhole(t.start,t.end);render();return;}
  }
  const prefix=expression.slice(0,cursor);
- const atomic=prefix.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)\($/i);
+ const templateNames=["randint","sqrt","root","frac","asin","acos","atan","sinh","cosh","tanh","sin","cos","tan","log","ln","rec","ran"];
+ for(const name of templateNames){
+  for(let start=prefix.lastIndexOf(name+"(");start>=0;start=prefix.lastIndexOf(name+"(",start-1)){
+   const close=matchingParen(expression,start+name.length,cursor);
+   if(close===cursor-1){
+    const body=expression.slice(start+name.length+1,close);
+    if(["randint","sqrt","root","frac","rec","ran"].includes(name)||body===""){
+     deleteWhole(start,close+1);render();return;
+    }
+   }
+  }
+ }
+ const powerStart=prefix.lastIndexOf("^(");
+ if(powerStart>=0){
+  const close=matchingParen(expression,powerStart+1,cursor);
+  if(close===cursor-1){deleteWhole(powerStart,close+1);render();return;}
+ }
+ const prefix2=expression.slice(0,cursor);
+ const atomic=prefix2.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)\($/i);
  if(atomic){const start=cursor-atomic[0].length;const close=expression.indexOf(")",cursor);if(close>=0){deleteWhole(start,close+1);render();return;}deleteWhole(start,cursor);render();return;}
- const word=prefix.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)$/i);
+ const word=prefix2.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)$/i);
  if(word){deleteWhole(cursor-word[0].length,cursor);render();return;}
  if(prefix.endsWith("pi")){deleteWhole(cursor-2,cursor);render();return;}
  expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor--;activeTemplate=null;answer=null;answerDisplay="";render();
