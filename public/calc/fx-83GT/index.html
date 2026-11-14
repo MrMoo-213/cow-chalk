@@ -278,7 +278,7 @@ function evaluate(source){
   if(q.type==="id"){
    const name=take().value;
    if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return ansMemory;
-   if(name==="x"||name==="a"||name==="b"||name==="c"||name==="d"||name==="f"||name==="y"||name==="z")return variables[name]??0;
+   if(["x","a","b","c","d","e","f","y","z"].includes(name))return variables[name==="x"||name==="y"||name==="z"?name:name.toUpperCase()]??0;
    if(peek()&&peek().type==="("){
     take();
     if(name==="frac"){const n=add();expect(",");const d=add();expect(")");return n/d;}
@@ -378,10 +378,12 @@ function chooseMenu(index){
  if(index!==undefined)menuIndex=clamp(index,0,menu.items.length-1);
  const item=menu.items[menuIndex];if(!item)return;
  const current=menu,action=current.action;
- if(menuStack.length)menu=menuStack.pop();else menu=null;
- menuIndex=0;menuScroll=0;
  if(action)action(item);
  else if(item.items)openMenu("",item.items,item.action);
+ if(menu===current){
+  menu=menuStack.length?menuStack.pop():null;
+  menuIndex=0;menuScroll=0;
+ }
  render();
 }
 function pageMenu(direction){
