@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Casio fx-991EX</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/favicon1.png">
+<style>
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#fff;overscroll-behavior:none}
+body{display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+#calculator{position:relative;display:block;height:min(100dvh,calc(100vw * 968 / 458));width:min(100vw,calc(100dvh * 458 / 968));aspect-ratio:458/968;flex:none}
+#calculator img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
+#screen{position:absolute;left:10.2%;top:15.1%;width:79.8%;height:15.3%;display:flex;align-items:center;justify-content:center;padding:4px;background:#c9e1d9;color:#111;font:600 clamp(10px,2.4vw,18px)/1.2 Arial,sans-serif;text-align:center;overflow:hidden;pointer-events:none}
+#back{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:#2388ff;color:#fff;text-decoration:none;font:32px/1 Arial,sans-serif;box-shadow:0 2px 9px #0002;-webkit-tap-highlight-color:transparent}
+#back:hover{background:#0874ed}
+#keys{position:absolute;inset:0}
+.key{position:absolute;transform:translate(-50%,-50%);border:0;border-radius:17%;padding:0;background:transparent;color:transparent;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.key:focus-visible{outline:2px solid #2388ff;background:#2388ff33}
+.key:active{background:#2388ff55}
+.key.round{border-radius:50%}
+.key.nav{border-radius:35%}
+</style>
+</head>
+<body>
+<a id="back" href="/calc/" aria-label="Back to calculators">‹</a>
+<div id="calculator" aria-label="Casio fx-991EX calculator">
+<img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-991ex.png" alt="Casio fx-991EX calculator">
+<div id="screen" aria-live="polite">Press a button</div>
+<div id="keys"></div>
+</div>
+<script>
+const keys=[
+{n:"SHIFT",x:61,y:384,w:9.8,h:4.3,s:"round"},{n:"ALPHA",x:120,y:384,w:9.8,h:4.3,s:"round"},
+{n:"UP",x:230,y:388,w:13,h:4.2,s:"nav"},{n:"LEFT",x:181,y:411,w:10.5,h:4.5,s:"nav"},{n:"RIGHT",x:279,y:411,w:10.5,h:4.5,s:"nav"},{n:"DOWN",x:230,y:444,w:13,h:4.2,s:"nav"},
+{n:"MODE",x:337,y:384,w:9.8,h:4.3,s:"round"},{n:"ON",x:397,y:384,w:9.8,h:4.3,s:"round"},
+{n:"OPTN",x:61,y:460,w:12.8,h:4.0},{n:"CALC",x:128,y:460,w:12.8,h:4.0},{n:"INTEGRAL",x:329,y:460,w:12.8,h:4.0},{n:"DIFFERENTIAL",x:396,y:460,w:12.8,h:4.0},
+{n:"FRACTION",x:61,y:515,w:12.8,h:4.0},{n:"SQUARE ROOT",x:128,y:515,w:12.8,h:4.0},{n:"x²",x:195,y:515,w:12.8,h:4.0},{n:"xⁿ",x:262,y:515,w:12.8,h:4.0},{n:"LOG",x:329,y:515,w:12.8,h:4.0},{n:"LN",x:396,y:515,w:12.8,h:4.0},
+{n:"(-)",x:61,y:568,w:12.8,h:4.0},{n:"° ' ''",x:128,y:568,w:12.8,h:4.0},{n:"HYP",x:195,y:568,w:12.8,h:4.0},{n:"SIN",x:262,y:568,w:12.8,h:4.0},{n:"COS",x:329,y:568,w:12.8,h:4.0},{n:"TAN",x:396,y:568,w:12.8,h:4.0},
+{n:"STO",x:61,y:622,w:12.8,h:4.0},{n:"ENG",x:128,y:622,w:12.8,h:4.0},{n:"(",x:195,y:622,w:12.8,h:4.0},{n:")",x:262,y:622,w:12.8,h:4.0},{n:"S↔D",x:329,y:622,w:12.8,h:4.0},{n:"M+",x:396,y:622,w:12.8,h:4.0},
+{n:"7",x:68,y:688,w:15,h:4.7},{n:"8",x:149,y:688,w:15,h:4.7},{n:"9",x:229,y:688,w:15,h:4.7},{n:"DEL",x:309,y:688,w:15,h:4.7},{n:"AC",x:389,y:688,w:15,h:4.7},
+{n:"4",x:68,y:754,w:15,h:4.7},{n:"5",x:149,y:754,w:15,h:4.7},{n:"6",x:229,y:754,w:15,h:4.7},{n:"×",x:309,y:754,w:15,h:4.7},{n:"÷",x:389,y:754,w:15,h:4.7},
+{n:"1",x:68,y:820,w:15,h:4.7},{n:"2",x:149,y:820,w:15,h:4.7},{n:"3",x:229,y:820,w:15,h:4.7},{n:"+",x:309,y:820,w:15,h:4.7},{n:"−",x:389,y:820,w:15,h:4.7},
+{n:"0",x:68,y:885,w:15,h:4.7},{n:".",x:149,y:885,w:15,h:4.7},{n:"×10ˣ",x:229,y:885,w:15,h:4.7},{n:"Ans",x:309,y:885,w:15,h:4.7},{n:"=",x:389,y:885,w:15,h:4.7}
+];
+const container=document.getElementById("keys");
+const screen=document.getElementById("screen");
+for(const key of keys){
+ const button=document.createElement("button");
+ button.type="button";
+ button.className="key"+(key.s?" "+key.s:"");
+ button.setAttribute("aria-label",key.n);
+ button.title=key.n;
+ button.style.left=(key.x/458*100)+"%";
+ button.style.top=(key.y/968*100)+"%";
+ button.style.width=key.w+"%";
+ button.style.height=key.h+"%";
+ button.addEventListener("click",()=>{screen.textContent=key.n+" pressed";});
+ container.appendChild(button);
+}
+</script>
+</body>
+</html>
