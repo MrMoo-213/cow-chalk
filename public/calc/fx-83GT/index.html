@@ -311,6 +311,13 @@ function renderRich(s,from,to,caretPos){
      const comma=findTopComma(s,bodyStart,bodyEnd);
      if(comma>=0)out+='<span class="frac"><span class="numerator">'+(bodyStart===comma?'<span class="fracBox">'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="fraction-bar"></span><span class="denominator">'+(comma+1===bodyEnd?'<span class="fracBox">'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
      else out+='frac('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
+    }else if(found==="mfrac"){
+     const commas=[];let depth=0;for(let k=bodyStart;k<bodyEnd;k++){if(s[k]==="(")depth++;else if(s[k]===")")depth--;else if(s[k]===","&&depth===0)commas.push(k);}
+     if(commas.length===2){
+      const a=commas[0],b=commas[1];
+      const slot=(x,y)=>x===y?'<span class="fracBox">'+(caretPos===x?'<span class="caret"></span>':'')+'</span>':renderRich(s,x,y,caretPos);
+      out+='<span class="mixedFraction"><span class="whole">'+slot(bodyStart,a)+'</span><span class="frac"><span class="numerator">'+slot(a+1,b)+'</span><span class="fraction-bar"></span><span class="denominator">'+slot(b+1,bodyEnd)+'</span></span></span>';
+     }else out+='mfrac('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
     }else if(found==="randint"){
      out+='<span>RanInt#('+renderRich(s,bodyStart,bodyEnd,caretPos)+')</span>';
     }else if(found==="ran"){
@@ -546,7 +553,16 @@ function renderAnswer(value){
  if(mixed)return escapeHtml(mixed[1])+' <span class="frac"><span class="numerator">'+escapeHtml(mixed[2])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(mixed[3])+'</span></span>';
  return escapeHtml(shown).replaceAll("-","−").replaceAll("*","×");
 }
+function renderKeyHistory(){
+ const root=$("keyHistory"),items=$("keyHistoryItems"),toggle=$("historyToggle");
+ if(!root||!items||!toggle)return;
+ root.classList.toggle("hidden",!keyHistoryVisible);
+ toggle.textContent=keyHistoryVisible?"Hide":"Show";
+ items.innerHTML=keyHistory.map(label=>'<span class="keyHistoryItem">'+escapeHtml(label==="EXE"?"=":label)+"</span>").join("");
+ items.scrollTop=items.scrollHeight;
+}
 function render(){
+ renderKeyHistory();
  shiftEl.src=shift?"https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003a.png":"";
  shiftEl.style.display=shift?"block":"none";
  angleEl.src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/"+(angleMode==="DEG"?"003b":angleMode==="RAD"?"003c":"003d")+".png";
@@ -621,9 +637,12 @@ function moveCursor(d){
  if(lastWasResult){lastWasResult=false;cursor=expression.length;answer=null;answerDisplay="";}
  if(d>0&&activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end){
   const start=activeTemplate.start,kind=activeTemplate.kind;
-  if(kind==="fraction"||kind==="root"||kind==="randint"){
+  if(kind==="mixedfraction"){
+   const commas=[];for(let k=start;k<activeTemplate.end;k++)if(expression[k]===",")commas.push(k);
+   if(commas.length===2){if(cursor<=commas[0])cursor=commas[0]+1;else if(cursor<=commas[1])cursor=commas[1]+1;else{cursor=activeTemplate.end;activeTemplate=null;}render();return;}
+  }else if(kind==="fraction"||kind==="root"||kind==="randint"){
    const comma=expression.indexOf(",",start);
-   const close=expression.indexOf(")",comma);
+   const close=expression.indexOf(")",comma<0?start:comma);
    if(comma>=0&&cursor<=comma){cursor=comma+1;render();return;}
    if(close>=0&&cursor<=close){cursor=close+1;activeTemplate=null;render();return;}
   }else{
@@ -745,7 +764,7 @@ function evaluate(source){
  const out=[];
  for(let j=0;j<tokens.length;j++){
   const a=tokens[j],b=tokens[j+1];out.push(a);
-  if(b&&((a.type==="number"||a.type==="id"||a.type===")"||a.type==="!"||a.type==="%"||a.type==="°")&&(b.type==="number"||b.type==="id"||b.type==="("))){
+  if(b&&a.type!=="¤"&&b.type!=="¤"&&((a.type==="number"||a.type==="id"||a.type===")"||a.type==="!"||a.type==="%"||a.type==="°")&&(b.type==="number"||b.type==="id"||b.type==="("))){
    if(!(a.type==="id"&&b.type==="("))out.push({type:"*",value:"*"});
   }
  }
@@ -784,9 +803,10 @@ function evaluate(source){
    if(peek()&&peek().type==="("){
     take();
     if(name==="ran"){expect(")");return Math.floor(Math.random()*1000)/1000;}
-    if(name==="frac"||name==="root"||name==="randint"||name==="log"||name==="gcd"||name==="lcm"||name==="npr"||name==="ncr"||name==="round"||name==="pol"||name==="rect"){
-     const a=add();let b=null;if(peek()&&peek().type===","){take();b=add();}expect(")");
-     if(name==="frac"){if(b===null)throw Error("Syntax ERROR");return a/b;}
+    if(name==="frac"||name==="mfrac"||name==="root"||name==="randint"||name==="log"||name==="gcd"||name==="lcm"||name==="npr"||name==="ncr"||name==="round"||name==="pol"||name==="rect"){
+     const a=add();let b=null,c=null;if(peek()&&peek().type===","){take();b=add();if(name==="mfrac"&&peek()&&peek().type===","){take();c=add();}}expect(")");
+     if(name==="frac"){if(b===null)throw Error("Syntax ERROR");if(b===0)throw Error("Math ERROR");return a/b;}
+     if(name==="mfrac"){if(b===null||c===null||c===0)throw Error("Syntax ERROR");return a+b/c;}
      if(name==="root"){if(b===null||a===0)throw Error("Math ERROR");return Math.sign(b)*Math.pow(Math.abs(b),1/a);}
      if(name==="randint"){if(b===null||!Number.isInteger(a)||!Number.isInteger(b)||a>b)throw Error("Math ERROR");return Math.floor(Math.random()*(b-a+1))+a;}
      if(name==="log")return b===null?Math.log10(a):Math.log(b)/Math.log(a);
@@ -1095,6 +1115,7 @@ function applyShift(label){
  return false;
 }
 function press(label){
+ if(!powerOff&&!menu&&!homeOpen){keyHistory.push(label);if(keyHistory.length>36)keyHistory.shift();renderKeyHistory();}
  if(label==="SHIFT"){shift=!shift;render();return;}
  const shifted=shift;shift=false;
  if(powerOff){if(label==="ON")powerOn();return;}
@@ -1185,6 +1206,7 @@ function press(label){
   append(label==="×"?"*":label==="÷"?"/":label==="−"?"-":label);return;
  }
 }
+$("historyToggle").addEventListener("click",()=>{keyHistoryVisible=!keyHistoryVisible;renderKeyHistory();});
 for(const [label,x,y] of keyLayout){
  const button=document.createElement("button");button.type="button";button.className="key";button.setAttribute("aria-label",label);button.title=label;
  button.style.left=(x/435*100)+"%";button.style.top=(y/913*100)+"%";
