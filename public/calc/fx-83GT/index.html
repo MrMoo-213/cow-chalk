@@ -381,8 +381,8 @@ function calculateAppInput(){
     else if(target==="stats"){const list=appState.column===0?appState.x:appState.y;list[appState.row]=value;appState.row++;}
    }
    appState.inputPrompt="";appState.inputTarget="";expression="";cursor=0;
-   if(target==="stats")appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";
-   if(target==="ratio"&&appState.values.length<3)appState.inputPrompt=(appState.values.length===1?"B":appState.equation==="A:B=X:D"?"D":"C")+" = ";
+   if(target==="stats"){appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
+   if(target==="ratio"&&appState.values.length<3){appState.inputPrompt=(appState.values.length===1?"B":appState.equation==="A:B=X:D"?"D":"C")+" = ";appState.inputTarget="ratio";}
    if(appState.type==="Ratio"&&appState.values.length>=3)solveRatio();
    if(appState.type==="Math Box"&&appState.mode==="Number Line"&&appState.lines.length<3){appState.input=true;appState.inputPrompt="Inequality "+(appState.lines.length+1)+" = ";appState.inputTarget="line";}
    render();
@@ -410,8 +410,18 @@ function appStatistics(){
  if(!n)return [];
  const sorted=x.slice().sort((a,b)=>a-b),sum=x.reduce((a,b)=>a+b,0),mean=sum/n;
  const variance=x.reduce((a,b)=>a+(b-mean)**2,0)/n;
- const median=(arr)=>arr.length%2?arr[(arr.length-1)/2]:(arr[arr.length/2-1]+arr[arr.length/2])/2;
- return [["n",n],["x̄",mean],["Σx",sum],["σx",Math.sqrt(variance)],["sx",n>1?Math.sqrt(variance*n/(n-1)):0],["min(x)",sorted[0]],["Q1",median(sorted.slice(0,Math.floor(n/2)))],["Med",median(sorted)],["Q3",median(sorted.slice(Math.ceil(n/2)))],["max(x)",sorted[n-1]]];
+ const median=arr=>!arr.length?0:arr.length%2?arr[(arr.length-1)/2]:(arr[arr.length/2-1]+arr[arr.length/2])/2;
+ const rows=[["n",n],["x̄",mean],["Σx",sum],["σx",Math.sqrt(variance)],["sx",n>1?Math.sqrt(variance*n/(n-1)):0],["min(x)",sorted[0]],["Q1",median(sorted.slice(0,Math.floor(n/2)))],["Med",median(sorted)],["Q3",median(sorted.slice(Math.ceil(n/2)))],["max(x)",sorted[n-1]]];
+ if(appState.paired){
+  const pairs=x.map((v,i)=>[v,appState.y[i]]).filter(p=>Number.isFinite(p[1]));
+  const m=pairs.length;if(m){
+   const mx=pairs.reduce((s,p)=>s+p[0],0)/m,my=pairs.reduce((s,p)=>s+p[1],0)/m;
+   const sxx=pairs.reduce((s,p)=>s+(p[0]-mx)**2,0),syy=pairs.reduce((s,p)=>s+(p[1]-my)**2,0),sxy=pairs.reduce((s,p)=>s+(p[0]-mx)*(p[1]-my),0);
+   const slope=sxx?sxy/sxx:0;
+   return [["n",m],["x̄",mx],["ȳ",my],["Σx",pairs.reduce((s,p)=>s+p[0],0)],["Σy",pairs.reduce((s,p)=>s+p[1],0)],["a",my-slope*mx],["b",slope],["r",sxx&&syy?sxy/Math.sqrt(sxx*syy):0],["min(x)",Math.min(...pairs.map(p=>p[0]))],["max(x)",Math.max(...pairs.map(p=>p[0]))]];
+  }
+ }
+ return rows;
 }
 function generateTable(){
  const rows=[],oldX=variables.x;
@@ -432,7 +442,8 @@ function runMathBoxSimulation(){
   const vals=Array.from({length:appState.count},()=>appState.mode==="Dice Roll"?1+Math.floor(Math.random()*6):Math.random()<.5?1:0);
   rows.push(vals);
  }
- appState.rows=rows;appState.result=true;render();
+ appState.rows=rows;
+ openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{appState.resultType=item.label;appState.result=true;render();});
 }
 function handleAppArrow(label){
  if(appState.type==="Statistics"){
@@ -481,11 +492,16 @@ function renderAppScreen(){
    html='<div class="appTitle">'+appState.mode+'</div>';
    if(appState.result){
     const heads=appState.rows.map(r=>r.reduce((a,b)=>a+b,0));
-    html+='<table class="appTable"><tr><th>#</th>'+appState.rows[0].map((_,i)=>'<th>'+String.fromCharCode(65+i)+'</th>').join("")+'<th>'+ (appState.mode==="Dice Roll"?"Sum":"Heads")+'</th></tr>'+appState.rows.slice(0,5).map((r,i)=>'<tr><td>'+(i+1)+'</td>'+r.map(v=>'<td>'+(appState.mode==="Dice Roll"?v:v?"●":"○")+'</td>').join("")+'<td>'+heads[i]+'</td></tr>').join("")+'</table><div class="appNote">Attempts: '+appState.attempts+' · TOOLS for another simulation</div>';
+    if(appState.resultType==="Relative Freq"){
+    const counts={};heads.forEach(v=>counts[v]=(counts[v]||0)+1);
+    html+='<table class="appTable"><tr><th>'+(appState.mode==="Dice Roll"?"Sum":"Heads")+'</th><th>Freq</th><th>Rel Fr</th></tr>'+Object.keys(counts).sort((a,b)=>Number(a)-Number(b)).map(k=>'<tr><td>'+k+'</td><td>'+counts[k]+'</td><td>'+fmt(counts[k]/appState.attempts)+'</td></tr>').join("")+'</table>';
+   }else html+='<table class="appTable"><tr><th>#</th>'+appState.rows[0].map((_,i)=>'<th>'+String.fromCharCode(65+i)+'</th>').join("")+'<th>'+ (appState.mode==="Dice Roll"?"Sum":"Heads")+'</th></tr>'+appState.rows.slice(0,5).map((r,i)=>'<tr><td>'+(i+1)+'</td>'+r.map(v=>'<td>'+(appState.mode==="Dice Roll"?v:v?"●":"○")+'</td>').join("")+'<td>'+heads[i]+'</td></tr>').join("")+'</table>';
+    html+='<div class="appNote">Attempts: '+appState.attempts+' · BACK for result type</div>';
    }else html+='<div class="appResult">'+(appState.mode==="Dice Roll"?"Dice":"Coins")+' = '+appState.count+'<br>Attempts = '+appState.attempts+'<br>Select TOOLS → Execute.</div>';
   }else if(appState.mode==="Circle"){
    const a=appState.angle||0,rad=angleMode==="DEG"?a*Math.PI/180:a;
-   html='<div class="appTitle">Circle</div><div class="appResult">Angle: '+fmt(a)+' '+angleMode+'<br>sin = '+fmt(Math.sin(rad))+'<br>cos = '+fmt(Math.cos(rad))+'<br>tan = '+fmt(Math.tan(rad))+'</div>';
+   const px=50+38*Math.cos(rad-Math.PI/2),py=50+38*Math.sin(rad-Math.PI/2);
+   html='<div class="appTitle">Circle</div><svg viewBox="0 0 100 100" style="width:46%;height:auto;float:left"><circle cx="50" cy="50" r="38" fill="none" stroke="#26352e" stroke-width="1.5"/><path d="M12 50H88 M50 12V88" stroke="#87938d" stroke-width=".8"/><path d="M50 50L'+px+' '+py+'" stroke="#26352e" stroke-width="2"/><circle cx="'+px+'" cy="'+py+'" r="2.5" fill="#26352e"/></svg><div class="appResult">Angle: '+fmt(a)+' '+angleMode+'<br>sin = '+fmt(Math.sin(rad))+'<br>cos = '+fmt(Math.cos(rad))+'<br>tan = '+fmt(Math.tan(rad))+'</div>';
   }else{
    html='<div class="appTitle">Number Line</div><div class="appResult">'+appState.lines.map(escapeHtml).join("<br>")+'</div><div class="appAxis"><span>−∞</span><span style="left:48%">0</span><span style="right:0">+∞</span></div><div class="appNote">Enter up to three inequalities. Press RIGHT for another line.</div>';
   }
