@@ -385,12 +385,17 @@ function calculateAppInput(){
    if(target==="f"||target==="g"){functions[target]=raw;persist();}
    else if(target==="line"){appState.lines.push(raw);}
    else{
-    const value=evaluate(raw);
-    if(target==="start"||target==="end"||target==="step")appState[target]=value;
-     else if(target==="attempts"){const attempts=Number(raw);if(!Number.isSafeInteger(attempts)||attempts<1)throw new Error("Integer ERROR");appState.attempts=attempts;}
-    else if(target==="angle"){appState.angle=value;appState.input=false;}
-    else if(target==="ratio"){appState.values.push(value);}
-    else if(target==="stats"){const list=appState.column===0?appState.x:appState.y;list[appState.row]=value;appState.row++;}
+    if(target==="attempts"){
+     const attempts=Number(raw);
+     if(!/^\\d+$/.test(raw)||!Number.isSafeInteger(attempts)||attempts<1)throw new Error("Integer ERROR");
+     appState.attempts=attempts;
+    }else{
+     const value=evaluate(raw);
+     if(target==="start"||target==="end"||target==="step")appState[target]=value;
+     else if(target==="angle"){appState.angle=value;appState.input=false;}
+     else if(target==="ratio")appState.values.push(value);
+     else if(target==="stats"){const list=appState.column===0?appState.x:appState.y;list[appState.row]=value;appState.row++;}
+    }
    }
    appState.inputPrompt="";appState.inputTarget="";expression="";cursor=0;
    if(target==="start"){appState.inputPrompt="End = ";appState.inputTarget="end";}
