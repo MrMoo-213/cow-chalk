@@ -46,8 +46,10 @@ for(const [label,x,y] of keys){
  button.title=label;
  button.style.left=(x/435*100)+"%";
  button.style.top=(y/913*100)+"%";
- button.style.width=(label==="SCROLL UP"||label==="SCROLL DOWN"?"12":"12.2")+"%";
- button.style.height=(label==="SCROLL UP"||label==="SCROLL DOWN"?"7":"5.9")+"%";
+ const isScroll=label==="SCROLL UP"||label==="SCROLL DOWN";
+ const isBottom=y>=650;
+ button.style.width=isScroll?"9.5%":isBottom?"12.2%":y<390?"9%":"10.2%";
+ button.style.height=isScroll?"7%":isBottom?"5.9%":y<390?"4.3%":"4.8%";
  button.addEventListener("click",()=>{screen.textContent=label+" pressed";});
  container.appendChild(button);
 }
