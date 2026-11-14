@@ -14,16 +14,16 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 #calculator{position:relative;display:block;height:min(100dvh,calc(100vw * 913 / 435));width:min(100vw,calc(100dvh * 435 / 913));aspect-ratio:435/913;flex:none}
 #calculator>img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
 #screen{position:absolute;left:12.4%;top:14.8%;width:77.5%;height:15.35%;padding:2.2% 2.5%;background:#c2ccc8;color:#17201d;font-family:Arial,sans-serif;overflow:hidden;pointer-events:none;display:flex;flex-direction:column;container-type:inline-size}
-#indicators{height:12%;min-height:0;display:flex;align-items:center;gap:3.5%;white-space:nowrap;font-size:7.2cqw;line-height:1}
+#indicators{height:12%;min-height:0;display:flex;align-items:center;gap:3.5%;white-space:nowrap;font-size:2.4cqw;line-height:1}
 .indicator{display:inline-flex;align-items:center;justify-content:center;min-width:3%;font-weight:700}
-#screenMain{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;font-size:10.4cqw;line-height:1.18}
+#screenMain{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;font-size:3.5cqw;line-height:1.18}
 #expression{width:100%;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;min-height:1.15em;padding-top:1.5%}
 #answer{width:100%;text-align:right;white-space:nowrap;overflow:hidden;font-size:1.16em;min-height:1.2em;padding-bottom:1%}
-#screenMain.menu{display:block;font-size:8.1cqw;line-height:1.3}
+#screenMain.menu{display:block;font-size:2.8cqw;line-height:1.3}
 #screenPanel{position:absolute;inset:0;display:none;overflow:hidden;background:transparent}
 #screenPanel.visible{display:block}
 #screenPanel.home.visible{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:2%;padding:2% 1%}
-.homeApp{display:flex;align-items:center;gap:7%;min-width:0;padding:2%;border-radius:5%;font-size:8.2cqw;font-weight:600;white-space:nowrap}
+.homeApp{display:flex;align-items:center;gap:7%;min-width:0;padding:2%;border-radius:5%;font-size:2.8cqw;font-weight:600;white-space:nowrap}
 .homeIcon{width:22%;aspect-ratio:1;border-radius:18%;display:grid;place-items:center;background:#eef3ef;border:1px solid #78837d;font-size:1.25em;flex:none}
 .homeApp.selected{outline:1.5px solid #263c33;background:#aabbb1}
 #menuRows{height:100%;display:flex;flex-direction:column;overflow:hidden}
@@ -97,7 +97,7 @@ const fmt=n=>{
  if(Number.isInteger(n)&&Math.abs(n)<1e13)return String(n);
  return Number(n.toPrecision(12)).toString();
 };
-const displayExpr=s=>s.replaceAll("*","×").replaceAll("/","÷").replaceAll("-","−").replaceAll("pi","π");
+const displayExpr=s=>s.replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−").replaceAll("pi","π").replaceAll("sqrt(","√(").replaceAll("cbrt(","∛(").replaceAll("^2","²").replaceAll("^3","³").replaceAll("^(-1)","⁻¹");
 function render(){
  shiftEl.textContent=shift?"↑":"";
  angleEl.textContent=angleMode==="DEG"?"D":angleMode==="RAD"?"R":"G";
