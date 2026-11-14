@@ -140,7 +140,13 @@ function fmt(n){
  else if(Number.isInteger(n)&&Math.abs(n)<1e13)out=String(n);
  else out=Number(n.toPrecision(12)).toString();
  if(decimalMark==="Comma")out=out.replace(".",",");
- if(digitSeparator==="On")out=out.replace(/\B(?=(\d{3})+(?!\d))/g,decimalMark==="Comma"?".":",");
+ if(digitSeparator==="On"){
+  const marker=decimalMark==="Comma"?",":".";
+  const parts=out.split(/[eE]/);
+  const mantissa=parts[0].split(marker);
+  mantissa[0]=mantissa[0].replace(/\B(?=(\d{3})+(?!\d))/g,decimalMark==="Comma"?".":",");
+  out=mantissa.join(marker)+(parts.length>1?"E"+parts[1]:"");
+ }
  return out;
 }
 function displayExpr(s){
@@ -151,13 +157,13 @@ function displayExpr(s){
 }
 function renderExpression(raw,caret){
  let s=raw.slice(0,caret)+"\uE000"+raw.slice(caret);
+ s=s.replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−").replaceAll("pi","π");
  s=escapeHtml(s);
  s=s.replace(/frac\(([^,()]*)\,([^()]*)\)/g,'<span class="frac"><span class="numerator">$1</span><span class="fraction-bar"></span><span class="denominator">$2</span></span>');
  s=s.replace(/sqrt\(([^()]*)\)/g,'<span class="root"><span class="radical">√</span><span class="radicand">$1</span></span>');
  s=s.replace(/cbrt\(([^()]*)\)/g,'<span class="root"><span class="radical">∛</span><span class="radicand">$1</span></span>');
  s=s.replace(/\^([0-9]+)/g,'<sup>$1</sup>');
- s=s.replaceAll("\uE000",'<span class="caret"></span>');
- return s.replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−").replaceAll("pi","π");
+ return s.replaceAll("\uE000",'<span class="caret"></span>');
 }
 function renderAnswer(){
  if(answer===null)return answerDisplay?escapeHtml(answerDisplay):"";
@@ -237,7 +243,9 @@ function render(){
  else answerEl.innerHTML=renderAnswer();
 }
 function renderAnswerValue(value){
- const text=fmt(value);
+ const text=standardResult(value);
+ const fraction=text.match(/^(-?\d+)\/(\d+)$/);
+ if(fraction)return '<span class="frac"><span class="numerator">'+escapeHtml(fraction[1])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(fraction[2])+'</span></span>';
  return escapeHtml(text).replaceAll("-","−");
 }
 
@@ -650,6 +658,7 @@ function press(label){
   render();return;
  }
  if(menu){
+  if(label==="HOME"){homeMenu();return;}
   if(label==="UP")menuIndex=clamp(menuIndex-1,0,menu.items.length-1);
   else if(label==="DOWN")menuIndex=clamp(menuIndex+1,0,menu.items.length-1);
   else if(label==="SCROLL UP")pageMenu("UP");
