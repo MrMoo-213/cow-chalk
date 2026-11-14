@@ -9,7 +9,7 @@
 *{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#fff;overscroll-behavior:none}
 body{display:flex;align-items:center;justify-content:center;touch-action:manipulation}
-#back{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:#2388ff;color:#fff;text-decoration:none;font:32px/1 Arial,sans-serif;box-shadow:0 2px 9px #0002;-webkit-tap-highlight-color:transparent}
+#back{position:fixed;left:14px;top:14px;transform:none;z-index:5;min-height:40px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;background:#2388ff;color:#fff;text-decoration:none;font:600 15px/1 Arial,sans-serif;box-shadow:0 2px 9px #0002;-webkit-tap-highlight-color:transparent}
 #back:hover{background:#0874ed}
 #calculator{position:relative;display:block;height:min(100dvh,calc(100vw * 913 / 435));width:min(100vw,calc(100dvh * 435 / 913));aspect-ratio:435/913;flex:none}
 #calculator>img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
@@ -37,14 +37,6 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 .menuScroll{position:absolute;right:0;top:2%;bottom:2%;width:1.5%;background:#aeb9b2}
 .menuThumb{position:absolute;left:0;right:0;background:#53645a;border-radius:4px}
 #keys{position:absolute;inset:0}
-#keyHistory{position:absolute;left:calc(100% + 8px);top:14.8%;width:132px;height:15.35%;background:#e8ece9;border:1px solid #9ba69f;color:#17201d;font:11px/1.35 Arial,sans-serif;z-index:6;display:flex;flex-direction:column;overflow:hidden}
-#historyToggle{position:absolute;right:2px;top:2px;border:0;border-radius:3px;background:#2388ff;color:#fff;padding:3px 6px;font-size:10px;cursor:pointer;z-index:1}
-#keyHistoryTitle{padding:4px 36px 3px 5px;font-weight:700;border-bottom:1px solid #aeb9b2;white-space:nowrap}
-#keyHistoryItems{padding:4px;overflow:auto;display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px}
-.keyHistoryItem{padding:2px 4px;background:#fff;border:1px solid #c0c9c3;border-radius:3px;white-space:nowrap}
-#keyHistory.hidden{width:40px;height:22px;background:transparent;border:0;overflow:visible}
-#keyHistory.hidden #keyHistoryTitle,#keyHistory.hidden #keyHistoryItems{display:none}
-@media(max-width:700px){#keyHistory{left:12.4%;right:auto;top:31%;width:77.5%;height:6.5%}#keyHistory.hidden{left:auto;right:0;top:31%}}
 .key{position:absolute;transform:translate(-50%,-50%);border:0;border-radius:50%;padding:0;background:transparent;color:transparent;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .key:focus-visible{outline:2px solid #2388ff;background:#2388ff33}
 .key:active{background:#2388ff55}
@@ -87,7 +79,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 </style>
 </head>
 <body>
-<a id="back" href="/calc/" aria-label="Back to calculators">‹</a>
+<a id="back" href="/calc/" aria-label="Back to calculators"><span aria-hidden="true">←</span><span>Back</span></a>
 <div id="calculator" aria-label="Casio fx-83GT CW+ calculator">
 <img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Cow Chalk fx-83GT CW+ calculator"><div id="brand">Cow Chalk</div>
 <div id="screen" aria-live="polite">
@@ -95,7 +87,6 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 <div id="screenMain"><div id="expression"></div><div id="answer">0</div><div id="screenPanel"></div></div>
 </div>
 <div id="keys"></div>
-<div id="keyHistory"><button id="historyToggle" type="button">Hide</button><div id="keyHistoryTitle">Key history</div><div id="keyHistoryItems"></div></div>
 </div>
 <script>
 
@@ -154,8 +145,6 @@ let editor=null;
 let editorReturn=null;
 let undoStack=[];
 let appState=null;
-let keyHistory=[];
-let keyHistoryVisible=true;
 
 function loadState(){
  try{
@@ -553,17 +542,8 @@ function renderAnswer(value){
  if(mixed)return escapeHtml(mixed[1])+' <span class="frac"><span class="numerator">'+escapeHtml(mixed[2])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(mixed[3])+'</span></span>';
  return escapeHtml(shown).replaceAll("-","−").replaceAll("*","×");
 }
-function renderKeyHistory(){
- const root=$("keyHistory"),items=$("keyHistoryItems"),toggle=$("historyToggle");
- if(!root||!items||!toggle)return;
- root.classList.toggle("hidden",!keyHistoryVisible);
- toggle.textContent=keyHistoryVisible?"Hide":"Show";
- const display={EXE:"=", "SQUARE ROOT":"√", SQUARE:"x²", POWER:"^", FRACTION:"□/□", "×10ˣ":"×10ˣ", DELETE:"DEL", "SCROLL UP":"↑↑", "SCROLL DOWN":"↓↓", LEFT:"←", RIGHT:"→", UP:"↑", DOWN:"↓", "−":"−", "÷":"÷", "×":"×"};
- items.innerHTML=keyHistory.map(label=>'<span class="keyHistoryItem">'+escapeHtml(display[label]||label)+"</span>").join("");
- items.scrollTop=items.scrollHeight;
-}
 function render(){
- renderKeyHistory();
+
  shiftEl.src=shift?"https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003a.png":"";
  shiftEl.style.display=shift?"block":"none";
  angleEl.src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/"+(angleMode==="DEG"?"003b":angleMode==="RAD"?"003c":"003d")+".png";
@@ -1116,7 +1096,7 @@ function applyShift(label){
  return false;
 }
 function press(label){
- if(!powerOff&&!menu&&!homeOpen){keyHistory.push(label);if(keyHistory.length>36)keyHistory.shift();renderKeyHistory();}
+
  if(label==="SHIFT"){shift=!shift;render();return;}
  const shifted=shift;shift=false;
  if(powerOff){if(label==="ON")powerOn();return;}
@@ -1207,7 +1187,7 @@ function press(label){
   append(label==="×"?"*":label==="÷"?"/":label==="−"?"-":label);return;
  }
 }
-$("historyToggle").addEventListener("click",()=>{keyHistoryVisible=!keyHistoryVisible;renderKeyHistory();});
+
 for(const [label,x,y] of keyLayout){
  const button=document.createElement("button");button.type="button";button.className="key";button.setAttribute("aria-label",label);button.title=label;
  button.style.left=(x/435*100)+"%";button.style.top=(y/913*100)+"%";
