@@ -84,7 +84,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 <body>
 <a id="back" href="/calc/" aria-label="Back to calculators"><span aria-hidden="true">←</span><span>Back</span></a>
 <div id="calculator" aria-label="Casio fx-83GT CW+ calculator">
-<img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Cow Chalk fx-83GT CW+ calculator"><div id="brand">Cow Chalk</div>
+<img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Cow Chalk fx-83GT CW+ calculator"><div id="brand">Cow Chalk<span>The Larpulator</span></div>
 <div id="screen" aria-live="polite">
 <div id="indicators"><img class="indicator" id="shiftIndicator" alt=""><img class="indicator" id="mathIndicator" src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003F.png" alt="Natural input"><img class="indicator" id="angleIndicator" src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003b.png" alt="Degrees"><span class="indicator text" id="historyIndicator"></span><span class="indicator text" id="formatIndicator"></span></div>
 <div id="screenMain"><div id="expression"></div><div id="answer">0</div><div id="screenPanel"></div></div>
@@ -531,7 +531,7 @@ function renderAppScreen(){
     const counts={};heads.forEach(v=>counts[v]=(counts[v]||0)+1);
     const entries=Object.keys(counts).sort((a,b)=>Number(a)-Number(b));const start=Math.max(0,(appState.tableRow||0)-3);html+='<table class="appTable"><tr><th>'+(appState.mode==="Dice Roll"?"Sum":"Heads")+'</th><th>Freq</th><th>Rel Fr</th></tr>'+entries.slice(start,start+4).map((k,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+k+'</td><td>'+counts[k]+'</td><td>'+fmt(counts[k]/appState.attempts)+'</td></tr>').join("")+'</table>';
    }else {const start=Math.max(0,(appState.tableRow||0)-3);html+='<table class="appTable"><tr><th>#</th>'+appState.rows[0].map((_,i)=>'<th>'+String.fromCharCode(65+i)+'</th>').join("")+'<th>'+ (appState.mode==="Dice Roll"?"Sum":"Heads")+'</th></tr>'+appState.rows.slice(start,start+4).map((r,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+(start+i+1)+'</td>'+r.map(v=>'<td>'+(appState.mode==="Dice Roll"?v:v?"●":"○")+'</td>').join("")+'<td>'+heads[start+i]+'</td></tr>').join("")+'</table>';}
-    html+='<div class="appNote">Attempts: '+appState.attempts+' · BACK for result type</div>';
+    
    }else html+='<div class="appResult">'+(appState.mode==="Dice Roll"?"Dice":"Coins")+' = '+appState.count+'<br>Attempts = '+appState.attempts+'<br>Select TOOLS → Execute.</div>';
   }else if(appState.mode==="Circle"){
    const a=appState.angle||0,rad=angleMode==="DEG"?a*Math.PI/180:a;
