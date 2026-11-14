@@ -558,7 +558,8 @@ function renderKeyHistory(){
  if(!root||!items||!toggle)return;
  root.classList.toggle("hidden",!keyHistoryVisible);
  toggle.textContent=keyHistoryVisible?"Hide":"Show";
- items.innerHTML=keyHistory.map(label=>'<span class="keyHistoryItem">'+escapeHtml(label==="EXE"?"=":label)+"</span>").join("");
+ const display={EXE:"=", "SQUARE ROOT":"√", SQUARE:"x²", POWER:"^", FRACTION:"□/□", "×10ˣ":"×10ˣ", DELETE:"DEL", "SCROLL UP":"↑↑", "SCROLL DOWN":"↓↓", LEFT:"←", RIGHT:"→", UP:"↑", DOWN:"↓", "−":"−", "÷":"÷", "×":"×"};
+ items.innerHTML=keyHistory.map(label=>'<span class="keyHistoryItem">'+escapeHtml(display[label]||label)+"</span>").join("");
  items.scrollTop=items.scrollHeight;
 }
 function render(){
