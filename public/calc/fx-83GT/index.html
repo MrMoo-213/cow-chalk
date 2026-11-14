@@ -809,6 +809,7 @@ function applyShift(label){
  if(label==="LOG"){insertFunction("ln");return true;}
  if(label==="−"){append("~");return true;}
  if(label==="+"){append("°");return true;}
+ if(label===")"){append(",");return true;}
  if(label==="POWER"){append("^(-1)");return true;}
  if(label==="7"){append("pi");return true;}
  if(label==="8"){append("e");return true;}
