@@ -519,7 +519,7 @@ function evaluate(source){
    if(["A","B","C","D","E","F"].includes(rawName))return variables[rawName]??0;
    if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return ansMemory;
    if(name==="ran"&&!peek())return Math.floor(Math.random()*1000)/1000;
-   if(["a","b","c","d","f","x","y","z"].includes(name))return variables[name.toUpperCase()]??variables[name]??0;
+   if(["x","y","z"].includes(name))return variables[name]??0;
    if(peek()&&peek().type==="("){
     take();
     if(name==="ran"){expect(")");return Math.floor(Math.random()*1000)/1000;}
