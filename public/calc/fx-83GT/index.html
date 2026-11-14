@@ -505,15 +505,15 @@ if(mode==="Dice Roll"||mode==="Coin Toss")appState={type:"Math Box",mode,count:1
 function renderAppScreen(){
  expressionEl.style.display="";answerEl.style.display="";panelEl.className="visible app"+(appState.type==="Statistics"&&!appState.showResults?" statsEditor":"");
   const input=appState.inputPrompt?escapeHtml(appState.inputPrompt)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):"";
-  expressionEl.innerHTML=escapeHtml(prefix)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>');
-  answerEl.innerHTML="";
+  expressionEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?"":(input||(appState.type==="Math Box"&&appState.mode==="Circle"?"Angle = "+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):""));
+  answerEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?input:"";
  if(appState.type==="Statistics"){
   if(appState.showResults){
    const rows=appStatistics();html='<div class="appTitle">'+(appState.paired?"2-Var Results":"1-Var Results")+'</div><div class="appResult">'+rows.map(v=>escapeHtml(v[0])+" = "+escapeHtml(fmt(v[1]))).join("<br>")+'</div>';
   }else{
    const cols=appState.paired?["x","y"]:["x"],rows=[];
    for(let i=0;i<Math.max(4,appState.x.length,appState.y.length);i++)rows.push('<tr><td>'+(i+1)+'</td>'+cols.map((col,j)=>'<td class="'+(appState.row===i&&appState.column===j?"selected":"")+'">'+(appState[col][i]===undefined?"":escapeHtml(fmt(appState[col][i])))+'</td>').join("")+'</tr>');
-    const start=appState.rowStart||0;html='<table class="appTable"><tr><th></th>'+cols.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.slice(start,start+4).map((row,i)=>row.replace("<tr>","<tr class="'+(appState.row===start+i?"selected":"")+'">')).join("")+'</table>';
+    const start=appState.rowStart||0;html='<table class="appTable"><tr><th></th>'+cols.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.slice(start,start+4).join("")+'</table>';
   }
  }else if(appState.type==="Table"){
   const rows=appState.rows||[];
@@ -584,7 +584,7 @@ function render(){
  if(editor){
   const prefix=editor.prefix;
   expressionEl.innerHTML=escapeHtml(prefix)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>');
-  expressionEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?"":(input||(appState.type==="Math Box"&&appState.mode==="Circle"?"Angle = "+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):""));
+  answerEl.innerHTML="";
   answerEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?input:"";
   return;
  }
