@@ -446,7 +446,7 @@ function runMathBoxSimulation(){
   rows.push(vals);
  }
  appState.rows=rows;
- openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{appState.resultType=item.label;appState.result=true;render();});
+ openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{menu=null;menuFrames=[];appState.resultType=item.label;appState.result=true;render();});
 }
 function handleAppArrow(label){
  if(appState.type==="Statistics"){
@@ -458,7 +458,7 @@ function handleAppArrow(label){
  if(appState.type==="Math Box"&&appState.mode==="Number Line"&&label==="RIGHT"&&appState.lines.length<3){beginAppInput("Inequality "+(appState.lines.length+1)+" = ","line");return;}
 }
 function handleAppBack(){
- if(appState.type==="Math Box"&&appState.result){appState.result=false;appState.rows=[];openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{appState.resultType=item.label;runMathBoxSimulation();});return;}
+ if(appState.type==="Math Box"&&appState.result){appState.result=false;appState.rows=[];openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{menu=null;menuFrames=[];appState.resultType=item.label;appState.result=true;render();});return;}
  if(appState.type==="Math Box"){
   appState=null;openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>startMathBox(item.label));return;
  }
