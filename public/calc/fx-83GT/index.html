@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Casio fx-83GT CW+</title>
+<title>Casio fx-83GT CW+ Calculator</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/favicon1.png">
 <style>
 *{box-sizing:border-box}
@@ -12,23 +12,32 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 #back{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:#2388ff;color:#fff;text-decoration:none;font:32px/1 Arial,sans-serif;box-shadow:0 2px 9px #0002;-webkit-tap-highlight-color:transparent}
 #back:hover{background:#0874ed}
 #calculator{position:relative;display:block;height:min(100dvh,calc(100vw * 913 / 435));width:min(100vw,calc(100dvh * 435 / 913));aspect-ratio:435/913;flex:none}
-#calculator img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
-#screen{position:absolute;left:12.4%;top:14.8%;width:77.5%;height:15.35%;display:flex;align-items:center;justify-content:center;padding:4px;background:#c2ccc8;color:#111;font:600 clamp(10px,2.4vw,18px)/1.2 Arial,sans-serif;text-align:center;overflow:hidden;pointer-events:none}
+#calculator>img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
+#screen{position:absolute;left:12.4%;top:14.8%;width:77.5%;height:15.35%;padding:5px 7px;background:#c2ccc8;color:#18201d;font:clamp(8px,1.75vw,13px)/1.35 Arial,sans-serif;overflow:hidden;pointer-events:none;display:flex;flex-direction:column;justify-content:flex-start;text-align:left}
+#indicators{height:13%;min-height:8px;display:flex;justify-content:space-between;white-space:nowrap;font-size:.72em;line-height:1}
+#screenMain{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere}
+#expression{font-size:1em;min-height:1.2em}
+#answer{font-size:1.22em;text-align:right;min-height:1.3em}
+#screenMain.menu{justify-content:flex-start;white-space:pre;line-height:1.55;font-size:.92em}
 #keys{position:absolute;inset:0}
 .key{position:absolute;transform:translate(-50%,-50%);border:0;border-radius:50%;padding:0;background:transparent;color:transparent;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .key:focus-visible{outline:2px solid #2388ff;background:#2388ff33}
 .key:active{background:#2388ff55}
+@media(hover:hover){.key:hover{background:#2388ff18}}
 </style>
 </head>
 <body>
 <a id="back" href="/calc/" aria-label="Back to calculators">‹</a>
 <div id="calculator" aria-label="Casio fx-83GT CW+ calculator">
 <img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Casio fx-83GT CW+ calculator">
-<div id="screen" aria-live="polite">Press a button</div>
+<div id="screen" aria-live="polite">
+<div id="indicators"><span id="modeIndicator">MathI/MathO</span><span id="statusIndicator">D</span></div>
+<div id="screenMain"><div id="expression"></div><div id="answer">0</div></div>
+</div>
 <div id="keys"></div>
 </div>
 <script>
-const keys=[
+const keyLayout=[
 ["ON",58,353],["HOME",122,357],["UP",250,357],["SCROLL UP",377,357],
 ["SETTINGS",58,413],["BACK",122,413],["LEFT",185,413],["OK",250,413],["RIGHT",314,413],["SCROLL DOWN",377,411],
 ["SHIFT",58,481],["VARIABLE",122,481],["FUNCTION",185,481],["DOWN",250,470],["CATALOG",314,481],["TOOLS",377,479],
@@ -40,22 +49,216 @@ const keys=[
 ["0",62,851],[".",140,850],["×10ˣ",218,850],["FORMAT",296,850],["EXE",374,850]
 ];
 const container=document.getElementById("keys");
-const screen=document.getElementById("screen");
-for(const [label,x,y] of keys){
- const button=document.createElement("button");
- button.type="button";
- button.className="key";
- button.setAttribute("aria-label",label);
- button.title=label;
- button.style.left=(x/435*100)+"%";
- button.style.top=(y/913*100)+"%";
- const isScroll=label==="SCROLL UP"||label==="SCROLL DOWN";
- const isBottom=y>=650;
- button.style.width=isScroll?"9.5%":isBottom?"12.2%":y<390?"9%":"10.2%";
- button.style.height=isScroll?"7%":isBottom?"5.9%":y<390?"4.3%":"4.8%";
- button.addEventListener("click",()=>{screen.textContent=label+" pressed";});
- container.appendChild(button);
+const expressionEl=document.getElementById("expression");
+const answerEl=document.getElementById("answer");
+const mainEl=document.getElementById("screenMain");
+const statusEl=document.getElementById("statusIndicator");
+const modeEl=document.getElementById("modeIndicator");
+let expression="";
+let answer=0;
+let lastExpression="";
+let shift=false;
+let angleMode="DEG";
+let inputMode="MathI/MathO";
+let resultMode="Natural";
+let menu=null;
+let menuIndex=0;
+let menuScroll=0;
+let memory=0;
+let variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};
+let history=[];
+let lastWasResult=false;
+let cursor=0;
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const fmt=n=>{
+ if(typeof n!=="number"||!Number.isFinite(n))return String(n);
+ if(Math.abs(n)<1e-12)n=0;
+ if(Number.isInteger(n)&&Math.abs(n)<1e13)return String(n);
+ return Number(n.toPrecision(12)).toString();
+};
+const displayExpr=s=>s.replaceAll("*","×").replaceAll("/","÷").replaceAll("-","−").replaceAll("pi","π");
+function render(){
+ modeEl.textContent=inputMode;
+ statusEl.textContent=(angleMode==="DEG"?"D":angleMode==="RAD"?"R":"G")+(shift?"  S":"");
+ if(menu){
+  mainEl.classList.add("menu");
+  expressionEl.textContent="";
+  const visible=6;
+  if(menuIndex<menuScroll)menuScroll=menuIndex;
+  if(menuIndex>=menuScroll+visible)menuScroll=menuIndex-visible+1;
+  const lines=menu.items.slice(menuScroll,menuScroll+visible).map((item,i)=>(menuScroll+i===menuIndex?"▶ ":"  ")+(menuScroll+i+1)+". "+item.label);
+  answerEl.textContent=menu.title+"\n"+lines.join("\n");
+  answerEl.style.textAlign="left";
+  return;
+ }
+ mainEl.classList.remove("menu");
+ answerEl.style.textAlign="right";
+ expressionEl.textContent=expression?displayExpr(expression):"";
+ if(lastWasResult&&lastExpression)expressionEl.textContent=displayExpr(lastExpression)+"\n";
+ answerEl.textContent=fmt(answer);
 }
+function tokenize(source){
+ const s=source.replaceAll("×","*").replaceAll("÷","/").replaceAll("−","-").replaceAll("π","pi").replaceAll("√","sqrt");
+ const tokens=[];let i=0;
+ while(i<s.length){
+  if(/\s/.test(s[i])){i++;continue;}
+  const rest=s.slice(i);
+  const num=rest.match(/^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/i);
+  if(num){tokens.push({type:"number",value:Number(num[0])});i+=num[0].length;continue;}
+  const id=rest.match(/^[a-zA-Z]+/);
+  if(id){tokens.push({type:"id",value:id[0].toLowerCase()});i+=id[0].length;continue;}
+  if("+-*/^!%(),".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
+  throw Error("Syntax ERROR");
+ }
+ const out=[];
+ for(let j=0;j<tokens.length;j++){
+  const a=tokens[j],b=tokens[j+1];
+  out.push(a);
+  if(b&&((a.type==="number"||a.type==="id"||a.type===")"||a.type==="!"||a.type==="%")&&(b.type==="number"||b.type==="id"||b.type==="("))){
+   if(!(a.type==="id"&&["sin","cos","tan","asin","acos","atan","sinh","cosh","tanh","sqrt","log","ln","abs","floor","ceil","round","exp"].includes(a.value)&&b.type==="("))out.push({type:"*",value:"*"});
+  }
+ }
+ return out;
+}
+function evaluate(source){
+ const t=tokenize(source);let p=0;
+ const peek=()=>t[p];
+ const take=()=>t[p++];
+ const expect=type=>{if(!peek()||peek().type!==type)throw Error("Syntax ERROR");return take();};
+ const factorial=n=>{if(n<0||!Number.isInteger(n)||n>170)throw Error("Math ERROR");let r=1;for(let i=2;i<=n;i++)r*=i;return r;};
+ const toRad=x=>angleMode==="DEG"?x*Math.PI/180:angleMode==="GRA"?x*Math.PI/200:x;
+ const fromRad=x=>angleMode==="DEG"?x*180/Math.PI:angleMode==="GRA"?x*200/Math.PI:x;
+ function primary(){
+  const q=peek();if(!q)throw Error("Syntax ERROR");
+  if(q.type==="number"){take();return q.value;}
+  if(q.type==="+"){take();return unary();}
+  if(q.type==="-"){take();return -unary();}
+  if(q.type==="("){take();const v=add();expect(")");return v;}
+  if(q.type==="id"){
+   const name=take().value;
+   if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return answer;
+   if(peek()&&peek().type==="("){
+    take();const v=add();expect(")");
+    const f={sqrt:Math.sqrt,log:Math.log10,ln:Math.log,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,exp:Math.exp,sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+    if(!f[name])throw Error("Syntax ERROR");return f[name](v);
+   }
+   if(name==="sqrt")return Math.sqrt(unary());
+   if(name==="sin"||name==="cos"||name==="tan"||name==="log"||name==="ln")return primaryFunction(name);
+   if(Object.prototype.hasOwnProperty.call(variables,name))return variables[name];
+   throw Error("Syntax ERROR");
+  }
+  throw Error("Syntax ERROR");
+ }
+ function primaryFunction(name){const v=unary();if(name==="sin")return Math.sin(toRad(v));if(name==="cos")return Math.cos(toRad(v));if(name==="tan")return Math.tan(toRad(v));if(name==="log")return Math.log10(v);return Math.log(v);}
+ function postfix(){let v=primary();while(peek()&&(peek().type==="!"||peek().type==="%")){const op=take().type;v=op==="!"?factorial(v):v/100;}return v;}
+ function power(){let v=postfix();if(peek()&&peek().type==="^"){take();v=Math.pow(v,unary());}return v;}
+ function unary(){return power();}
+ function mul(){let v=unary();while(peek()&&["*","/"].includes(peek().type)){const op=take().type;const r=unary();v=op==="*"?v*r:v/r;}return v;}
+ function add(){let v=mul();while(peek()&&["+","+"] .includes(peek().type)){const op=take().type;const r=mul();v=op==="+"?v+r:v-r;}return v;}
+ const value=add();if(p<t.length)throw Error("Syntax ERROR");if(!Number.isFinite(value))throw Error("Math ERROR");return value;
+}
+function append(value){
+ if(menu){return;}
+ if(lastWasResult){if(/[0-9.(]/.test(value))expression="";else expression=String(answer);lastWasResult=false;}
+ expression=expression.slice(0,cursor)+value+expression.slice(cursor);cursor+=value.length;render();
+}
+function insertFunction(name){append(name+"(");}
+function calculate(){
+ if(!expression.trim())return;
+ try{
+  const result=evaluate(expression);
+  lastExpression=expression;history.unshift({expression,result});history=history.slice(0,30);
+  answer=result;lastWasResult=true;cursor=expression.length;render();
+ }catch(e){answer=e.message||"Math ERROR";lastWasResult=false;render();setTimeout(()=>{if(typeof answer==="string"){answer=0;render();}},1300);}
+}
+function clear(){expression="";lastExpression="";answer=0;lastWasResult=false;cursor=0;render();}
+function moveCursor(d){if(lastWasResult){expression=lastExpression;lastWasResult=false;}cursor=clamp(cursor+d,0,expression.length);render();}
+function openMenu(title,items,action){menu={title,items,action};menuIndex=0;menuScroll=0;render();}
+function closeMenu(){menu=null;render();}
+function chooseMenu(){
+ if(!menu)return;
+ const item=menu.items[menuIndex];if(!item)return;
+ const action=menu.action;menu=null;
+ if(action)action(item);render();
+}
+function settingsMenu(){
+ openMenu("SETTINGS",[{label:"Calc Settings"},{label:"System Settings"},{label:"Reset"}],item=>{
+  if(item.label==="Calc Settings")openMenu("CALC SETTINGS",[{label:"Input/Output"},{label:"Angle Unit"},{label:"Number Format"},{label:"Fraction Result"},{label:"Decimal Mark"}],x=>{
+   if(x.label==="Angle Unit")openMenu("ANGLE UNIT",["Degree","Radian","Gradian"].map(label=>({label})),v=>{angleMode=v.label==="Degree"?"DEG":v.label==="Radian"?"RAD":"GRA";});
+   else if(x.label==="Input/Output")openMenu("INPUT/OUTPUT",["MathI/MathO","MathI/DecimalO","LineI/LineO","LineI/DecimalO"].map(label=>({label})),v=>{inputMode=v.label;});
+   else if(x.label==="Number Format")openMenu("NUMBER FORMAT",["Norm 1","Norm 2","Fix","Sci"].map(label=>({label})),v=>{resultMode=v.label;});
+   else if(x.label==="Fraction Result")openMenu("FRACTION RESULT",["Mixed Fraction","Improper Fraction"].map(label=>({label})),()=>{});
+   else openMenu("DECIMAL MARK",["Dot","Comma"].map(label=>({label})),()=>{});
+  });
+  if(item.label==="System Settings")openMenu("SYSTEM SETTINGS",[{label:"Contrast"},{label:"Auto Power Off"}],()=>{});
+  if(item.label==="Reset")openMenu("RESET",[{label:"Reset Setup"},{label:"Reset All"}],v=>{if(v.label==="Reset All"){variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};memory=0;answer=0;angleMode="DEG";inputMode="MathI/MathO";clear();}});
+ });
+}
+function homeMenu(){openMenu("HOME",[{label:"Calculate"},{label:"Statistics"},{label:"Table"},{label:"Ratio"},{label:"Math Box"}],v=>{if(v.label!=="Calculate")openMenu(v.label.toUpperCase(),[{label:"This app is not implemented yet"},{label:"BACK"}],()=>{});else clear();});}
+function variableMenu(){openMenu("VARIABLE",Object.keys(variables).map(label=>({label:label+" = "+fmt(variables[label]),name:label})),v=>append(v.name));}
+function catalogMenu(){openMenu("CATALOG",["Trigonometry","sin(","cos(","tan(","asin(","acos(","atan(","log(","ln(","sqrt(","π","e","!","%"].map(label=>({label})),v=>{if(v.label==="π")append("pi");else if(v.label==="e")append("e");else if(v.label==="!")append("!");else if(v.label==="%")append("%");else if(v.label==="Trigonometry")openMenu("TRIGONOMETRY",["sin(","cos(","tan(","asin(","acos(","atan("].map(label=>({label})),x=>append(x.label));else append(v.label);});}
+function toolsMenu(){openMenu("TOOLS",[{label:"Calculate"},{label:"Calculation History"},{label:"Memory"},{label:"Variable"},{label:"Prime Factorisation"}],v=>{
+ if(v.label==="Calculation History")openMenu("HISTORY",history.map(h=>({label:h.expression+" = "+fmt(h.result),value:h})),h=>{expression=h.value.expression;answer=h.value.result;lastWasResult=true;lastExpression=expression;cursor=expression.length;});
+ if(v.label==="Memory")openMenu("MEMORY",[{label:"M = "+fmt(memory)},{label:"M+"},{label:"M-"},{label:"MR"},{label:"MC"}],x=>{if(x.label==="M+")memory+=Number(answer);if(x.label==="M-")memory-=Number(answer);if(x.label==="MR")append(String(memory));if(x.label==="MC")memory=0;});
+ if(v.label==="Variable")variableMenu();
+ if(v.label==="Prime Factorisation")insertFunction("factor(");
+ });}
+function press(label){
+ if(label==="ON"){clear();menu=null;shift=false;return;}
+ if(menu){
+  if(label==="UP"||label==="SCROLL UP")menuIndex=clamp(menuIndex-1,0,menu.items.length-1);
+  else if(label==="DOWN"||label==="SCROLL DOWN")menuIndex=clamp(menuIndex+1,0,menu.items.length-1);
+  else if(label==="OK"||label==="EXE")chooseMenu();
+  else if(label==="BACK"||label==="AC")closeMenu();
+  render();return;
+ }
+ if(label==="SHIFT"){shift=!shift;render();return;}
+ if(label==="HOME"){homeMenu();return;}
+ if(label==="SETTINGS"){settingsMenu();return;}
+ if(label==="BACK"){if(expression){expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor=Math.max(0,cursor-1);}else clear();render();return;}
+ if(label==="UP"){if(history.length){const h=history[0];expression=h.expression;cursor=expression.length;lastWasResult=false;render();}return;}
+ if(label==="DOWN"){return;}
+ if(label==="LEFT"){moveCursor(-1);return;}
+ if(label==="RIGHT"){moveCursor(1);return;}
+ if(label==="VARIABLE"){variableMenu();return;}
+ if(label==="CATALOG"){catalogMenu();return;}
+ if(label==="TOOLS"){toolsMenu();return;}
+ if(label==="FUNCTION"){openMenu("FUNCTION",[{label:"f(x) = "},{label:"g(x) = "}],()=>{});return;}
+ if(label==="OK"||label==="EXE"){calculate();return;}
+ if(label==="AC"){clear();return;}
+ if(label==="DELETE"){if(lastWasResult){expression=lastExpression;lastWasResult=false;}expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor=Math.max(0,cursor-1);render();return;}
+ if(label==="FORMAT"){if(typeof answer==="number"&&!Number.isInteger(answer)){openMenu("FORMAT",[{label:"Standard"},{label:"Decimal"},{label:"Prime Factorisation"}],v=>{if(v.label==="Decimal")answer=Number(answer);if(v.label==="Prime Factorisation"){const n=Math.abs(Math.trunc(answer));let factors=[],d=2,m=n;while(d*d<=m){let c=0;while(m%d===0){m/=d;c++;}if(c)factors.push(d+(c>1?"^"+c:""));d++;}if(m>1)factors.push(m);answer=factors.join(" × ")||"1";}});}return;}
+ if(label==="FRACTION"){append("/");return;}
+ if(label==="SQUARE ROOT"){insertFunction(shift?"cbrt":"sqrt");shift=false;return;}
+ if(label==="POWER"){append("^");return;}
+ if(label==="SQUARE"){append(shift?"^3":"^2");shift=false;return;}
+ if(label==="LOG"){insertFunction(shift?"ln":"log");shift=false;return;}
+ if(label==="sin"||label==="cos"||label==="tan"){insertFunction(shift?({sin:"asin",cos:"acos",tan:"atan"}[label]):label);shift=false;return;}
+ if(label==="ANS"){append("ans");return;}
+ if(label==="x"){append("x");return;}
+ if(label==="×10ˣ"){append("×10^");return;}
+ if(label==="×"||label==="÷"||label==="+"||label==="−"||label==="("||label===")"||label==="."||/^[0-9]$/.test(label)){append(label);return;}
+}
+for(const [label,x,y] of keyLayout){
+ const button=document.createElement("button");button.type="button";button.className="key";button.setAttribute("aria-label",label);button.title=label;
+ button.style.left=(x/435*100)+"%";button.style.top=(y/913*100)+"%";
+ const scroll=label==="SCROLL UP"||label==="SCROLL DOWN",bottom=y>=650;
+ button.style.width=scroll?"9.5%":bottom?"12.2%":y<390?"9%":"10.2%";
+ button.style.height=scroll?"7%":bottom?"5.9%":y<390?"4.3%":"4.8%";
+ button.addEventListener("click",()=>press(label));container.appendChild(button);
+}
+document.addEventListener("keydown",e=>{
+ if(e.key==="Enter"||e.key==="="){e.preventDefault();press("EXE");}
+ else if(e.key==="Escape"){press("AC");}
+ else if(e.key==="Backspace"){e.preventDefault();press("DELETE");}
+ else if(e.key==="ArrowLeft"){e.preventDefault();press("LEFT");}
+ else if(e.key==="ArrowRight"){e.preventDefault();press("RIGHT");}
+ else if(e.key==="ArrowUp"){e.preventDefault();press("UP");}
+ else if(e.key==="ArrowDown"){e.preventDefault();press("DOWN");}
+ else if(/^[0-9.+*/()%-]$/.test(e.key)){e.preventDefault();append(e.key);}
+ else if(e.key==="^"){e.preventDefault();append("^");}
+});
+render();
 </script>
 </body>
 </html>
