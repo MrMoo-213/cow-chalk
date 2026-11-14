@@ -622,6 +622,7 @@ function showRealTime(){
   clearInterval(clockId);updateClock();clockId=setInterval(updateClock,10);
 }
 function selectOption(choice){
+  if(choice==="calculators"){location.href="/calc/";return}
   if(choice==="pirate"){goRoute("pirate");return}
   if(choice==="realtime"){goRoute("time");return}
   if(choice==="stopwatch"){goRoute("stopwatch");return}
