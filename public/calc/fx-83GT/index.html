@@ -776,7 +776,14 @@ function press(label){
   if(label==="FRACTION"){insertFraction();return;}
   if(label==="POWER"){insertPower();return;}
   if(label==="SQUARE ROOT"){insertSquareRoot();return;}
+  if(label==="SQUARE"){append("^2");return;}
+  if(label==="LOG"){insertFunction("log");return;}
+  if(label==="ANS"){append("ans");return;}
+  if(label==="x"){append("x");return;}
   if(label==="sin"||label==="cos"||label==="tan"){insertFunction(label);return;}
+  if(label==="CATALOG"){catalogMenu();return;}
+  if(label==="FUNCTION"){functionMenu();return;}
+  if(label==="×10ˣ"){append("*10^");return;}
   return;
  }
  if(homeOpen){
