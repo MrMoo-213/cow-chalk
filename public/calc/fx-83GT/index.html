@@ -504,9 +504,9 @@ if(mode==="Dice Roll"||mode==="Coin Toss")appState={type:"Math Box",mode,count:1
 }
 function renderAppScreen(){
  expressionEl.style.display="";answerEl.style.display="";panelEl.className="visible app"+(appState.type==="Statistics"&&!appState.showResults?" statsEditor":"");
-   expressionEl.innerHTML=escapeHtml(prefix)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>');
-   answerEl.innerHTML="";
- let html="";
+  const input=appState.inputPrompt?escapeHtml(appState.inputPrompt)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):"";
+  expressionEl.innerHTML=escapeHtml(prefix)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>');
+  answerEl.innerHTML="";
  if(appState.type==="Statistics"){
   if(appState.showResults){
    const rows=appStatistics();html='<div class="appTitle">'+(appState.paired?"2-Var Results":"1-Var Results")+'</div><div class="appResult">'+rows.map(v=>escapeHtml(v[0])+" = "+escapeHtml(fmt(v[1]))).join("<br>")+'</div>';
