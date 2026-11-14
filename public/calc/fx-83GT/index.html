@@ -762,9 +762,9 @@ function formatMenu(){
  openMenu("",options.map(label=>({label,value:""})),item=>{
   if(item.label==="Standard")answerDisplay=standardResult(answer);
   if(item.label==="Decimal")answerDisplay=fmt(answer);
-  if(item.label==="Recurring Decimal")answerDisplay=recurringDecimal(answer);
-  if(item.label==="Improper Fraction"){const p=fractionParts(answer);answerDisplay=p[0]+"/"+p[1];}
-  if(item.label==="Mixed Fraction")answerDisplay=mixedFraction(answer);
+  if(item.label==="Recurring Decimal")answerDisplay=exactFraction(answer)?recurringDecimal(answer):fmt(answer);
+  if(item.label==="Improper Fraction"){const p=exactFraction(answer);answerDisplay=p?p[0]+"/"+p[1]:standardResult(answer);}
+  if(item.label==="Mixed Fraction")answerDisplay=exactFraction(answer)?mixedFraction(answer):standardResult(answer);
   if(item.label==="ENG Notation"){
    const exponent=Number.isFinite(answer)&&answer!==0?Math.floor(Math.log10(Math.abs(answer))/3)*3:0;
    answerDisplay=fmt(answer/Math.pow(10,exponent))+" × 10^"+exponent;
