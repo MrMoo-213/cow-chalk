@@ -59,7 +59,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 @keyframes blink{50%{opacity:0}}
 #screenPanel .homeApp:active,#screenPanel .menuRow:active{filter:brightness(.9)}
 
-#brand{position:absolute;left:14%;top:9.3%;width:31%;height:2.8%;display:flex;align-items:center;color:#1a2520;font:700 3.3cqw/1 Arial,sans-serif;letter-spacing:.02em;pointer-events:none;z-index:1}
+#brand{position:absolute;left:14%;top:9.3%;width:31%;height:2.8%;display:flex;align-items:center;color:#1a2520;font:700 clamp(7px,1.1vw,12px)/1 Arial,sans-serif;letter-spacing:.02em;pointer-events:none;z-index:1}
 #screen.powered-off{background:#7e8882;color:#7e8882}
 #screen.powered-off #indicators{visibility:hidden}
 #screen.powered-off #screenMain{visibility:hidden}
@@ -117,6 +117,7 @@ let fractionResult="Improper Fraction";
 let decimalMark="Dot";
 let digitSeparator="On";
 let formatKeyMode="Format Menu";
+let systemSettings={contrast:5,autoPowerOff:"10 Min.",multilineFont:"Normal Font",qrVersion:"Version 11"};
 let memory=0;
 let variables={A:0,B:0,C:0,D:0,E:0,F:0,x:0,y:0,z:0};
 let functions={f:"",g:""};
@@ -134,11 +135,17 @@ let undoStack=[];
 
 function loadState(){
  try{
-  const match=String(document.cookie||"").split("; ").find(v=>v.startsWith(KEY+"="));
-  if(!match)return;
-  const data=JSON.parse(decodeURIComponent(match.slice(KEY.length+1)));
+  let packed="";
+  try{if(typeof localStorage!=="undefined")packed=localStorage.getItem(KEY)||"";}catch(e){}
+  if(!packed){
+   const match=String(document.cookie||"").split("; ").find(v=>v.startsWith(KEY+"="));
+   if(match)packed=decodeURIComponent(match.slice(KEY.length+1));
+  }
+  if(!packed)return;
+  const data=JSON.parse(packed);
   if(data.variables)variables={...variables,...data.variables};
   if(data.functions)functions={...functions,...data.functions};
+  if(data.systemSettings)systemSettings={...systemSettings,...data.systemSettings};
   if(data.settings){
    angleMode=data.settings.angleMode||angleMode;inputMode=data.settings.inputMode||inputMode;
    resultMode=data.settings.resultMode||resultMode;fixDigits=data.settings.fixDigits??fixDigits;
@@ -156,11 +163,13 @@ function loadState(){
 function persist(){
  try{
   const data={
-   variables,functions,ansMemory,memory,history:history.slice(0,50),expression,
+   variables,functions,systemSettings,ansMemory,memory,history:history.slice(0,50),expression,
    answer:typeof answer==="number"?answer:null,answerDisplay,
    settings:{angleMode,inputMode,resultMode,fixDigits,sciDigits,fractionResult,decimalMark,digitSeparator,formatKeyMode}
   };
-  document.cookie=KEY+"="+encodeURIComponent(JSON.stringify(data))+"; path=/; max-age=31536000; SameSite=Lax";
+  const packed=JSON.stringify(data);
+  try{if(typeof localStorage!=="undefined")localStorage.setItem(KEY,packed);}catch(e){}
+  document.cookie=KEY+"="+encodeURIComponent(packed)+"; path=/; max-age=31536000; SameSite=Lax";
  }catch(e){}
 }
 function fmt(n){
@@ -243,14 +252,14 @@ function renderRich(s,from,to,caretPos){
    if(close>=0){
     const bodyStart=open+1,bodyEnd=close;
     if(found==="sqrt"){
-     out+='<span class="root"><span class="radical">√</span><span class="radicand">'+(bodyStart===bodyEnd?'<span class="rootBox">□</span>':renderRich(s,bodyStart,bodyEnd,caretPos))+'</span></span>';
+     out+='<span class="root"><span class="radical">√</span><span class="radicand">'+(bodyStart===bodyEnd?'<span class="rootBox">□'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,bodyEnd,caretPos))+'</span></span>';
     }else if(found==="root"){
      const comma=findTopComma(s,bodyStart,bodyEnd);
-     if(comma>=0)out+='<span class="customRoot"><span class="rootIndex">'+(bodyStart===comma?'<span class="rootBox">□</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="radical">√</span><span class="radicand">'+(comma+1===bodyEnd?'<span class="rootBox">□</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
+     if(comma>=0)out+='<span class="customRoot"><span class="rootIndex">'+(bodyStart===comma?'<span class="rootBox">□'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="radical">√</span><span class="radicand">'+(comma+1===bodyEnd?'<span class="rootBox">□'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
      else out+='root('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
     }else if(found==="frac"){
      const comma=findTopComma(s,bodyStart,bodyEnd);
-     if(comma>=0)out+='<span class="frac"><span class="numerator">'+(bodyStart===comma?'<span class="fracBox">□</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="fraction-bar"></span><span class="denominator">'+(comma+1===bodyEnd?'<span class="fracBox">□</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
+     if(comma>=0)out+='<span class="frac"><span class="numerator">'+(bodyStart===comma?'<span class="fracBox">□'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="fraction-bar"></span><span class="denominator">'+(comma+1===bodyEnd?'<span class="fracBox">□'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
      else out+='frac('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
     }else if(found==="randint"){
      out+='<span>RanInt#('+renderRich(s,bodyStart,bodyEnd,caretPos)+')</span>';
@@ -267,7 +276,7 @@ function renderRich(s,from,to,caretPos){
   }
   if(s[i]==="^"&&s[i+1]==="("){
    const close=matchingParen(s,i+1,to);
-   if(close>=0){const exponent=close===i+2?'<span class="powerBox">□</span>':renderRich(s,i+2,close,caretPos);out+='<sup>'+exponent+'</sup>';i=close+1;continue;}
+   if(close>=0){const exponent=close===i+2?'<span class="powerBox">□'+(caretPos===i+2?'<span class="caret"></span>':'')+'</span>':renderRich(s,i+2,close,caretPos);out+='<sup>'+exponent+'</sup>';i=close+1;continue;}
   }
   const ch=s[i];
   if(ch==="~"||ch==="-")out+="−";
@@ -319,6 +328,10 @@ const homeApps=[
 function renderAnswer(value){
  if(typeof value!=="number"||!Number.isFinite(value))return escapeHtml(answerDisplay);
  const shown=answerDisplay||standardResult(value);
+ const recurring=shown.match(/^(-?\d+)\.\((\d+)\)$/);
+ if(recurring)return escapeHtml(recurring[1])+".<span class=\"recurringDigits\">"+escapeHtml(recurring[2])+"</span>";
+ const eng=shown.match(/^(.+?)\s×\s10\^(-?\d+)$/);
+ if(eng)return escapeHtml(eng[1])+" × 10<sup>"+escapeHtml(eng[2])+"</sup>";
  const frac=shown.match(/^(-?\d+)\/(\d+)$/);
  if(frac)return '<span class="frac"><span class="numerator">'+escapeHtml(frac[1])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(frac[2])+'</span></span>';
  const mixed=shown.match(/^(-?\d+) (\d+)\/(\d+)$/);
@@ -612,19 +625,19 @@ function settingsMenu(){
    if(choice.label==="FORMAT Key")openOptions(["Format Menu","S↔D Decimal"],formatKeyMode,v=>{formatKeyMode=v;});
   });
   if(item.label==="System Settings")openMenu("",[
-   {label:"Contrast"},{label:"Auto Power Off",value:"10 Min."},{label:"MultiLine Font",value:"Normal Font"},{label:"QR Code",value:"Version 11"}
+   {label:"Contrast",value:String(systemSettings.contrast)},{label:"Auto Power Off",value:systemSettings.autoPowerOff},{label:"MultiLine Font",value:systemSettings.multilineFont},{label:"QR Code",value:systemSettings.qrVersion}
   ],v=>{
-   if(v.label==="Auto Power Off")openOptions(["10 Min.","60 Min."],"10 Min.",()=>{});
-   else if(v.label==="MultiLine Font")openOptions(["Normal Font","Small Font"],"Normal Font",()=>{});
-   else if(v.label==="QR Code")openOptions(["Version 3","Version 11"],"Version 11",()=>{});
-   else openOptions(["1","2","3","4","5","6","7","8","9"],"5",()=>{});
+   if(v.label==="Auto Power Off")openOptions(["10 Min.","60 Min."],systemSettings.autoPowerOff,value=>{systemSettings.autoPowerOff=value;});
+   else if(v.label==="MultiLine Font")openOptions(["Normal Font","Small Font"],systemSettings.multilineFont,value=>{systemSettings.multilineFont=value;});
+   else if(v.label==="QR Code")openOptions(["Version 3","Version 11"],systemSettings.qrVersion,value=>{systemSettings.qrVersion=value;});
+   else openOptions(["1","2","3","4","5","6","7","8","9"],String(systemSettings.contrast),value=>{systemSettings.contrast=Number(value);});
   });
   if(item.label==="Reset")openMenu("",[{label:"Settings & Data"},{label:"Variable Memory"},{label:"Initialize All"}],v=>{
    openMenu("",[{label:"No"},{label:"Yes"}],confirm=>{
     if(confirm.label!=="Yes")return;
     if(v.label!=="Settings & Data"){variables={A:0,B:0,C:0,D:0,E:0,F:0,x:0,y:0,z:0};memory=0;}
     if(v.label!=="Variable Memory"){angleMode="DEG";inputMode="MathI/MathO";resultMode="Norm 2";fractionResult="Improper Fraction";decimalMark="Dot";digitSeparator="On";formatKeyMode="Format Menu";history=[];expression="";answer=null;answerDisplay="";}
-    functions={f:"",g:""};persist();
+    functions={f:"",g:""};systemSettings={contrast:5,autoPowerOff:"10 Min.",multilineFont:"Normal Font",qrVersion:"Version 11"};persist();
    });
   });
  });
