@@ -504,27 +504,32 @@ function variableMenu(){
  openMenu("",Object.keys(variables).map(label=>({label:label+" = "+fmt(variables[label]),name:label})),v=>append(v.name));
 }
 function catalogMenu(){
- const categories=["Basic Math","Probability","Numeric","Angle/Coordinate","Hyperbolic/Trig","Other"];
+ const categories=["Func Analysis","Probability","Numeric Calc","Angle/Coord/Sexa","Hyperbolic/Trig","Others"];
  const data={
-  "Basic Math":["sqrt(","cbrt(","abs(","round(","floor(","ceil(","log(","ln(","exp(","10^("],
-  "Probability":["!","nPr(","nCr(","rand(","randInt("],
-  "Numeric":["gcd(","lcm(","abs(","round(","floor(","ceil(","%"],
-  "Angle/Coordinate":["°","sin(","cos(","tan(","asin(","acos(","atan("],
+  "Func Analysis":["logab(","log(","ln("],
+  "Probability":["%","!","nPr(","nCr(","rand(","randInt("],
+  "Numeric Calc":["gcd(","lcm(","abs(","round(","floor(","ceil(","Rnd("],
+  "Angle/Coord/Sexa":["°","r","g","Rec(","Pol(","DMS"],
   "Hyperbolic/Trig":["sin(","cos(","tan(","asin(","acos(","atan(","sinh(","cosh(","tanh("],
-  "Other":["Ans","π","e","frac(,)","sqrt(","x⁻¹","x²","^(", "−",",","(",")"]
+  "Others":["Ans","π","e","√(","∛(","x√(","x⁻¹","x²","x³","^(","−",",","(",")"]
  };
  openMenu("",categories.map(label=>({label,hasChildren:true})),item=>{
   const commands=data[item.label].map(label=>({label}));
   openMenu("",commands,v=>{
+   menu=null;menuStack=[];
    if(v.label==="Ans")append("ans");
    else if(v.label==="π")append("pi");
    else if(v.label==="e")append("e");
-   else if(v.label==="frac(,)")insertFraction();
-   else if(v.label==="sqrt(")insertFunction("sqrt");
+   else if(v.label==="√(")insertFunction("sqrt");
+   else if(v.label==="∛(")insertFunction("cbrt");
    else if(v.label==="x⁻¹")append("^(-1)");
    else if(v.label==="x²")append("^2");
+   else if(v.label==="x³")append("^3");
    else if(v.label==="^(")append("^(");
+   else if(v.label==="x√(")append("root(");
+   else if(v.label==="DMS")append("dms(");
    else append(v.label);
+   render();
   });
  });
 }
@@ -547,12 +552,9 @@ function memoryMenu(){
  });
 }
 function toolsMenu(){
- openMenu("",[{label:"Undo"},{label:"Memory"},{label:"Variable List"}],v=>{
-  if(v.label==="Undo"){
-   const old=undoStack.pop();if(old){expression=old.expression;answer=old.answer;answerDisplay=old.answerDisplay;cursor=old.cursor;lastWasResult=old.lastWasResult;}
-  }
-  if(v.label==="Memory")memoryMenu();
-  if(v.label==="Variable List")variableMenu();
+ openMenu("",[{label:"Undo"}],()=>{
+  const old=undoStack.pop();
+  if(old){expression=old.expression;answer=old.answer;answerDisplay=old.answerDisplay;cursor=old.cursor;lastWasResult=old.lastWasResult;}
  });
 }
 function standardResult(value){
