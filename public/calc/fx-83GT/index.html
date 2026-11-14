@@ -59,7 +59,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 @keyframes blink{50%{opacity:0}}
 #screenPanel .homeApp:active,#screenPanel .menuRow:active{filter:brightness(.9)}
 
-#brand{position:absolute;left:14%;top:9.3%;width:31%;height:2.8%;display:flex;align-items:center;color:#1a2520;font:700 clamp(7px,1.1vw,12px)/1 Arial,sans-serif;letter-spacing:.02em;pointer-events:none;z-index:1}
+#brand{position:absolute;left:14%;top:9.3%;width:31%;height:2.8%;display:flex;align-items:center;background:#f7f7f5;color:#1a2520;font:700 clamp(7px,1.1vw,12px)/1 Arial,sans-serif;letter-spacing:.02em;pointer-events:none;z-index:1}
 #screen.powered-off{background:#7e8882;color:#7e8882}
 #screen.powered-off #indicators{visibility:hidden}
 #screen.powered-off #screenMain{visibility:hidden}
@@ -802,6 +802,10 @@ function press(label){
  if(label==="ON"){powerOn();return;}
  if(editor){
   if(label==="EXE"||label==="OK"){calculate();return;}
+  if(label==="BACK"){
+   const ret=editorReturn;editor=null;expression=ret.expression;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;cursor=ret.cursor;
+   menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;activeTemplate=null;render();return;
+  }
   if(label==="AC"){expression="";cursor=0;render();return;}
   if(label==="DELETE"){deleteAtom();return;}
   if(label==="LEFT"){moveCursor(-1);return;}
