@@ -382,6 +382,8 @@ function calculateAppInput(){
     else if(target==="stats"){const list=appState.column===0?appState.x:appState.y;list[appState.row]=value;appState.row++;}
    }
    appState.inputPrompt="";appState.inputTarget="";expression="";cursor=0;
+   if(target==="start"){appState.inputPrompt="End = ";appState.inputTarget="end";}
+   else if(target==="end"){appState.inputPrompt="Step = ";appState.inputTarget="step";}
    if(target==="stats"){appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
    if(target==="ratio"&&appState.values.length<3){appState.inputPrompt=(appState.values.length===1?"B":appState.equation==="A:B=X:D"?"D":"C")+" = ";appState.inputTarget="ratio";}
    if(appState.type==="Ratio"&&appState.values.length>=3)solveRatio();
@@ -456,9 +458,10 @@ function handleAppArrow(label){
  if(appState.type==="Math Box"&&appState.mode==="Number Line"&&label==="RIGHT"&&appState.lines.length<3){beginAppInput("Inequality "+(appState.lines.length+1)+" = ","line");return;}
 }
 function handleAppBack(){
- if(appState.type==="Math Box"&&appState.result){appState.result=false;appState.rows=[];render();return;}
- if(appState.type==="Math Box"&&appState.mode!=="Dice Roll"&&appState.mode!=="Coin Toss"){appState=null;homeMenu();return;}
- if(appState.type==="Math Box"&&(appState.mode==="Dice Roll"||appState.mode==="Coin Toss")){appState=null;openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>startMathBox(item.label));return;}
+ if(appState.type==="Math Box"&&appState.result){appState.result=false;appState.rows=[];openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{appState.resultType=item.label;runMathBoxSimulation();});return;}
+ if(appState.type==="Math Box"){
+  appState=null;openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>startMathBox(item.label));return;
+ }
  if(appState.type==="Statistics"&&appState.showResults){appState.showResults=false;render();return;}
  appState=null;expression="";homeMenu();
 }
@@ -504,7 +507,14 @@ function renderAppScreen(){
    const px=50+38*Math.cos(rad-Math.PI/2),py=50+38*Math.sin(rad-Math.PI/2);
    html='<div class="appTitle">Circle</div><svg viewBox="0 0 100 100" style="width:46%;height:auto;float:left"><circle cx="50" cy="50" r="38" fill="none" stroke="#26352e" stroke-width="1.5"/><path d="M12 50H88 M50 12V88" stroke="#87938d" stroke-width=".8"/><path d="M50 50L'+px+' '+py+'" stroke="#26352e" stroke-width="2"/><circle cx="'+px+'" cy="'+py+'" r="2.5" fill="#26352e"/></svg><div class="appResult">Angle: '+fmt(a)+' '+angleMode+'<br>sin = '+fmt(Math.sin(rad))+'<br>cos = '+fmt(Math.cos(rad))+'<br>tan = '+fmt(Math.tan(rad))+'</div>';
   }else{
-   html='<div class="appTitle">Number Line</div><div class="appResult">'+appState.lines.map(escapeHtml).join("<br>")+'</div><div class="appAxis"><span>−∞</span><span style="left:48%">0</span><span style="right:0">+∞</span></div><div class="appNote">Enter up to three inequalities. Press RIGHT for another line.</div>';
+   const graphs=appState.lines.map((line,index)=>{
+    const match=line.match(/^\s*x\s*(<=|>=|<|>)\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if(!match)return '<div class="appNote">'+escapeHtml(line)+'</div>';
+    const op=match[1],value=Number(match[2]),x=8+Math.max(0,Math.min(1,(value+10)/20))*84,y=12+index*22,filled=op.includes("="),left=op[0]==="<";
+    const segment=left?'M8 '+y+' H'+x:'M'+x+' '+y+' H92';
+    return '<svg viewBox="0 0 100 '+(y+9)+'" style="width:100%;height:24px;display:block"><path d="M8 '+y+' H92" stroke="#87938d" stroke-width="1"/><path d="'+segment+'" stroke="#26352e" stroke-width="3"/><path d="M'+(left?8:92)+' '+y+' l'+(left?4:-4)+' -3 v6 z" fill="#26352e"/><circle cx="'+x+'" cy="'+y+'" r="3" fill="'+(filled?"#26352e":"#c2ccc8")+'" stroke="#26352e" stroke-width="1.5"/></svg>';
+   }).join("");
+   html='<div class="appTitle">Number Line</div>'+graphs+'<div class="appNote">Enter up to three inequalities. Press RIGHT for another line.</div>';
   }
  }
  panelEl.innerHTML=html;
@@ -998,7 +1008,7 @@ function toolsMenu(){
    else generateTable();
   });return;
  }
- if(appState.type==="Math Box"&&appState.mode==="Dice Roll"||appState.type==="Math Box"&&appState.mode==="Coin Toss"){
+ if(appState.type==="Math Box"&&(appState.mode==="Dice Roll"||appState.mode==="Coin Toss")){
   openMenu("",[{label:(appState.mode==="Dice Roll"?"Dice: ":"Coins: ")+appState.count},{label:"Attempts: "+appState.attempts},{label:"Execute"}],item=>{
    if(item.label.startsWith("Dice:")||item.label.startsWith("Coins:"))openOptions(["1","2","3"],String(appState.count),v=>{appState.count=Number(v);render();});
    else if(item.label.startsWith("Attempts:"))openOptions(["5","10","25","50","100","250"],String(appState.attempts),v=>{appState.attempts=Number(v);render();});
