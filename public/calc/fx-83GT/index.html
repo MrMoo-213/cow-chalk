@@ -512,7 +512,7 @@ function renderAppScreen(){
    const rows=appStatistics();html='<div class="appTitle">'+(appState.paired?"2-Var Results":"1-Var Results")+'</div><div class="appResult">'+rows.map(v=>escapeHtml(v[0])+" = "+escapeHtml(fmt(v[1]))).join("<br>")+'</div>';
   }else{
    const cols=appState.paired?["x","y"]:["x"],rows=[];
-   for(let i=0;i<Math.max(4,appState.x.length,appState.y.length);i++)rows.push('<tr><td>'+(i+1)+'</td>'+cols.map((col,j)=>'<td class="'+(appState.row===i&&appState.column===j?"selected":"")+'">'+(appState[col][i]===undefined?"":escapeHtml(fmt(appState[col][i])))+'</td>').join("")+'</tr>');
+   for(let i=0;i<Math.max(4,appState.x.length,appState.y.length,appState.row+1);i++)rows.push('<tr class="'+(appState.row===i?"selected":"")+'"><td>'+(i+1)+'</td>'+cols.map((col,j)=>'<td>'+(appState[col][i]===undefined?"":escapeHtml(fmt(appState[col][i])))+'</td>').join("")+'</tr>');
     const start=appState.rowStart||0;html='<table class="appTable"><tr><th></th>'+cols.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.slice(start,start+4).join("")+'</table>';
   }
  }else if(appState.type==="Table"){
@@ -1081,15 +1081,15 @@ function chooseHome(){
  const app=homeApps[homeIndex].label;homeOpen=false;appState=null;expression="";answer=null;answerDisplay="";lastExpression="";lastWasResult=false;historyCursor=-1;cursor=0;activeTemplate=null;
  if(app==="Calculate"){render();return;}
  if(app==="Statistics"){
-paired:item.label==="2-Variable",x:[],y:[],column:0,row:0,rowStart:0,showResults:false
+  openMenu("",[{label:"1-Variable"},{label:"2-Variable"}],item=>{appState={type:"Statistics",paired:item.label==="2-Variable",x:[],y:[],column:0,row:0,rowStart:0,showResults:false,inputPrompt:"x1 = ",inputTarget:"stats"};expression="";render();});return;
  }
-tableType:"f(x)",rows:[],tableRow:0,tableStart:0}
+ if(app==="Table"){appState={type:"Table",start:-5,end:5,step:1,tableType:"f(x)",rows:[],tableRow:0,tableStart:0};render();return;}
  if(app==="Ratio"){
   openMenu("",[{label:"A:B=X:D"},{label:"A:B=C:X"}],item=>{appState={type:"Ratio",equation:item.label,values:[],solved:false,inputPrompt:"A = ",inputTarget:"ratio"};expression="";render();});return;
  }
  if(app==="Math Box"){
   openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>{
-result:false,tableRow:0,tableStart:0}
+   if(item.label==="Dice Roll"||item.label==="Coin Toss"){appState={type:"Math Box",mode:item.label,count:1,attempts:5,rows:[],result:false,tableRow:0,tableStart:0};toolsMenu();menuIndex=2;render();return;}
    else if(item.label==="Number Line")appState={type:"Math Box",mode:item.label,lines:[],input:true};
    else appState={type:"Math Box",mode:item.label,input:true};
    expression="";if(item.label==="Circle")beginAppInput("Angle = ","angle");else if(item.label==="Number Line")beginAppInput("Inequality 1 = ","line");else render();
@@ -1097,6 +1097,7 @@ result:false,tableRow:0,tableStart:0}
  }
  render();
 }
+
 function applyShift(label){
  if(label==="AC"){powerDown();return true;}
  if(label==="sin"||label==="cos"||label==="tan"){insertFunction({sin:"asin",cos:"acos",tan:"atan"}[label]);return true;}
