@@ -139,10 +139,10 @@ function evaluate(source){
    if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return answer;
    if(peek()&&peek().type==="("){
     take();const v=add();expect(")");
-    const f={sqrt:Math.sqrt,log:Math.log10,ln:Math.log,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,exp:Math.exp,sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+    const f={sqrt:Math.sqrt,cbrt:Math.cbrt,log:Math.log10,ln:Math.log,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,exp:Math.exp,sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
     if(!f[name])throw Error("Syntax ERROR");return f[name](v);
    }
-   if(name==="sqrt")return Math.sqrt(unary());
+   if(name==="sqrt")return Math.sqrt(unary());if(name==="cbrt")return Math.cbrt(unary());
    if(name==="sin"||name==="cos"||name==="tan"||name==="log"||name==="ln")return primaryFunction(name);
    if(Object.prototype.hasOwnProperty.call(variables,name))return variables[name];
    throw Error("Syntax ERROR");
@@ -154,7 +154,7 @@ function evaluate(source){
  function power(){let v=postfix();if(peek()&&peek().type==="^"){take();v=Math.pow(v,unary());}return v;}
  function unary(){return power();}
  function mul(){let v=unary();while(peek()&&["*","/"].includes(peek().type)){const op=take().type;const r=unary();v=op==="*"?v*r:v/r;}return v;}
- function add(){let v=mul();while(peek()&&["+","+"] .includes(peek().type)){const op=take().type;const r=mul();v=op==="+"?v+r:v-r;}return v;}
+ function add(){let v=mul();while(peek()&&["+","-"].includes(peek().type)){const op=take().type;const r=mul();v=op==="+"?v+r:v-r;}return v;}
  const value=add();if(p<t.length)throw Error("Syntax ERROR");if(!Number.isFinite(value))throw Error("Math ERROR");return value;
 }
 function append(value){
