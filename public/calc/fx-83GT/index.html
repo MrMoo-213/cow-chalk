@@ -20,27 +20,45 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 #screenMain{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;font-size:7.1cqw;line-height:1.12}
 #expression{width:100%;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;min-height:1.15em;padding-top:1%;font-size:1em;font-weight:500}
 #answer{width:100%;text-align:right;white-space:nowrap;overflow:hidden;font-size:1.12em;min-height:1.2em;padding-bottom:1%;font-weight:500}
-#screenMain.menu{display:block;font-size:5.7cqw;line-height:1.18}
-#screenPanel{position:absolute;inset:0;display:none;overflow:hidden;background:transparent}
+#screenMain.menu{display:block;font-size:5.3cqw;line-height:1.1}
+#screenPanel{position:absolute;inset:0;display:none;overflow:hidden;background:transparent;pointer-events:auto}
 #screenPanel.visible{display:block}
-#screenPanel.home.visible{display:flex;flex-direction:column;gap:0;padding:0 1%;overflow:hidden}
-.homeApp{display:flex;align-items:center;gap:5%;flex:1 1 0;min-height:0;min-width:0;padding:0 2%;border-radius:0;font-size:5.4cqw;font-weight:500;white-space:nowrap}
-.homeIcon{width:11%;height:72%;aspect-ratio:1;border-radius:0;display:grid;place-items:center;background:transparent;border:0;font-size:1.12em;line-height:1;flex:none;color:#17201d}
-.homeApp.selected{outline:0;background:#53645a;color:#fff}.homeApp.selected .homeIcon{color:#fff}
-#menuRows{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
-.menuTitle{flex:none;font-weight:700;font-size:.9em;padding:0 1% 1.5%;border-bottom:1px solid #65716b;margin-bottom:1%}
-.menuRow{height:auto;min-height:0;flex:1 1 0;display:flex;align-items:center;gap:2%;padding:0 1%;white-space:nowrap;overflow:hidden}
-.menuRow.selected{background:#879b90;color:#07120c;outline:1px solid #33443b}
+#screenPanel.home.visible{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:3% 2%;padding:1% 2%;overflow:hidden}
+.homeApp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2%;min-height:0;min-width:0;padding:2%;border-radius:1%;font-size:3.7cqw;font-weight:600;white-space:nowrap;overflow:hidden;cursor:pointer}
+.homeIcon{width:57%;height:62%;display:grid;place-items:center;background:transparent;border:0;font-size:1.5em;line-height:1;flex:none;color:#17201d}.homeIcon svg{width:100%;height:100%;display:block}
+.homeApp.selected{outline:0;background:#17201d;color:#fff}.homeApp.selected .homeIcon{color:#fff}.homeLabel{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#menuRows{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding-right:2%}
+.menuTitle{display:none}
+.menuRow{height:25%;min-height:0;flex:1 1 0;display:flex;align-items:center;gap:2%;padding:0 1%;white-space:nowrap;overflow:hidden;font-family:ui-monospace,Consolas,monospace;font-size:1em;font-weight:600;cursor:pointer}
+.menuRow.selected{background:#17201d;color:#fff;outline:0}
 .menuNumber{width:8%;flex:none;text-align:center;font-size:.82em}
 .menuLabel{flex:1;overflow:hidden;text-overflow:ellipsis}
 .menuArrow{width:7%;text-align:right;flex:none}
-.menuScroll{position:absolute;right:0;top:3%;bottom:2%;width:1.2%;background:#aeb9b2}
+.menuScroll{position:absolute;right:0;top:2%;bottom:2%;width:1.5%;background:#aeb9b2}
 .menuThumb{position:absolute;left:0;right:0;background:#53645a;border-radius:4px}
 #keys{position:absolute;inset:0}
 .key{position:absolute;transform:translate(-50%,-50%);border:0;border-radius:50%;padding:0;background:transparent;color:transparent;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .key:focus-visible{outline:2px solid #2388ff;background:#2388ff33}
 .key:active{background:#2388ff55}
 @media(hover:hover){.key:hover{background:#2388ff18}}
+
+.homeIcon .glyph{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter}
+.menuNumber{width:9%;flex:none;text-align:left;font-size:.9em}
+.menuLabel{flex:1;overflow:hidden;text-overflow:ellipsis}
+.menuValue{max-width:26%;overflow:hidden;text-overflow:ellipsis;text-align:right;font-size:.76em;font-weight:500}
+.menuArrow{width:7%;text-align:right;flex:none}
+.menuRow.selected .menuNumber,.menuRow.selected .menuArrow{color:#fff}
+.menuThumb{position:absolute;left:0;right:0;background:#53645a;border-radius:2px}
+.frac{display:inline-grid;grid-template-rows:auto 1px auto;vertical-align:middle;text-align:center;min-width:1.1em;margin:0 .08em;line-height:1.0}
+.frac .fraction-bar{height:1px;background:currentColor;width:100%;align-self:center}
+.frac .numerator,.frac .denominator{display:block;padding:0 .12em;min-height:.65em}
+.root{display:inline-flex;align-items:stretch;vertical-align:middle;white-space:nowrap}
+.root .radical{font-size:1.15em;line-height:1}
+.root .radicand{border-top:1px solid currentColor;padding:0 .08em 0 .02em;min-width:.3em}
+.caret{display:inline-block;width:.075em;height:1em;background:#17201d;vertical-align:-.12em;animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+#screenPanel .homeApp:active,#screenPanel .menuRow:active{filter:brightness(.9)}
+
 </style>
 </head>
 <body>
@@ -54,6 +72,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 <div id="keys"></div>
 </div>
 <script>
+
 const keyLayout=[
 ["ON",58,353],["HOME",122,357],["UP",250,357],["SCROLL UP",377,357],
 ["SETTINGS",58,413],["BACK",122,413],["LEFT",185,413],["OK",250,413],["RIGHT",314,413],["SCROLL DOWN",377,411],
@@ -65,6 +84,7 @@ const keyLayout=[
 ["1",62,785],["2",140,785],["3",218,785],["+",296,785],["−",374,785],
 ["0",62,851],[".",140,850],["×10ˣ",218,850],["FORMAT",296,850],["EXE",374,850]
 ];
+
 const container=document.getElementById("keys");
 const expressionEl=document.getElementById("expression");
 const answerEl=document.getElementById("answer");
@@ -74,14 +94,27 @@ const angleEl=document.getElementById("angleIndicator");
 const historyEl=document.getElementById("historyIndicator");
 const formatEl=document.getElementById("formatIndicator");
 const panelEl=document.getElementById("screenPanel");
+
 let expression="";
-let answer=0;
+let answer=null;
+let answerDisplay="";
+let ansMemory=0;
 let lastExpression="";
 let shift=false;
 let angleMode="DEG";
 let inputMode="MathI/MathO";
-let resultMode="Natural";
+let resultMode="Norm 2";
+let fixDigits=2;
+let sciDigits=3;
+let fractionResult="Improper Fraction";
+let decimalMark="Dot";
+let digitSeparator="On";
+let multilineFont="Normal Font";
+let autoPowerOff="10 Min.";
+let qrVersion="Version 11";
+let contrast=0;
 let menu=null;
+let menuStack=[];
 let homeOpen=false;
 let homeIndex=0;
 let menuIndex=0;
@@ -89,53 +122,124 @@ let menuScroll=0;
 let memory=0;
 let variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};
 let history=[];
+let historyCursor=-1;
 let lastWasResult=false;
 let cursor=0;
+let undoStack=[];
+let powerOff=false;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-const fmt=n=>{
+const escapeHtml=s=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+
+function fmt(n){
  if(typeof n!=="number"||!Number.isFinite(n))return String(n);
  if(Math.abs(n)<1e-12)n=0;
- if(Number.isInteger(n)&&Math.abs(n)<1e13)return String(n);
- return Number(n.toPrecision(12)).toString();
-};
-const displayExpr=s=>s.replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−").replaceAll("pi","π").replaceAll("sqrt(","√(").replaceAll("cbrt(","∛(").replaceAll("^2","²").replaceAll("^3","³").replaceAll("^(-1)","⁻¹");
-function render(){
+ let out;
+ if(resultMode==="Fix")out=n.toFixed(fixDigits);
+ else if(resultMode==="Sci")out=n.toExponential(sciDigits-1).replace("e","E");
+ else if(Number.isInteger(n)&&Math.abs(n)<1e13)out=String(n);
+ else out=Number(n.toPrecision(12)).toString();
+ if(decimalMark==="Comma")out=out.replace(".",",");
+ if(digitSeparator==="On")out=out.replace(/\B(?=(\d{3})+(?!\d))/g,decimalMark==="Comma"?".":",");
+ return out;
+}
+function displayExpr(s){
+ return String(s)
+ .replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−")
+ .replaceAll("pi","π").replaceAll("sqrt(","√(").replaceAll("cbrt(","∛(")
+ .replaceAll("^2","²").replaceAll("^3","³").replaceAll("^(-1)","⁻¹");
+}
+function renderExpression(raw,caret){
+ let s=raw.slice(0,caret)+"\uE000"+raw.slice(caret);
+ s=escapeHtml(s);
+ s=s.replace(/frac\(([^,()]*)\,([^()]*)\)/g,'<span class="frac"><span class="numerator">$1</span><span class="fraction-bar"></span><span class="denominator">$2</span></span>');
+ s=s.replace(/sqrt\(([^()]*)\)/g,'<span class="root"><span class="radical">√</span><span class="radicand">$1</span></span>');
+ s=s.replace(/cbrt\(([^()]*)\)/g,'<span class="root"><span class="radical">∛</span><span class="radicand">$1</span></span>');
+ s=s.replace(/\^([0-9]+)/g,'<sup>$1</sup>');
+ s=s.replaceAll("\uE000",'<span class="caret"></span>');
+ return s.replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−").replaceAll("pi","π");
+}
+function renderAnswer(){
+ if(answer===null)return "";
+ if(typeof answerDisplay==="string" && /^-?\d+\/\d+$/.test(answerDisplay)){
+  const p=answerDisplay.split("/");
+  return '<span class="frac"><span class="numerator">'+escapeHtml(p[0])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(p[1])+'</span></span>';
+ }
+ return escapeHtml(answerDisplay||fmt(answer)).replaceAll("*","×").replaceAll("-","−");
+}
+function indicatorRender(){
  shiftEl.src=shift?"https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003a.png":"";
  shiftEl.style.display=shift?"block":"none";
  angleEl.src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/"+(angleMode==="DEG"?"003b":angleMode==="RAD"?"003c":"003d")+".png";
- historyEl.textContent=history.length?"↕":"";
+ historyEl.textContent=history.length>1?(historyCursor>0?"↑":historyCursor===0?"↓":"↕"):"";
  formatEl.textContent=resultMode==="Fix"?"FIX":resultMode==="Sci"?"SCI":"";
- panelEl.className="";panelEl.innerHTML="";
- expressionEl.style.display="";answerEl.style.display="";
+}
+const homeApps=[
+ {label:"Calculate",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M8 8h24v24H8zM13 14h4m-2-2v4m8 0h4M13 22h4m-2-2v4m8 0h4M13 29h4m8 0h4"/></svg>'},
+ {label:"Statistics",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M6 34V6M6 34h29M11 29V21h5v8M21 29V13h5v16M31 29V5h5v24"/></svg>'},
+ {label:"Table",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M5 8h30v25H5zM5 16h30M5 24h30M15 8v25M25 8v25"/></svg>'},
+ {label:"Ratio",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M4 10h13v20H4zM23 10h13v20H23zM18 15h4m-4 10h4"/></svg>'},
+ {label:"Math Box",icon:'<svg viewBox="0 0 40 40"><rect class="glyph" x="5" y="5" width="13" height="13" rx="2"/><rect class="glyph" x="22" y="22" width="13" height="13" rx="2"/><circle cx="11.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="26" cy="26" r="1.7" fill="currentColor"/><circle cx="31" cy="31" r="1.7" fill="currentColor"/></svg>'}
+];
+
+function renderMenu(){
+ const visible=Math.min(4,menu.items.length);
+ if(menuIndex<menuScroll)menuScroll=menuIndex;
+ if(menuIndex>=menuScroll+visible)menuScroll=menuIndex-visible+1;
+ const rows=menu.items.slice(menuScroll,menuScroll+visible).map((item,i)=>{
+  const index=menuScroll+i;
+  const label=escapeHtml(item.label);
+  const value=item.value!==undefined?escapeHtml(item.value):"";
+  const selected=item.selected===true?"●":"";
+  const arrow=item.children||item.hasChildren?"›":"";
+  return '<div class="menuRow '+(index===menuIndex?"selected":"")+'" data-index="'+index+'"><span class="menuNumber">'+(i+1)+'</span><span class="menuLabel">'+label+'</span><span class="menuValue">'+(selected||value)+'</span><span class="menuArrow">'+arrow+'</span></div>';
+ }).join("");
+ const maxStart=Math.max(0,menu.items.length-visible);
+ const thumbHeight=menu.items.length>visible?Math.max(14,100*visible/menu.items.length):100;
+ const thumbTop=maxStart?100*menuScroll/menu.items.length:0;
+ panelEl.innerHTML='<div id="menuRows">'+rows+'</div>'+(menu.items.length>visible?'<div class="menuScroll"><div class="menuThumb" style="height:'+thumbHeight+'%;top:'+thumbTop+'%"></div></div>':"");
+}
+function render(){
+ indicatorRender();
+ panelEl.className="";
+ panelEl.innerHTML="";
+ expressionEl.style.display="";
+ answerEl.style.display="";
  mainEl.classList.remove("menu","home");
+ if(powerOff){
+  expressionEl.style.display="none";answerEl.style.display="none";
+  return;
+ }
  if(homeOpen){
-  mainEl.classList.add("home");expressionEl.style.display="none";answerEl.style.display="none";
+  mainEl.classList.add("home");
+  expressionEl.style.display="none";answerEl.style.display="none";
   panelEl.className="visible home";
-  const apps=[["Calculate","▦"],["Statistics","▥"],["Table","▤"],["Ratio","a:b"],["Math Box","◉"]];
-  panelEl.innerHTML=apps.map((app,i)=>'<div class="homeApp '+(i===homeIndex?'selected':'')+'"><span class="homeIcon">'+app[1]+'</span><span>'+app[0]+'</span></div>').join("");
+  panelEl.innerHTML=homeApps.map((app,i)=>'<div class="homeApp '+(i===homeIndex?"selected":"")+'" data-home="'+i+'"><span class="homeIcon">'+app.icon+'</span><span class="homeLabel">'+app.label+'</span></div>').join("");
   return;
  }
  if(menu){
-  mainEl.classList.add("menu");expressionEl.style.display="none";answerEl.style.display="none";panelEl.className="visible";
-  const visible=Math.max(1,Math.min(menu.items.length,5));
-  if(menuIndex<menuScroll)menuScroll=menuIndex;
-  if(menuIndex>=menuScroll+visible)menuScroll=menuIndex-visible+1;
-  const rows=menu.items.slice(menuScroll,menuScroll+visible).map((item,i)=>{
-   const index=menuScroll+i;
-   const label=String(item.label).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-   return '<div class="menuRow '+(index===menuIndex?'selected':'')+'"><span class="menuNumber">'+(index+1)+'</span><span class="menuLabel">'+label+'</span><span class="menuArrow">'+(item.children?"›":"")+'</span></div>';
-  }).join("");
-  const thumbHeight=Math.max(12,100*visible/menu.items.length);
-  const thumbTop=menu.items.length>visible?100*menuScroll/menu.items.length:0;
-  panelEl.innerHTML='<div id="menuRows"><div class="menuTitle">'+menu.title+'</div>'+rows+'</div>'+(menu.items.length>visible?'<div class="menuScroll"><div class="menuThumb" style="height:'+thumbHeight+'%;top:'+thumbTop+'%"></div></div>':'');
+  mainEl.classList.add("menu");
+  expressionEl.style.display="none";answerEl.style.display="none";
+  panelEl.className="visible";
+  renderMenu();
   return;
  }
- expressionEl.textContent=expression?displayExpr(expression):"";
- if(lastWasResult&&lastExpression)expressionEl.textContent=displayExpr(lastExpression);
- answerEl.textContent=fmt(answer);
+ let shownExpression=expression;
+ let shownAnswer=answer;
+ if(historyCursor>0&&history[historyCursor]){
+  shownExpression=history[historyCursor].expression;
+  shownAnswer=history[historyCursor].result;
+ }
+ expressionEl.innerHTML=shownExpression?renderExpression(shownExpression,historyCursor>0?shownExpression.length:cursor):"";
+ if(historyCursor>0&&history[historyCursor])answerEl.innerHTML=renderAnswerValue(shownAnswer);
+ else answerEl.innerHTML=renderAnswer();
 }
+function renderAnswerValue(value){
+ const text=fmt(value);
+ return escapeHtml(text).replaceAll("-","−");
+}
+
 function tokenize(source){
- const s=source.replaceAll("×","*").replaceAll("÷","/").replaceAll("−","-").replaceAll("π","pi").replaceAll("√","sqrt");
+ const s=source.replaceAll("×","*").replaceAll("÷","/").replaceAll("−","-").replaceAll("π","pi");
  const tokens=[];let i=0;
  while(i<s.length){
   if(/\s/.test(s[i])){i++;continue;}
@@ -149,10 +253,9 @@ function tokenize(source){
  }
  const out=[];
  for(let j=0;j<tokens.length;j++){
-  const a=tokens[j],b=tokens[j+1];
-  out.push(a);
+  const a=tokens[j],b=tokens[j+1];out.push(a);
   if(b&&((a.type==="number"||a.type==="id"||a.type===")"||a.type==="!"||a.type==="%")&&(b.type==="number"||b.type==="id"||b.type==="("))){
-   if(!(a.type==="id"&&["sin","cos","tan","asin","acos","atan","sinh","cosh","tanh","sqrt","log","ln","abs","floor","ceil","round","exp"].includes(a.value)&&b.type==="("))out.push({type:"*",value:"*"});
+   if(!(a.type==="id"&&["sin","cos","tan","asin","acos","atan","sinh","cosh","tanh","sqrt","cbrt","log","ln","abs","floor","ceil","round","exp","frac","tenpow","gcd","lcm","npr","ncr","randint"].includes(a.value)&&b.type==="("))out.push({type:"*",value:"*"});
   }
  }
  return out;
@@ -165,6 +268,7 @@ function evaluate(source){
  const factorial=n=>{if(n<0||!Number.isInteger(n)||n>170)throw Error("Math ERROR");let r=1;for(let i=2;i<=n;i++)r*=i;return r;};
  const toRad=x=>angleMode==="DEG"?x*Math.PI/180:angleMode==="GRA"?x*Math.PI/200:x;
  const fromRad=x=>angleMode==="DEG"?x*180/Math.PI:angleMode==="GRA"?x*200/Math.PI:x;
+ const gcd=(a,b)=>{a=Math.abs(Math.trunc(a));b=Math.abs(Math.trunc(b));while(b){const q=a%b;a=b;b=q;}return a;};
  function primary(){
   const q=peek();if(!q)throw Error("Syntax ERROR");
   if(q.type==="number"){take();return q.value;}
@@ -173,20 +277,27 @@ function evaluate(source){
   if(q.type==="("){take();const v=add();expect(")");return v;}
   if(q.type==="id"){
    const name=take().value;
-   if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return answer;
+   if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return ansMemory;
+   if(name==="x"||name==="a"||name==="b"||name==="c"||name==="d"||name==="f"||name==="y"||name==="z")return variables[name]??0;
    if(peek()&&peek().type==="("){
-    take();const v=add();expect(")");
-    const f={sqrt:Math.sqrt,cbrt:Math.cbrt,log:Math.log10,ln:Math.log,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,exp:Math.exp,sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+    take();
+    if(name==="frac"){const n=add();expect(",");const d=add();expect(")");return n/d;}
+    if(name==="gcd"||name==="lcm"||name==="npr"||name==="ncr"||name==="randint"){
+     const a=add();expect(",");const b=add();expect(")");
+     if(name==="gcd")return gcd(a,b);
+     if(name==="lcm")return Math.abs(a*b)/gcd(a,b);
+     if(name==="npr")return factorial(a)/factorial(a-b);
+     if(name==="ncr")return factorial(a)/(factorial(b)*factorial(a-b));
+     return Math.floor(Math.random()*(Math.floor(b)-Math.ceil(a)+1))+Math.ceil(a);
+    }
+    const v=add();expect(")");
+    const f={sqrt:Math.sqrt,cbrt:Math.cbrt,log:Math.log10,ln:Math.log,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,exp:Math.exp,tenpow:x=>10**x,sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
     if(!f[name])throw Error("Syntax ERROR");return f[name](v);
    }
-   if(name==="sqrt")return Math.sqrt(unary());if(name==="cbrt")return Math.cbrt(unary());
-   if(name==="sin"||name==="cos"||name==="tan"||name==="log"||name==="ln")return primaryFunction(name);
-   if(Object.prototype.hasOwnProperty.call(variables,name))return variables[name];
    throw Error("Syntax ERROR");
   }
   throw Error("Syntax ERROR");
  }
- function primaryFunction(name){const v=unary();if(name==="sin")return Math.sin(toRad(v));if(name==="cos")return Math.cos(toRad(v));if(name==="tan")return Math.tan(toRad(v));if(name==="log")return Math.log10(v);return Math.log(v);}
  function postfix(){let v=primary();while(peek()&&(peek().type==="!"||peek().type==="%")){const op=take().type;v=op==="!"?factorial(v):v/100;}return v;}
  function power(){let v=postfix();if(peek()&&peek().type==="^"){take();v=Math.pow(v,unary());}return v;}
  function unary(){return power();}
@@ -194,98 +305,361 @@ function evaluate(source){
  function add(){let v=mul();while(peek()&&["+","-"].includes(peek().type)){const op=take().type;const r=mul();v=op==="+"?v+r:v-r;}return v;}
  const value=add();if(p<t.length)throw Error("Syntax ERROR");if(!Number.isFinite(value))throw Error("Math ERROR");return value;
 }
+function saveUndo(){undoStack.push({expression,answer,answerDisplay,cursor,lastWasResult});if(undoStack.length>40)undoStack.shift();}
 function append(value){
- if(menu){return;}
- if(lastWasResult){if(/[0-9.(]/.test(value))expression="";else expression=String(answer);lastWasResult=false;}
- expression=expression.slice(0,cursor)+value+expression.slice(cursor);cursor+=value.length;render();
+ if(menu||homeOpen||powerOff)return;
+ if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ if(lastWasResult){if(/^[0-9.(]/.test(value)||value==="frac("||value==="sqrt("||value==="cbrt(")expression="";else expression=String(ansMemory);lastWasResult=false;cursor=expression.length;}
+ saveUndo();
+ expression=expression.slice(0,cursor)+value+expression.slice(cursor);cursor+=value.length;answer=null;answerDisplay="";render();
 }
 function insertFunction(name){append(name+"(");}
+function insertFraction(){
+ if(menu||homeOpen)return;
+ if(lastWasResult){expression="";lastWasResult=false;cursor=0;}
+ saveUndo();
+ const part="frac(,)";
+ expression=expression.slice(0,cursor)+part+expression.slice(cursor);
+ cursor+=5;answer=null;answerDisplay="";render();
+}
+function moveFractionCursor(direction){
+ const start=expression.lastIndexOf("frac(",Math.max(0,cursor));
+ if(start<0)return false;
+ const comma=expression.indexOf(",",start+5),end=expression.indexOf(")",comma);
+ if(comma<0||end<0||cursor<start+5||cursor>end)return false;
+ if(direction==="DOWN"&&cursor<=comma){cursor=comma+1;return true;}
+ if(direction==="UP"&&cursor>comma){cursor=start+5;return true;}
+ return false;
+}
 function calculate(){
  if(!expression.trim())return;
  try{
   const result=evaluate(expression);
-  lastExpression=expression;history.unshift({expression,result});history=history.slice(0,30);
-  answer=result;lastWasResult=true;cursor=expression.length;render();
- }catch(e){answer=e.message||"Math ERROR";lastWasResult=false;render();setTimeout(()=>{if(typeof answer==="string"){answer=0;render();}},1300);}
+  lastExpression=expression;history.unshift({expression,result});history=history.slice(0,50);
+  answer=result;answerDisplay=fmt(result);ansMemory=result;lastWasResult=true;historyCursor=-1;cursor=expression.length;undoStack=[];
+  render();
+ }catch(e){
+  answer=null;answerDisplay=e.message||"Math ERROR";lastWasResult=false;render();
+  const msg=answerDisplay;setTimeout(()=>{if(answerDisplay===msg){answerDisplay="";render();}},1300);
+ }
 }
-function clear(){expression="";lastExpression="";answer=0;lastWasResult=false;cursor=0;render();}
-function moveCursor(d){if(lastWasResult){expression=lastExpression;lastWasResult=false;}cursor=clamp(cursor+d,0,expression.length);render();}
-function openMenu(title,items,action){homeOpen=false;menu={title,items,action};menuIndex=0;menuScroll=0;render();}
-function closeMenu(){menu=null;homeOpen=false;render();}
-function chooseMenu(){
- if(homeOpen){const apps=["Calculate","Statistics","Table","Ratio","Math Box"];const choice=apps[homeIndex];homeOpen=false;if(choice==="Calculate")clear();else openMenu(choice.toUpperCase(),[{label:"This app is not available in Calculate mode"}],()=>{});return;}
+function clearEntry(){
+ saveUndo();expression="";answer=null;answerDisplay="";lastWasResult=false;historyCursor=-1;cursor=0;render();
+}
+function powerOn(){
+ powerOff=false;shift=false;expression="";answer=null;answerDisplay="";lastExpression="";history=[];historyCursor=-1;cursor=0;lastWasResult=false;undoStack=[];menu=null;menuStack=[];homeOpen=false;render();
+}
+function moveCursor(d){
+ if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ cursor=clamp(cursor+d,0,expression.length);render();
+}
+function scrollHistory(direction){
+ if(history.length<2)return;
+ if(direction==="UP"){
+  if(historyCursor<0)historyCursor=1;
+  else historyCursor=Math.min(history.length-1,historyCursor+1);
+ }else{
+  if(historyCursor>1)historyCursor--;
+  else historyCursor=-1;
+ }
+ render();
+}
+function openMenu(title,items,action){
+ if(menu)menuStack.push(menu);
+ menu={title:title||"",items:items||[],action:action||null};
+ menuIndex=0;menuScroll=0;render();
+}
+function closeMenu(){
+ if(menuStack.length)menu=menuStack.pop();else menu=null;
+ menuIndex=0;menuScroll=0;render();
+}
+function chooseMenu(index){
  if(!menu)return;
+ if(index!==undefined)menuIndex=clamp(index,0,menu.items.length-1);
  const item=menu.items[menuIndex];if(!item)return;
- const action=menu.action;menu=null;
- if(action)action(item);render();
+ const current=menu,action=current.action;
+ if(menuStack.length)menu=menuStack.pop();else menu=null;
+ menuIndex=0;menuScroll=0;
+ if(action)action(item);
+ else if(item.items)openMenu("",item.items,item.action);
+ render();
+}
+function pageMenu(direction){
+ if(!menu)return;
+ const visible=Math.min(4,menu.items.length),maxStart=Math.max(0,menu.items.length-visible);
+ if(direction==="UP"){
+  if(menuScroll===0){menuScroll=maxStart;menuIndex=menu.items.length-1;}
+  else{menuScroll=Math.max(0,menuScroll-visible);menuIndex=menuScroll;}
+ }else{
+  if(menuScroll>=maxStart){menuScroll=0;menuIndex=0;}
+  else{menuScroll=Math.min(maxStart,menuScroll+visible);menuIndex=menuScroll;}
+ }
+ render();
+}
+function openOptions(labels,current,setter,formatter){
+ const opts=labels.map(label=>({label,value:formatter?formatter(label):"",selected:label===current}));
+ openMenu("",opts,item=>{setter(item.label);render();});
+}
+
+function openSettingsCategory(category){
+ if(category==="Calc Settings"){
+  const rows=[
+   {label:"Input/Output",value:inputMode},
+   {label:"Angle Unit",value:angleMode==="DEG"?"Degree":angleMode==="RAD"?"Radian":"Gradian"},
+   {label:"Number Format",value:resultMode},
+   {label:"Fraction Result",value:fractionResult},
+   {label:"Decimal Mark",value:decimalMark},
+   {label:"Digit Separator",value:digitSeparator}
+  ];
+  openMenu("",rows,item=>{
+   if(item.label==="Input/Output")openOptions(["MathI/MathO","MathI/DecimalO","LineI/LineO","LineI/DecimalO"],inputMode,v=>{inputMode=v;history=[];historyCursor=-1;});
+   if(item.label==="Angle Unit")openOptions(["Degree","Radian","Gradian"],angleMode==="DEG"?"Degree":angleMode==="RAD"?"Radian":"Gradian",v=>{angleMode=v==="Degree"?"DEG":v==="Radian"?"RAD":"GRA";});
+   if(item.label==="Number Format"){
+    openMenu("",["Norm 1","Norm 2","Fix","Sci"].map(label=>({label,selected:resultMode===label})),v=>{
+     if(v.label==="Fix")openMenu("",Array.from({length:10},(_,i)=>({label:String(i),selected:fixDigits===i})),d=>{fixDigits=Number(d.label);resultMode="Fix";});
+     else if(v.label==="Sci")openMenu("",Array.from({length:10},(_,i)=>({label:String(i+1),selected:sciDigits===i+1})),d=>{sciDigits=Number(d.label);resultMode="Sci";});
+     else resultMode=v.label;
+    });
+   }
+   if(item.label==="Fraction Result")openOptions(["Mixed Fraction","Improper Fraction"],fractionResult,v=>{fractionResult=v;});
+   if(item.label==="Decimal Mark")openOptions(["Dot","Comma"],decimalMark,v=>{decimalMark=v;});
+   if(item.label==="Digit Separator")openOptions(["On","Off"],digitSeparator,v=>{digitSeparator=v;});
+  });
+ }else if(category==="System Settings"){
+  openMenu("",[
+   {label:"Contrast",value:String(contrast)},
+   {label:"Auto Power Off",value:autoPowerOff},
+   {label:"MultiLine Font",value:multilineFont},
+   {label:"QR Code",value:qrVersion}
+  ],item=>{
+   if(item.label==="Contrast")openOptions(Array.from({length:9},(_,i)=>String(i+1)),String(contrast||5),v=>{contrast=Number(v);});
+   if(item.label==="Auto Power Off")openOptions(["10 Min.","60 Min."],autoPowerOff,v=>{autoPowerOff=v;});
+   if(item.label==="MultiLine Font")openOptions(["Normal Font","Small Font"],multilineFont,v=>{multilineFont=v;});
+   if(item.label==="QR Code")openOptions(["Version 3","Version 11"],qrVersion,v=>{qrVersion=v;});
+  });
+ }else if(category==="Reset"){
+  openMenu("",[
+   {label:"Settings & Data"},
+   {label:"Variable Memory"},
+   {label:"Initialize All"}
+  ],item=>{
+   openMenu("",[{label:"No"},{label:"Yes"}],choice=>{
+    if(choice.label!=="Yes")return;
+    if(item.label==="Variable Memory"){variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};memory=0;}
+    if(item.label==="Settings & Data"){expression="";answer=null;answerDisplay="";history=[];inputMode="MathI/MathO";angleMode="DEG";resultMode="Norm 2";fixDigits=2;sciDigits=3;fractionResult="Improper Fraction";decimalMark="Dot";digitSeparator="On";}
+    if(item.label==="Initialize All"){variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};memory=0;expression="";answer=null;answerDisplay="";history=[];inputMode="MathI/MathO";angleMode="DEG";resultMode="Norm 2";fixDigits=2;sciDigits=3;fractionResult="Improper Fraction";decimalMark="Dot";digitSeparator="On";}
+    historyCursor=-1;cursor=0;lastWasResult=false;
+   });
+  });
+ }else{
+  openMenu("",[{label:"Get Started"},{label:"User Guide"}],()=>{});
+ }
 }
 function settingsMenu(){
- openMenu("SETTINGS",[{label:"Calc Settings"},{label:"System Settings"},{label:"Reset"}],item=>{
-  if(item.label==="Calc Settings")openMenu("CALC SETTINGS",[{label:"Input/Output"},{label:"Angle Unit"},{label:"Number Format"},{label:"Fraction Result"},{label:"Decimal Mark"}],x=>{
-   if(x.label==="Angle Unit")openMenu("ANGLE UNIT",["Degree","Radian","Gradian"].map(label=>({label})),v=>{angleMode=v.label==="Degree"?"DEG":v.label==="Radian"?"RAD":"GRA";});
-   else if(x.label==="Input/Output")openMenu("INPUT/OUTPUT",["MathI/MathO","MathI/DecimalO","LineI/LineO","LineI/DecimalO"].map(label=>({label})),v=>{inputMode=v.label;});
-   else if(x.label==="Number Format")openMenu("NUMBER FORMAT",["Norm 1","Norm 2","Fix","Sci"].map(label=>({label})),v=>{resultMode=v.label;});
-   else if(x.label==="Fraction Result")openMenu("FRACTION RESULT",["Mixed Fraction","Improper Fraction"].map(label=>({label})),()=>{});
-   else openMenu("DECIMAL MARK",["Dot","Comma"].map(label=>({label})),()=>{});
-  });
-  if(item.label==="System Settings")openMenu("SYSTEM SETTINGS",[{label:"Contrast"},{label:"Auto Power Off"}],()=>{});
-  if(item.label==="Reset")openMenu("RESET",[{label:"Reset Setup"},{label:"Reset All"}],v=>{if(v.label==="Reset All"){variables={x:0,A:0,B:0,C:0,D:0,E:0,F:0,y:0,z:0};memory=0;answer=0;angleMode="DEG";inputMode="MathI/MathO";clear();}});
+ if(homeOpen){openMenu("",[{label:"Get Started"},{label:"HOME"}],v=>{if(v.label==="HOME"){menu=null;homeOpen=true;render();}});return;}
+ openMenu("",[
+  {label:"Calc Settings",hasChildren:true},
+  {label:"System Settings",hasChildren:true},
+  {label:"Reset",hasChildren:true},
+  {label:"Get Started"}
+ ],item=>{
+  if(["Calc Settings","System Settings","Reset"].includes(item.label))openSettingsCategory(item.label);
+  else openMenu("",[{label:"CASIO fx-83GT CW"},{label:"User Guide"}],()=>{});
  });
 }
-function homeMenu(){menu=null;homeOpen=true;homeIndex=0;render();}
-function variableMenu(){openMenu("VARIABLE",Object.keys(variables).map(label=>({label:label+" = "+fmt(variables[label]),name:label})),v=>append(v.name));}
-function catalogMenu(){openMenu("CATALOG",["Trigonometry","sin(","cos(","tan(","asin(","acos(","atan(","log(","ln(","sqrt(","π","e","!","%"].map(label=>({label})),v=>{if(v.label==="π")append("pi");else if(v.label==="e")append("e");else if(v.label==="!")append("!");else if(v.label==="%")append("%");else if(v.label==="Trigonometry")openMenu("TRIGONOMETRY",["sin(","cos(","tan(","asin(","acos(","atan("].map(label=>({label})),x=>append(x.label));else append(v.label);});}
-function toolsMenu(){openMenu("TOOLS",[{label:"Calculate"},{label:"Calculation History"},{label:"Memory"},{label:"Variable"},{label:"Prime Factorisation"}],v=>{
- if(v.label==="Calculation History")openMenu("HISTORY",history.map(h=>({label:h.expression+" = "+fmt(h.result),value:h})),h=>{expression=h.value.expression;answer=h.value.result;lastWasResult=true;lastExpression=expression;cursor=expression.length;});
- if(v.label==="Memory")openMenu("MEMORY",[{label:"M = "+fmt(memory)},{label:"M+"},{label:"M-"},{label:"MR"},{label:"MC"}],x=>{if(x.label==="M+")memory+=Number(answer);if(x.label==="M-")memory-=Number(answer);if(x.label==="MR")append(String(memory));if(x.label==="MC")memory=0;});
- if(v.label==="Variable")variableMenu();
- if(v.label==="Prime Factorisation")insertFunction("factor(");
- });}
+function homeMenu(){menu=null;menuStack=[];homeOpen=true;homeIndex=0;history=[];historyCursor=-1;expression="";answer=null;answerDisplay="";lastExpression="";cursor=0;lastWasResult=false;shift=false;render();}
+function chooseHome(){
+ const app=homeApps[homeIndex]?.label;
+ homeOpen=false;menu=null;menuStack=[];
+ if(app==="Calculate"){expression="";answer=null;answerDisplay="";history=[];historyCursor=-1;cursor=0;lastWasResult=false;render();return;}
+ const items=app==="Statistics"?["1-Variable","2-Variable","Regression","Data Editor"]:
+  app==="Table"?["Define f(x)/g(x)","Table Type","Start","End","Step"]:
+  app==="Ratio"?["A:B = C:D","Solve A","Solve B","Solve C","Solve D"]:
+  ["Dice Roll","Coin Toss","Number Line","Circle"];
+ openMenu("",items.map(label=>({label,hasChildren:true})),item=>{
+  openMenu("",[{label:item.label},{label:"This app uses its own calculation screen"}],()=>{});
+ });
+}
+function variableMenu(){
+ openMenu("",Object.keys(variables).map(label=>({label:label+" = "+fmt(variables[label]),name:label})),v=>append(v.name));
+}
+function catalogMenu(){
+ const categories=["Basic Math","Probability","Numeric","Angle/Coordinate","Hyperbolic/Trig","Other"];
+ const data={
+  "Basic Math":["sqrt(","cbrt(","abs(","round(","floor(","ceil(","log(","ln(","exp(","10^("],
+  "Probability":["!","nPr(","nCr(","rand(","randInt("],
+  "Numeric":["gcd(","lcm(","abs(","round(","floor(","ceil(","%"],
+  "Angle/Coordinate":["°","sin(","cos(","tan(","asin(","acos(","atan("],
+  "Hyperbolic/Trig":["sin(","cos(","tan(","asin(","acos(","atan(","sinh(","cosh(","tanh("],
+  "Other":["Ans","π","e","frac(,)","sqrt(","x⁻¹","x²","^(", "−",",","(",")"]
+ };
+ openMenu("",categories.map(label=>({label,hasChildren:true})),item=>{
+  const commands=data[item.label].map(label=>({label}));
+  openMenu("",commands,v=>{
+   if(v.label==="Ans")append("ans");
+   else if(v.label==="π")append("pi");
+   else if(v.label==="e")append("e");
+   else if(v.label==="frac(,)")insertFraction();
+   else if(v.label==="sqrt(")insertFunction("sqrt");
+   else if(v.label==="x⁻¹")append("^(-1)");
+   else if(v.label==="x²")append("^2");
+   else if(v.label==="^(")append("^(");
+   else append(v.label);
+  });
+ });
+}
+function shiftedCatalogMenu(){
+ const common=["π","e","sqrt(","cbrt(","sin(","cos(","tan(","log(","ln(","gcd(","lcm(","nPr(","nCr("];
+ openMenu("",common.map(label=>({label})),v=>append(v.label==="π"?"pi":v.label));
+}
+function memoryMenu(){
+ openMenu("",[
+  {label:"M = "+fmt(memory)},
+  {label:"M+"},
+  {label:"M−"},
+  {label:"MR"},
+  {label:"MC"}
+ ],v=>{
+  if(v.label==="M+")memory+=Number(ansMemory);
+  if(v.label==="M−")memory-=Number(ansMemory);
+  if(v.label==="MR")append(String(memory));
+  if(v.label==="MC")memory=0;
+ });
+}
+function toolsMenu(){
+ openMenu("",[{label:"Undo"},{label:"Memory"},{label:"Variable List"}],v=>{
+  if(v.label==="Undo"){
+   const old=undoStack.pop();if(old){expression=old.expression;answer=old.answer;answerDisplay=old.answerDisplay;cursor=old.cursor;lastWasResult=old.lastWasResult;}
+  }
+  if(v.label==="Memory")memoryMenu();
+  if(v.label==="Variable List")variableMenu();
+ });
+}
+function fractionParts(value){
+ const sign=value<0?-1:1;value=Math.abs(value);
+ let h1=1,h2=0,k1=0,k2=1,b=value;
+ for(let i=0;i<24;i++){
+  const a=Math.floor(b),h=a*h1+h2,k=a*k1+k2;
+  if(k>100000||Math.abs(value-h/k)<1e-10)return [sign*h,k];
+  h2=h1;h1=h;k2=k1;k1=k;
+  const f=b-a;if(f===0)break;b=1/f;
+ }
+ return [sign*Math.round(value*100000),100000];
+}
+function primeFactors(n){
+ n=Math.abs(Math.trunc(n));if(!n)return "0";
+ const factors=[];for(let d=2;d*d<=n;d++){let count=0;while(n%d===0){n/=d;count++;}if(count)factors.push(d+(count>1?"^"+count:""));}
+ if(n>1)factors.push(String(n));return factors.join(" × ")||"1";
+}
+function formatMenu(){
+ if(typeof answer!=="number"||!Number.isFinite(answer))return;
+ const [num,den]=fractionParts(answer);
+ const items=[{label:"Standard"},{label:"Decimal"},{label:"ENG Notation"},{label:"Sexagesimal"}];
+ if(Number.isInteger(answer))items.push({label:"Prime Factor"});
+ if(Math.abs(num/den-answer)<1e-8){
+  items.push({label:"Recurring Decimal"},{label:"Improper Fraction"},{label:"Mixed Fraction"});
+ }
+ openMenu("",items,v=>{
+  if(v.label==="Standard")answerDisplay=fmt(answer);
+  if(v.label==="Decimal")answerDisplay=String(Number(answer.toPrecision(12)));
+  if(v.label==="Prime Factor")answerDisplay=primeFactors(answer);
+  if(v.label==="Recurring Decimal")answerDisplay=fmt(answer);
+  if(v.label==="Improper Fraction")answerDisplay=num+"/"+den;
+  if(v.label==="Mixed Fraction"){
+   const whole=Math.trunc(num/den),rem=Math.abs(num%den);
+   answerDisplay=rem?whole+" "+rem+"/"+den:String(whole);
+  }
+  if(v.label==="ENG Notation"){
+   const exp=Math.floor(Math.log10(Math.abs(answer))/3)*3;
+   answerDisplay=fmt(answer/Math.pow(10,exp))+" × 10^"+exp;
+  }
+  if(v.label==="Sexagesimal"){
+   const sign=answer<0?"−":"";const a=Math.abs(answer),d=Math.floor(a),mFloat=(a-d)*60,m=Math.floor(mFloat),s=(mFloat-m)*60;
+   answerDisplay=sign+d+"° "+m+"′ "+Number(s.toFixed(3))+"″";
+  }
+  render();
+ });
+}
+function applyShift(label){
+ const variableMap={"4":"A","5":"B","6":"C","1":"D","2":"E","3":"F","0":"x",".":"y","×10ˣ":"z"};
+ if(variableMap[label]){append(variableMap[label]);return true;}
+ if(label==="7"){append("pi");return true;}
+ if(label==="8"){append("npr(");return true;}
+ if(label==="9"){append("ncr(");return true;}
+ if(label==="sin"){insertFunction("asin");return true;}
+ if(label==="cos"){insertFunction("acos");return true;}
+ if(label==="tan"){insertFunction("atan");return true;}
+ if(label==="SQUARE ROOT"){insertFunction("cbrt");return true;}
+ if(label==="SQUARE"){append("^3");return true;}
+ if(label==="POWER"){append("^(-1)");return true;}
+ if(label==="LOG"){insertFunction("tenpow");return true;}
+ if(label==="FRACTION"){insertFraction();return true;}
+ if(label==="CATALOG"){shiftedCatalogMenu();return true;}
+ if(label==="FORMAT"){
+  if(typeof answer==="number"){answerDisplay=answer.toExponential(3);render();}
+  return true;
+ }
+ if(label==="AC"){powerOff=true;expression="";answer=null;answerDisplay="";render();return true;}
+ if(label==="("){append("(-");return true;}
+ if(label===")"){append(",");return true;}
+ return false;
+}
 function press(label){
- if(label==="ON"){clear();menu=null;homeOpen=false;shift=false;return;}
+ if(label==="SHIFT"){shift=!shift;render();return;}
+ const shifted=shift;shift=false;
+ if(shifted&&applyShift(label)){render();return;}
+ if(powerOff&&label!=="ON")return;
+ if(label==="ON"){powerOn();return;}
  if(homeOpen){
-  if(label==="LEFT")homeIndex=clamp(homeIndex-1,0,4);
-  else if(label==="RIGHT")homeIndex=clamp(homeIndex+1,0,4);
-  else if(label==="UP")homeIndex=clamp(homeIndex-2,0,4);
-  else if(label==="DOWN")homeIndex=clamp(homeIndex+2,0,4);
-  else if(label==="OK"||label==="EXE")chooseMenu();
-  else if(label==="HOME"||label==="BACK"||label==="AC")homeOpen=false;
+  if(label==="LEFT")homeIndex=Math.max(0,homeIndex-1);
+  else if(label==="RIGHT")homeIndex=Math.min(4,homeIndex+1);
+  else if(label==="UP")homeIndex=Math.max(0,homeIndex-3);
+  else if(label==="DOWN")homeIndex=Math.min(4,homeIndex+3);
+  else if(label==="OK"||label==="EXE")chooseHome();
+  else if(label==="HOME"||label==="BACK"||label==="AC"){homeOpen=false;render();}
   render();return;
  }
  if(menu){
-  if(label==="UP"||label==="SCROLL UP")menuIndex=clamp(menuIndex-1,0,menu.items.length-1);
-  else if(label==="DOWN"||label==="SCROLL DOWN")menuIndex=clamp(menuIndex+1,0,menu.items.length-1);
-  else if(label==="OK"||label==="EXE")chooseMenu();
-  else if(label==="BACK"||label==="AC")closeMenu();
+  if(label==="UP")menuIndex=clamp(menuIndex-1,0,menu.items.length-1);
+  else if(label==="DOWN")menuIndex=clamp(menuIndex+1,0,menu.items.length-1);
+  else if(label==="SCROLL UP")pageMenu("UP");
+  else if(label==="SCROLL DOWN")pageMenu("DOWN");
+  else if(label==="LEFT"||label==="BACK"||label==="AC")closeMenu();
+  else if(label==="RIGHT"||label==="OK"||label==="EXE")chooseMenu();
+  else if(/^[1-4]$/.test(label))chooseMenu(menuScroll+Number(label)-1);
   render();return;
  }
- if(label==="SHIFT"){shift=!shift;render();return;}
  if(label==="HOME"){homeMenu();return;}
  if(label==="SETTINGS"){settingsMenu();return;}
- if(label==="BACK"){if(expression){expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor=Math.max(0,cursor-1);}else clear();render();return;}
- if(label==="UP"){if(history.length){const h=history[0];expression=h.expression;cursor=expression.length;lastWasResult=false;render();}return;}
- if(label==="DOWN"){return;}
+ if(label==="BACK"){if(expression){saveUndo();expression=expression.slice(0,Math.max(0,cursor-1))+expression.slice(cursor);cursor=Math.max(0,cursor-1);answer=null;}else clearEntry();render();return;}
+ if(label==="UP"){if(moveFractionCursor("UP"))render();else scrollHistory("UP");return;}
+ if(label==="DOWN"){if(moveFractionCursor("DOWN"))render();else scrollHistory("DOWN");return;}
  if(label==="LEFT"){moveCursor(-1);return;}
  if(label==="RIGHT"){moveCursor(1);return;}
  if(label==="VARIABLE"){variableMenu();return;}
  if(label==="CATALOG"){catalogMenu();return;}
  if(label==="TOOLS"){toolsMenu();return;}
- if(label==="FUNCTION"){openMenu("FUNCTION",[{label:"f(x) = "},{label:"g(x) = "}],()=>{});return;}
+ if(label==="FUNCTION"){openMenu("",[{label:"f(x)"},{label:"g(x)"}],v=>{openMenu("",[{label:"Enter defining equation for "+v.label}],()=>{});});return;}
  if(label==="OK"||label==="EXE"){calculate();return;}
- if(label==="AC"){clear();return;}
- if(label==="DELETE"){if(lastWasResult){expression=lastExpression;lastWasResult=false;}expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor=Math.max(0,cursor-1);render();return;}
- if(label==="FORMAT"){if(typeof answer==="number"&&!Number.isInteger(answer)){openMenu("FORMAT",[{label:"Standard"},{label:"Decimal"},{label:"Prime Factorisation"}],v=>{if(v.label==="Decimal")answer=Number(answer);if(v.label==="Prime Factorisation"){const n=Math.abs(Math.trunc(answer));let factors=[],d=2,m=n;while(d*d<=m){let c=0;while(m%d===0){m/=d;c++;}if(c)factors.push(d+(c>1?"^"+c:""));d++;}if(m>1)factors.push(m);answer=factors.join(" × ")||"1";}});}return;}
- if(label==="FRACTION"){append("/");return;}
- if(label==="SQUARE ROOT"){insertFunction(shift?"cbrt":"sqrt");shift=false;return;}
- if(label==="POWER"){append("^");return;}
- if(label==="SQUARE"){append(shift?"^3":"^2");shift=false;return;}
- if(label==="LOG"){insertFunction(shift?"ln":"log");shift=false;return;}
- if(label==="sin"||label==="cos"||label==="tan"){insertFunction(shift?({sin:"asin",cos:"acos",tan:"atan"}[label]):label);shift=false;return;}
+ if(label==="AC"){clearEntry();return;}
+ if(label==="DELETE"){
+  if(historyCursor>0&&history[historyCursor]){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;}
+  saveUndo();if(lastWasResult){expression=lastExpression;lastWasResult=false;cursor=expression.length;}
+  expression=expression.slice(0,Math.max(0,cursor-1))+expression.slice(cursor);cursor=Math.max(0,cursor-1);answer=null;answerDisplay="";render();return;
+ }
+ if(label==="FORMAT"){formatMenu();return;}
+ if(label==="FRACTION"){insertFraction();return;}
+ if(label==="SQUARE ROOT"){insertFunction("sqrt");return;}
+ if(label==="POWER"){append("^(");return;}
+ if(label==="SQUARE"){append("^2");return;}
+ if(label==="LOG"){insertFunction("log");return;}
+ if(label==="sin"||label==="cos"||label==="tan"){insertFunction(label);return;}
  if(label==="ANS"){append("ans");return;}
  if(label==="x"){append("x");return;}
  if(label==="×10ˣ"){append("×10^");return;}
  if(label==="×"||label==="÷"||label==="+"||label==="−"||label==="("||label===")"||label==="."||/^[0-9]$/.test(label)){append(label);return;}
 }
+
 for(const [label,x,y] of keyLayout){
  const button=document.createElement("button");button.type="button";button.className="key";button.setAttribute("aria-label",label);button.title=label;
  button.style.left=(x/435*100)+"%";button.style.top=(y/913*100)+"%";
@@ -294,6 +668,12 @@ for(const [label,x,y] of keyLayout){
  button.style.height=scroll?"7%":bottom?"5.9%":y<390?"4.3%":"4.8%";
  button.addEventListener("click",()=>press(label));container.appendChild(button);
 }
+panelEl.addEventListener("click",e=>{
+ const home=e.target.closest("[data-home]");
+ if(home){homeIndex=Number(home.dataset.home);chooseHome();return;}
+ const row=e.target.closest("[data-index]");
+ if(row&&menu){menuIndex=Number(row.dataset.index);chooseMenu(menuIndex);}
+});
 document.addEventListener("keydown",e=>{
  if(e.key==="Enter"||e.key==="="){e.preventDefault();press("EXE");}
  else if(e.key==="Escape"){press("BACK");}
@@ -303,9 +683,10 @@ document.addEventListener("keydown",e=>{
  else if(e.key==="ArrowUp"){e.preventDefault();press("UP");}
  else if(e.key==="ArrowDown"){e.preventDefault();press("DOWN");}
  else if(/^[0-9.+*/()%-]$/.test(e.key)){e.preventDefault();append(e.key);}
- else if(e.key==="^"){e.preventDefault();append("^");}
+ else if(e.key==="^"){e.preventDefault();append("^(");}
 });
 render();
+
 </script>
 </body>
 </html>
