@@ -493,7 +493,10 @@ function calculate(){
    else functions[editor.name]=expression;
    persist();
    if(editor.kind==="variable"){
-    const ret=editorReturn;editor=null;expression=ret.expression;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;cursor=ret.cursor;activeTemplate=null;
+    const ret=editorReturn;
+    const savedItem=ret.menu&&ret.menu.items?ret.menu.items.find(item=>item.name===editor.name):null;
+    if(savedItem)savedItem.value=fmt(v);
+    editor=null;expression=ret.expression;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;cursor=ret.cursor;activeTemplate=null;
     menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;
    }else{
     const ret=editorReturn;editor=null;expression=ret.expression;cursor=ret.cursor;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;
