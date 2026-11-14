@@ -460,7 +460,7 @@ function calculate(){
    else functions[editor.name]=expression;
    persist();
    if(editor.kind==="variable"){
-    const ret=editorReturn;editor=null;expression="";answer=null;answerDisplay="";lastWasResult=false;cursor=0;
+    const ret=editorReturn;editor=null;expression=ret.expression;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;cursor=ret.cursor;activeTemplate=null;
     menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;
    }else{
     const ret=editorReturn;editor=null;expression=ret.expression;cursor=ret.cursor;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;
@@ -488,7 +488,7 @@ function evaluate(source){
   const number=rest.match(/^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/i);
   if(number){tokens.push({type:"number",value:Number(number[0])});i+=number[0].length;continue;}
   const id=rest.match(/^[a-zA-Z]+/);
-  if(id){tokens.push({type:"id",value:id[0].toLowerCase()});i+=id[0].length;continue;}
+  if(id){tokens.push({type:"id",value:id[0]});i+=id[0].length;continue;}
   if("+-*/^!%(),~°".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
   throw Error("Syntax ERROR");
  }
@@ -515,10 +515,11 @@ function evaluate(source){
   if(q.type==="~"){take();return -unary();}
   if(q.type==="("){take();const v=add();expect(")");return v;}
   if(q.type==="id"){
-   const name=take().value;
+   const rawName=take().value,name=rawName.toLowerCase();
+   if(["A","B","C","D","E","F"].includes(rawName))return variables[rawName]??0;
    if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return ansMemory;
    if(name==="ran"&&!peek())return Math.floor(Math.random()*1000)/1000;
-   if(name==="a"||name==="b"||name==="c"||name==="d"||name==="e"||name==="f"||name==="x"||name==="y"||name==="z")return variables[name.toUpperCase()]??variables[name]??0;
+   if(["a","b","c","d","f","x","y","z"].includes(name))return variables[name.toUpperCase()]??variables[name]??0;
    if(peek()&&peek().type==="("){
     take();
     if(name==="ran"){expect(")");return Math.floor(Math.random()*1000)/1000;}
@@ -629,9 +630,15 @@ function settingsMenu(){
  });
 }
 function beginEditor(kind,name){
+ let returnMenu=menu,returnFrames=menuFrames.slice(),returnIndex=menuIndex,returnScroll=menuScroll;
+ if(kind==="variable"&&menuFrames.length){
+  const parent=menuFrames[menuFrames.length-1];
+  returnMenu=parent.menu;returnIndex=parent.index;returnScroll=parent.scroll;returnFrames=menuFrames.slice(0,-1);
+ }
+ if(kind==="function"){returnMenu=null;returnFrames=[];returnIndex=0;returnScroll=0;}
  const returnState={
   expression,answer,answerDisplay,lastExpression,lastWasResult,cursor,
-  menu,frames:menuFrames.slice(),index:menuIndex,scroll:menuScroll
+  menu:returnMenu,frames:returnFrames,index:returnIndex,scroll:returnScroll
  };
  editorReturn=returnState;
  editor={kind,name,prefix:kind==="variable"?name+" = ":""+name+"(x) = "};
