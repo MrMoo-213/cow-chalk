@@ -37,6 +37,14 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 .menuScroll{position:absolute;right:0;top:2%;bottom:2%;width:1.5%;background:#aeb9b2}
 .menuThumb{position:absolute;left:0;right:0;background:#53645a;border-radius:4px}
 #keys{position:absolute;inset:0}
+#keyHistory{position:absolute;left:calc(100% + 8px);top:14.8%;width:132px;height:15.35%;background:#e8ece9;border:1px solid #9ba69f;color:#17201d;font:11px/1.35 Arial,sans-serif;z-index:6;display:flex;flex-direction:column;overflow:hidden}
+#historyToggle{position:absolute;right:2px;top:2px;border:0;border-radius:3px;background:#2388ff;color:#fff;padding:3px 6px;font-size:10px;cursor:pointer;z-index:1}
+#keyHistoryTitle{padding:4px 36px 3px 5px;font-weight:700;border-bottom:1px solid #aeb9b2;white-space:nowrap}
+#keyHistoryItems{padding:4px;overflow:auto;display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px}
+.keyHistoryItem{padding:2px 4px;background:#fff;border:1px solid #c0c9c3;border-radius:3px;white-space:nowrap}
+#keyHistory.hidden{width:40px;height:22px;background:transparent;border:0;overflow:visible}
+#keyHistory.hidden #keyHistoryTitle,#keyHistory.hidden #keyHistoryItems{display:none}
+@media(max-width:700px){#keyHistory{left:auto;right:0;top:14.8%;width:110px}#keyHistory.hidden{right:0}}
 .key{position:absolute;transform:translate(-50%,-50%);border:0;border-radius:50%;padding:0;background:transparent;color:transparent;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .key:focus-visible{outline:2px solid #2388ff;background:#2388ff33}
 .key:active{background:#2388ff55}
@@ -55,7 +63,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 .root{display:inline-flex;align-items:stretch;vertical-align:middle;white-space:nowrap}
 .root .radical{font-size:1.15em;line-height:1}
 .root .radicand{border-top:1px solid currentColor;padding:0 .08em 0 .02em;min-width:.3em}
-.caret{display:inline-block;width:.075em;height:1em;background:#17201d;vertical-align:-.12em;animation:blink 1s step-end infinite}.powerBox,.rootBox,.fracBox{display:inline-block;min-width:.52em;min-height:.72em;border:1px solid #34433c;vertical-align:middle;text-align:center;line-height:.68em}.powerBox{font-size:.72em;vertical-align:super;min-width:.48em;height:.72em}.rootBox{font-size:.68em;min-width:.55em}.customRoot{display:inline-flex;align-items:stretch;vertical-align:middle}.customRoot .rootIndex{font-size:.55em;align-self:flex-start;margin-right:-.05em}.customRoot .radical{font-size:1.3em;line-height:1}.customRoot .radicand{border-top:1px solid currentColor;padding:0 .1em}.fractionBar{height:1px;background:currentColor;width:100%}.recurringDigits{text-decoration:overline}.off{filter:brightness(.75)}
+.caret{display:inline-block;width:.075em;height:1em;background:#17201d;vertical-align:-.12em;animation:blink 1s step-end infinite}.powerBox,.rootBox,.fracBox{display:inline-block;min-width:.52em;min-height:.72em;border:1px solid #34433c;vertical-align:middle;text-align:center;line-height:.68em}.powerBox{font-size:.72em;vertical-align:super;min-width:.48em;height:.72em}.rootBox{font-size:.68em;min-width:.55em}.customRoot{display:inline-flex;align-items:stretch;vertical-align:middle}.customRoot .rootIndex{font-size:.55em;align-self:flex-start;margin-right:-.05em}.customRoot .radical{font-size:1.3em;line-height:1}.customRoot .radicand{border-top:1px solid currentColor;padding:0 .1em}.fractionBar{height:1px;background:currentColor;width:100%}.recurringDigits{text-decoration:overline}.recurringTemplate{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:.8;margin:0 .04em}.recurringTemplate .recurringDot{font-size:.75em;height:.4em;line-height:.5em}.recurringTemplate .recurringBox{display:inline-block;border:1px solid #34433c;min-width:.48em;height:.55em;line-height:.5em;text-align:center}.off{filter:brightness(.75)}
 @keyframes blink{50%{opacity:0}}
 #screenPanel .homeApp:active,#screenPanel .menuRow:active{filter:brightness(.9)}
 
@@ -87,6 +95,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 <div id="screenMain"><div id="expression"></div><div id="answer">0</div><div id="screenPanel"></div></div>
 </div>
 <div id="keys"></div>
+<div id="keyHistory"><button id="historyToggle" type="button">Hide</button><div id="keyHistoryTitle">Key history</div><div id="keyHistoryItems"></div></div>
 </div>
 <script>
 
@@ -145,6 +154,8 @@ let editor=null;
 let editorReturn=null;
 let undoStack=[];
 let appState=null;
+let keyHistory=[];
+let keyHistoryVisible=true;
 
 function loadState(){
  try{
@@ -191,8 +202,8 @@ function fmt(n){
  let out;
  if(resultMode==="Fix")out=n.toFixed(fixDigits);
  else if(resultMode==="Sci")out=n.toExponential(Math.max(0,sciDigits-1)).replace("e","E");
- else if(Number.isInteger(n)&&Math.abs(n)<1e13)out=String(n);
- else out=Number(n.toPrecision(12)).toString();
+ else if(Number.isInteger(n)&&Math.abs(n)<1e10)out=String(n);
+ else out=Number(n.toPrecision(10)).toString();
  if(decimalMark==="Comma")out=out.replace(".",",");
  if(digitSeparator==="On"){
   const marker=decimalMark==="Comma"?",":".";
@@ -272,8 +283,9 @@ function primeFactors(n){
 }
 function sexagesimal(value){
  const sign=value<0?"−":"";let n=Math.abs(value);
- const d=Math.floor(n);n=(n-d)*60;const m=Math.floor(n);const s=(n-m)*60;
- return sign+d+"° "+m+"′ "+Number(s.toFixed(3))+"″";
+ let d=Math.floor(n+1e-12);n=(n-d)*60;let m=Math.floor(n+1e-10);let sec=Math.round((n-m)*60);
+ if(sec>=60){sec=0;m++;}if(m>=60){m=0;d++;}
+ return sign+d+"°"+m+"′"+sec+"″";
 }
 function renderRich(s,from,to,caretPos){
  let out="",i=from;
@@ -304,7 +316,7 @@ function renderRich(s,from,to,caretPos){
     }else if(found==="ran"){
      out+='<span>Ran#</span>';
     }else if(found==="rec"){
-     out+='<span class="recurringDigits">'+renderRich(s,bodyStart,bodyEnd,caretPos)+'</span>';
+     out+='<span class="recurringTemplate"><span class="recurringDot">·</span><span class="recurringBox">'+(bodyStart===bodyEnd?(caretPos===bodyStart?'<span class="caret"></span>':""):renderRich(s,bodyStart,bodyEnd,caretPos))+'</span></span>';
     }else{
      const label={asin:"sin⁻¹",acos:"cos⁻¹",atan:"tan⁻¹",sinh:"sinh",cosh:"cosh",tanh:"tanh",sin:"sin",cos:"cos",tan:"tan",log:"log",ln:"ln",exp:"exp",abs:"Abs",floor:"floor",ceil:"ceil",round:"Rnd",f:"f",g:"g"}[found]||found;
      out+=escapeHtml(label)+"("+renderRich(s,bodyStart,bodyEnd,caretPos)+")";
@@ -312,6 +324,7 @@ function renderRich(s,from,to,caretPos){
     i=close+1;continue;
    }
   }
+  if(s[i]==="^"&&s[i+1]==="2"){out+="<sup>2</sup>";i+=2;continue;}
   if(s[i]==="^"&&s[i+1]==="("){
    const close=matchingParen(s,i+1,to);
    if(close>=0){const exponent=close===i+2?'<span class="powerBox">'+(caretPos===i+2?'<span class="caret"></span>':'')+'</span>':renderRich(s,i+2,close,caretPos);out+='<sup>'+exponent+'</sup>';i=close+1;continue;}
@@ -322,6 +335,7 @@ function renderRich(s,from,to,caretPos){
   else if(ch==="/")out+="÷";
   else if(ch==="p"&&s.slice(i,i+2)==="pi"){out+="π";i+=2;continue;}
   else if(s.slice(i,i+3).toLowerCase()==="ans"){out+="Ans";i+=3;continue;}
+  else if(ch==="¤"){const prior=s.slice(0,i).split("¤").length-1;out+=prior===0?"°":prior===1?"′":"″";}
   else if(ch===",")out+=",";
   else out+=escapeHtml(ch);
   i++;
@@ -592,6 +606,7 @@ function insertTemplate(raw,kind,offset){
 }
 function insertFunction(name){insertTemplate(name+"()",name,name.length+1);}
 function insertFraction(){insertTemplate("frac(,)","fraction",5);}
+function insertMixedFraction(){insertTemplate("mfrac(,,)","mixedfraction",6);}
 function insertSquareRoot(){insertTemplate("sqrt()","sqrt",5);}
 function insertPower(){
  if(lastWasResult){expression=String(ansMemory);cursor=expression.length;lastWasResult=false;}
@@ -599,7 +614,7 @@ function insertPower(){
 }
 function insertNthRoot(){insertTemplate("root(,)","root",5);}
 function insertRecurring(){insertTemplate("rec()","recurring",4);}
-function insertRanInt(){insertTemplate("randint(,)","randint",8);}
+function insertRanInt(){insertTemplate("randint()","randint",8);}
 function moveCursor(d){
  if(editor){cursor=clamp(cursor+d,0,expression.length);render();return;}
  if(historyCursor>=0){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
@@ -712,7 +727,6 @@ function calculate(){
   persist();render();
  }catch(e){
   answer=null;answerDisplay=e.message||"Math ERROR";render();
-  const msg=answerDisplay;setTimeout(()=>{if(answerDisplay===msg){answerDisplay="";render();}},1400);
  }
 }
 function evaluate(source){
@@ -725,7 +739,7 @@ function evaluate(source){
   if(number){tokens.push({type:"number",value:Number(number[0])});i+=number[0].length;continue;}
   const id=rest.match(/^[a-zA-Z]+/);
   if(id){tokens.push({type:"id",value:id[0]});i+=id[0].length;continue;}
-  if("+-*/^!%(),~°ʳᵍ".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
+  if("+-*/^!%(),~°ʳᵍ¤".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
   throw Error("Syntax ERROR");
  }
  const out=[];
@@ -744,7 +758,18 @@ function evaluate(source){
  const gcd=(a,b)=>{a=Math.abs(Math.trunc(a));b=Math.abs(Math.trunc(b));while(b){const t=a%b;a=b;b=t;}return a;};
  function primary(){
   const q=peek();if(!q)throw Error("Syntax ERROR");
-  if(q.type==="number"){take();return q.value;}
+  if(q.type==="number"){
+   take();let value=q.value;
+   if(peek()&&peek().type==="¤"){
+    take();const minutes=peek()&&peek().type==="number"?take().value:0;
+    if(!peek()||peek().type!=="¤")throw Error("Syntax ERROR");take();
+    const seconds=peek()&&peek().type==="number"?take().value:0;
+    if(!peek()||peek().type!=="¤")throw Error("Syntax ERROR");take();
+    if(minutes>=60||seconds>=60||minutes<0||seconds<0)throw Error("Math ERROR");
+    value+=minutes/60+seconds/3600;
+   }
+   return value;
+  }
   if(q.type==="+"){take();return unary();}
   if(q.type==="- "){take();return -unary();}
   if(q.type==="-"){take();return -unary();}
@@ -1053,7 +1078,7 @@ function applyShift(label){
  if(label==="SQUARE"){insertRecurring();return true;}
  if(label==="LOG"){insertFunction("ln");return true;}
  if(label==="−"){append("~");return true;}
- if(label==="+"){append("°");return true;}
+ if(label==="+"){append("¤");return true;}
  if(label===")"){append(",");return true;}
  if(label==="POWER"){append("^(-1)");return true;}
  if(label==="7"){append("pi");return true;}
@@ -1063,7 +1088,8 @@ function applyShift(label){
   append(vars[label]);return true;
  }
  if(label==="×10ˣ"){append("z");return true;}
- if(label==="FRACTION"){insertFraction();return true;}
+ if(label==="x"){answer=null;answerDisplay="Casio Error: this is discontinued";render();return true;}
+ if(label==="FRACTION"){insertMixedFraction();return true;}
  if(label==="CATALOG"){catalogMenu();return true;}
  if(label==="FORMAT"){formatMenu();return true;}
  return false;
