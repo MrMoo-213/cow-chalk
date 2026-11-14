@@ -364,6 +364,7 @@ const homeApps=[
  {label:"Math Box",icon:'<svg viewBox="0 0 40 40"><rect class="glyph" x="5" y="5" width="13" height="13" rx="2"/><rect class="glyph" x="22" y="22" width="13" height="13" rx="2"/><circle cx="11.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="26" cy="26" r="1.7" fill="currentColor"/><circle cx="31" cy="31" r="1.7" fill="currentColor"/></svg>'}
 ];
 function beginAppInput(prompt,target){
+ menu=null;menuFrames=[];menuIndex=0;menuScroll=0;
  appState.inputPrompt=prompt;appState.inputTarget=target;expression="";answer=null;answerDisplay="";cursor=0;render();
 }
 function calculateAppInput(){
@@ -748,12 +749,17 @@ function evaluate(source){
    if(peek()&&peek().type==="("){
     take();
     if(name==="ran"){expect(")");return Math.floor(Math.random()*1000)/1000;}
-    if(name==="frac"||name==="root"||name==="randint"){
-     const a=add();expect(",");const b=add();expect(")");
-     if(name==="frac")return a/b;
-     if(name==="root"){if(a===0)throw Error("Math ERROR");return Math.sign(b)*Math.pow(Math.abs(b),1/a);}
-     if(!Number.isInteger(a)||!Number.isInteger(b)||a>b)throw Error("Math ERROR");
-     return Math.floor(Math.random()*(b-a+1))+a;
+    if(name==="frac"||name==="root"||name==="randint"||name==="log"||name==="gcd"||name==="lcm"||name==="npr"||name==="ncr"||name==="round"||name==="pol"||name==="rect"){
+     const a=add();let b=null;if(peek()&&peek().type===","){take();b=add();}expect(")");
+     if(name==="frac"){if(b===null)throw Error("Syntax ERROR");return a/b;}
+     if(name==="root"){if(b===null||a===0)throw Error("Math ERROR");return Math.sign(b)*Math.pow(Math.abs(b),1/a);}
+     if(name==="randint"){if(b===null||!Number.isInteger(a)||!Number.isInteger(b)||a>b)throw Error("Math ERROR");return Math.floor(Math.random()*(b-a+1))+a;}
+     if(name==="log")return b===null?Math.log10(a):Math.log(b)/Math.log(a);
+     if(name==="gcd"||name==="lcm"){if(b===null)throw Error("Syntax ERROR");const d=gcd(a,b);return name==="gcd"?d:Math.abs(a*b)/(d||1);}
+     if(name==="npr"||name==="ncr"){if(b===null||!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||b>a)throw Error("Math ERROR");return factorial(a)/(name==="npr"?factorial(a-b):factorial(b)*factorial(a-b));}
+     if(name==="round"){const places=b===null?0:b,scale=10**places;return Math.round(a*scale)/scale;}
+     if(name==="pol"){if(b===null)throw Error("Syntax ERROR");variables.x=Math.hypot(a,b);variables.y=fromRad(Math.atan2(b,a));return variables.x;}
+     if(name==="rect"){if(b===null)throw Error("Syntax ERROR");variables.x=a*Math.cos(toRad(b));variables.y=a*Math.sin(toRad(b));return variables.x;}
     }
     if(name==="f"||name==="g"){
      const value=add();expect(")");
@@ -761,7 +767,7 @@ function evaluate(source){
      return evaluate(functions[name].replace(/\bx\b/gi,"("+value+")"));
     }
     const v=add();expect(")");
-    const f={sqrt:Math.sqrt,log:Math.log10,ln:Math.log,exp:Math.exp,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,rec:x=>{const d=String(Math.trunc(Math.abs(x)));return Number(d)/((10**d.length)-1);}};
+    const f={sqrt:Math.sqrt,log:Math.log10,ln:Math.log,exp:Math.exp,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),asinh:Math.asinh,acosh:Math.acosh,atanh:Math.atanh,sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,rec:x=>{const d=String(Math.trunc(Math.abs(x)));return Number(d)/((10**d.length)-1);}};
     if(!f[name])throw Error("Syntax ERROR");return f[name](v);
    }
    throw Error("Syntax ERROR");
@@ -895,44 +901,50 @@ function functionMenu(){
 }
 function catalogMenu(){
  const groups=[
-  {label:"Func Analysis",values:["log(,)","ln()"]},
-  {label:"Probability",values:["%","!","nPr(","nCr(","Ran#","RanInt#("]},
-  {label:"Numeric Calc",values:["gcd(,)","lcm(,)","abs()","rec()","round(,)"]},
-  {label:"Angle/Coord/Sexa...",values:["°","Pol(,)","Rec(,)","DMS()"]},
-  {label:"Hyperbolic/Trig",values:["sinh(","cosh(","tanh(","sinh⁻¹(","cosh⁻¹(","tanh⁻¹(","sin(","cos(","tan(","sin⁻¹(","cos⁻¹(","tan⁻¹("]},
-  {label:"Others",values:["π","e","Ans","f(x)","g(x)"]}
+  {label:"Func Analysis",values:["Logarithm (log)","Natural Logarithm"]},
+  {label:"Probability",values:["%","Factorial (!)","Permutation (P)","Combination (C)","Random Number","Random Integer"]},
+  {label:"Numeric Calc",values:["GCD","LCM","Absolute Value","Recurring Decimal","Round Off"]},
+  {label:"Angle/Coord/Sexa...",values:["Degrees","Radians","Gradians","Rect to Polar","Polar to Rect","Degs Mins Secs"]},
+  {label:"Hyperbolic/Trig",values:["sinh","cosh","tanh","sinh⁻¹","cosh⁻¹","tanh⁻¹","sin","cos","tan","sin⁻¹","cos⁻¹","tan⁻¹"]},
+  {label:"Others",values:["Ans","π","e","√(","x√(","x⁻¹","x²","^(","(−)",",","(",")"]}
  ];
  openMenu("",groups.map(g=>({label:g.label,children:true,items:g.values.map(label=>({label}))})),group=>{
   openMenu("",group.items,item=>{
    const v=item.label;menu=null;menuFrames=[];
-   if(v==="√(")insertSquareRoot();else if(v==="∛(")insertNthRoot();
-   else if(v==="Ran#")insertTemplate("ran()","ran",5);
-   else if(v==="RanInt#(")insertRanInt();
+   if(v==="Logarithm (log)")insertTemplate("log(,)","log",4);
+   else if(v==="Natural Logarithm")insertFunction("ln");
+   else if(v==="Random Number")insertTemplate("ran()","ran",5);
+   else if(v==="Random Integer")insertRanInt();
+   else if(v==="Factorial (!)")append("!");
+   else if(v==="Permutation (P)")insertTemplate("nPr(,)","npr",4);
+   else if(v==="Combination (C)")insertTemplate("nCr(,)","ncr",4);
+   else if(v==="GCD")insertTemplate("gcd(,)","gcd",4);
+   else if(v==="LCM")insertTemplate("lcm(,)","lcm",4);
+   else if(v==="Absolute Value")insertFunction("abs");
+   else if(v==="Recurring Decimal")insertRecurring();
+   else if(v==="Round Off")insertTemplate("round(,)","round",6);
+   else if(v==="Degrees")append("°");
+   else if(v==="Radians")append("pi/180");
+   else if(v==="Gradians")append("pi/200");
+   else if(v==="Rect to Polar")insertTemplate("pol(,)","pol",4);
+   else if(v==="Polar to Rect")insertTemplate("rect(,)","rect",5);
+   else if(v==="Degs Mins Secs")append("°");
+   else if(v==="sinh⁻¹")insertFunction("asinh");
+   else if(v==="cosh⁻¹")insertFunction("acosh");
+   else if(v==="tanh⁻¹")insertFunction("atanh");
+   else if(["sinh","cosh","tanh","sin","cos","tan"].includes(v))insertFunction(v);
    else if(v==="Ans")append("ans");
    else if(v==="π")append("pi");
-   else if(v==="°")append("°");
-   else if(v==="sin⁻¹(")insertFunction("asin");
-   else if(v==="cos⁻¹(")insertFunction("acos");
-   else if(v==="tan⁻¹(")insertFunction("atan");
-   else if(v==="f(x)"||v==="g(x)")insertFunction(v[0]);
-   else if(v==="log(,)")insertTemplate("log(,)","log",4);
-   else if(v==="ln()")insertFunction("ln");
-   else if(v==="gcd(,)")insertTemplate("gcd(,)","gcd",4);
-   else if(v==="lcm(,)")insertTemplate("lcm(,)","lcm",4);
-   else if(v==="abs()")insertFunction("abs");
-   else if(v==="rec()")insertRecurring();
-   else if(v==="round(,)")insertTemplate("round(,)","round",6);
-   else if(v==="Pol(,)")insertTemplate("pol(,)","pol",4);
-   else if(v==="Rec(,)")insertTemplate("rect(,)","rect",5);
-   else if(v==="DMS()")append("°");
-   else if(v==="%")append("%");
-   else if(v==="!")append("!");
-   else if(v==="nPr(")insertTemplate("nPr(,)","nPr",4);
-   else if(v==="nCr(")insertTemplate("nCr(,)","nCr",4);
-   else if(v==="sinh⁻¹(")insertFunction("asinh");
-   else if(v==="cosh⁻¹(")insertFunction("acosh");
-   else if(v==="tanh⁻¹(")insertFunction("atanh");
-   else append(v.replace("(","")+"()");
+   else if(v==="e")append("e");
+   else if(v==="√(")insertSquareRoot();
+   else if(v==="x√(")insertNthRoot();
+   else if(v==="x⁻¹")append("^(-1)");
+   else if(v==="x²")append("^2");
+   else if(v==="^(")insertPower();
+   else if(v==="(−)")append("~");
+   else if(v===",")append(",");
+   else if(v==="("||v===")")append(v);
+   else append(v);
    render();
   });
  });
