@@ -387,6 +387,7 @@ function calculateAppInput(){
    else{
     const value=evaluate(raw);
     if(target==="start"||target==="end"||target==="step")appState[target]=value;
+     else if(target==="attempts"){const attempts=Number(raw);if(!Number.isSafeInteger(attempts)||attempts<1)throw new Error("Integer ERROR");appState.attempts=attempts;}
     else if(target==="angle"){appState.angle=value;appState.input=false;}
     else if(target==="ratio"){appState.values.push(value);}
     else if(target==="stats"){const list=appState.column===0?appState.x:appState.y;list[appState.row]=value;appState.row++;}
@@ -466,6 +467,8 @@ function handleAppArrow(label){
   render();return;
  }
  if(appState.type==="Math Box"&&appState.mode==="Number Line"&&label==="RIGHT"&&appState.lines.length<3){beginAppInput("Inequality "+(appState.lines.length+1)+" = ","line");return;}
+  if(appState.type==="Table"&&appState.generated&&(label==="UP"||label==="DOWN")){appState.tableRow=clamp((appState.tableRow||0)+(label==="DOWN"?1:-1),0,Math.max(0,appState.rows.length-1));render();return;}
+  if(appState.type==="Math Box"&&appState.result&&(label==="UP"||label==="DOWN")){appState.tableRow=clamp((appState.tableRow||0)+(label==="DOWN"?1:-1),0,Math.max(0,appState.rows.length-1));render();return;}
 }
 function handleAppBack(){
  if(appState.type==="Math Box"&&appState.result){appState.result=false;openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{menu=null;menuFrames=[];appState.resultType=item.label;appState.result=true;render();});return;}
@@ -492,11 +495,11 @@ function renderAppScreen(){
   }else{
    const cols=appState.paired?["x","y"]:["x"],rows=[];
    for(let i=0;i<Math.max(4,appState.x.length,appState.y.length);i++)rows.push('<tr><td>'+(i+1)+'</td>'+cols.map((col,j)=>'<td class="'+(appState.row===i&&appState.column===j?"selected":"")+'">'+(appState[col][i]===undefined?"":escapeHtml(fmt(appState[col][i])))+'</td>').join("")+'</tr>');
-   html='<div class="appTitle">Statistics Editor</div><table class="appTable"><tr><th></th>'+cols.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.slice(0,6).join("")+'</table><div class="appNote">Enter a value, then EXE. '+(appState.paired?"Use LEFT/RIGHT to change column.":"")+'</div>';
+   html='<div class="appTitle">Statistics Editor</div><table class="appTable"><tr><th></th>'+cols.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.slice(Math.max(0,appState.row-3),Math.max(0,appState.row-3)+4).join("")+'</table><div class="appNote">Enter a value, then EXE. '+(appState.paired?"Use LEFT/RIGHT to change column.":"")+'</div>';
   }
  }else if(appState.type==="Table"){
   const rows=appState.rows||[];
-  html='<div class="appTitle">Table</div><table class="appTable"><tr><th>x</th>'+(appState.tableType!=="g(x)"?'<th>f(x)</th>':"")+(appState.tableType!=="f(x)"?'<th>g(x)</th>':"")+'</tr>'+rows.slice(0,6).map(r=>'<tr><td>'+fmt(r.x)+'</td>'+(appState.tableType!=="g(x)"?'<td>'+r.f+'</td>':"")+(appState.tableType!=="f(x)"?'<td>'+r.g+'</td>':"")+'</tr>').join("")+'</table><div class="appNote">'+(rows.length?"TOOLS → Table Range / Define f(x)/g(x)":"TOOLS → Define f(x), then Table Range and Generate")+'</div>';
+  html='<div class="appTitle">Table</div><table class="appTable"><tr><th>x</th>'+(appState.tableType!=="g(x)"?'<th>f(x)</th>':"")+(appState.tableType!=="f(x)"?'<th>g(x)</th>':"")+'</tr>'+rows.slice(Math.max(0,(appState.tableRow||0)-3),Math.max(0,(appState.tableRow||0)-3)+4).map((r,i)=>'<tr><td>'+fmt(r.x)+'</td>'+(appState.tableType!=="g(x)"?'<td>'+r.f+'</td>':"")+(appState.tableType!=="f(x)"?'<td>'+r.g+'</td>':"")+'</tr>').join("")+'</table><div class="appNote">'+(rows.length?"TOOLS → Table Range / Define f(x)/g(x)":"TOOLS → Define f(x), then Table Range and Generate")+'</div>';
  }else if(appState.type==="Ratio"){
   const form=appState.equation||"A:B=X:D";
   const labels=form==="A:B=X:D"?["A","B","D"]:["A","B","C"];
@@ -1039,7 +1042,7 @@ function toolsMenu(){
  if(appState.type==="Math Box"&&(appState.mode==="Dice Roll"||appState.mode==="Coin Toss")){
   openMenu("",[{label:(appState.mode==="Dice Roll"?"Dice: ":"Coins: ")+appState.count},{label:"Attempts: "+appState.attempts},{label:"Execute"}],item=>{
    if(item.label.startsWith("Dice:")||item.label.startsWith("Coins:"))openOptions(["1","2","3"],String(appState.count),v=>{appState.count=Number(v);render();});
-   else if(item.label.startsWith("Attempts:"))openOptions(["5","10","25","50","100","250"],String(appState.attempts),v=>{appState.attempts=Number(v);render();});
+   else if(item.label.startsWith("Attempts:"))beginAppInput("Attempts = ","attempts");
    else runMathBoxSimulation();
   });return;
  }
@@ -1058,13 +1061,13 @@ function chooseHome(){
  if(app==="Statistics"){
   openMenu("",[{label:"1-Variable"},{label:"2-Variable"}],item=>{appState={type:"Statistics",paired:item.label==="2-Variable",x:[],y:[],column:0,row:0,showResults:false,inputPrompt:"x1 = ",inputTarget:"stats"};expression="";render();});return;
  }
- if(app==="Table"){appState={type:"Table",start:-5,end:5,step:1,tableType:"f(x)",rows:[]};render();return;}
+ if(app==="Table"){appState={type:"Table",start:-5,end:5,step:1,tableType:"f(x)",rows:[],tableRow:0};render();return;}
  if(app==="Ratio"){
   openMenu("",[{label:"A:B=X:D"},{label:"A:B=C:X"}],item=>{appState={type:"Ratio",equation:item.label,values:[],solved:false,inputPrompt:"A = ",inputTarget:"ratio"};expression="";render();});return;
  }
  if(app==="Math Box"){
   openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>{
-   if(item.label==="Dice Roll"||item.label==="Coin Toss")appState={type:"Math Box",mode:item.label,count:1,attempts:5,rows:[],result:false};
+   if(item.label==="Dice Roll"||item.label==="Coin Toss"){appState={type:"Math Box",mode:item.label,count:1,attempts:5,rows:[],result:false,tableRow:0};toolsMenu();menuIndex=2;render();return;}
    else if(item.label==="Number Line")appState={type:"Math Box",mode:item.label,lines:[],input:true};
    else appState={type:"Math Box",mode:item.label,input:true};
    expression="";if(item.label==="Circle")beginAppInput("Angle = ","angle");else if(item.label==="Number Line")beginAppInput("Inequality 1 = ","line");else render();
@@ -1129,8 +1132,8 @@ function press(label){
  if(homeOpen){
   if(label==="LEFT")homeIndex=(homeIndex+4)%5;
   else if(label==="RIGHT")homeIndex=(homeIndex+1)%5;
-  else if(label==="UP")homeIndex=(homeIndex+3)%5;
-  else if(label==="DOWN")homeIndex=(homeIndex+2)%5;
+  else if(label==="UP"){if(homeIndex>=3)homeIndex-=3;}
+  else if(label==="DOWN"){if(homeIndex<3)homeIndex=Math.min(4,homeIndex+3); }
   else if(label==="OK"||label==="EXE")chooseHome();
   else if(label==="HOME"||label==="BACK"||label==="AC"){homeOpen=false;render();}
   render();return;
