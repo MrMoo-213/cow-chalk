@@ -14,8 +14,9 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 #calculator{position:relative;display:block;height:min(100dvh,calc(100vw * 913 / 435));width:min(100vw,calc(100dvh * 435 / 913));aspect-ratio:435/913;flex:none}
 #calculator>img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
 #screen{position:absolute;left:12.4%;top:14.8%;width:77.5%;height:15.35%;padding:2.2% 2.5%;background:#c2ccc8;color:#17201d;font-family:Arial,sans-serif;overflow:hidden;pointer-events:none;display:flex;flex-direction:column;container-type:inline-size}
-#indicators{height:12%;min-height:0;display:flex;align-items:center;gap:3.5%;white-space:nowrap;font-size:2.4cqw;line-height:1}
-.indicator{display:inline-flex;align-items:center;justify-content:center;min-width:3%;font-weight:700}
+#indicators{height:12%;min-height:0;display:flex;align-items:center;gap:2.5%;white-space:nowrap;overflow:hidden}
+.indicator{height:82%;width:auto;max-width:5%;object-fit:contain;display:block}
+.indicator.text{width:auto;max-width:none;font:700 2.4cqw/1 Arial,sans-serif}
 #screenMain{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;font-size:3.5cqw;line-height:1.18}
 #expression{width:100%;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;min-height:1.15em;padding-top:1.5%}
 #answer{width:100%;text-align:right;white-space:nowrap;overflow:hidden;font-size:1.16em;min-height:1.2em;padding-bottom:1%}
@@ -47,7 +48,7 @@ body{display:flex;align-items:center;justify-content:center;touch-action:manipul
 <div id="calculator" aria-label="Casio fx-83GT CW+ calculator">
 <img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Casio fx-83GT CW+ calculator">
 <div id="screen" aria-live="polite">
-<div id="indicators"><span class="indicator" id="shiftIndicator"></span><span class="indicator" id="mathIndicator">▱</span><span class="indicator" id="angleIndicator">D</span><span class="indicator" id="historyIndicator"></span><span class="indicator" id="formatIndicator"></span></div>
+<div id="indicators"><img class="indicator" id="shiftIndicator" alt=""><img class="indicator" id="mathIndicator" src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003F.png" alt="Natural input"><img class="indicator" id="angleIndicator" src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003b.png" alt="Degrees"><span class="indicator text" id="historyIndicator"></span><span class="indicator text" id="formatIndicator"></span></div>
 <div id="screenMain"><div id="expression"></div><div id="answer">0</div><div id="screenPanel"></div></div>
 </div>
 <div id="keys"></div>
@@ -99,8 +100,9 @@ const fmt=n=>{
 };
 const displayExpr=s=>s.replaceAll("*","×").replaceAll("/","⁄").replaceAll("-","−").replaceAll("pi","π").replaceAll("sqrt(","√(").replaceAll("cbrt(","∛(").replaceAll("^2","²").replaceAll("^3","³").replaceAll("^(-1)","⁻¹");
 function render(){
- shiftEl.textContent=shift?"↑":"";
- angleEl.textContent=angleMode==="DEG"?"D":angleMode==="RAD"?"R":"G";
+ shiftEl.src=shift?"https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003a.png":"";
+ shiftEl.style.display=shift?"block":"none";
+ angleEl.src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/"+(angleMode==="DEG"?"003b":angleMode==="RAD"?"003c":"003d")+".png";
  historyEl.textContent=history.length?"↕":"";
  formatEl.textContent=resultMode==="Fix"?"FIX":resultMode==="Sci"?"SCI":"";
  panelEl.className="";panelEl.innerHTML="";
