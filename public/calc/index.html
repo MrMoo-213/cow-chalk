@@ -1,227 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f5f7fb">
-<title>Cow Calc</title>
-<link rel="icon" type="image/png" href="/assets/pictures/favicon1.png">
-<link rel="apple-touch-icon" href="/assets/pictures/favicon1.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{color-scheme:light;--ink:#202b3c;--muted:#78869a;--blue:#3978d5;--blue-dark:#2864bd;--line:#e5eaf1;--panel:#fff;--page:#f5f7fb;--soft:#edf3fb;--shadow:0 18px 55px rgba(34,57,88,.10)}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:var(--page);color:var(--ink);font-family:"DM Sans",sans-serif}
-button{font:inherit}
-.page{width:min(100%,1040px);margin:auto;padding:34px 24px 50px}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
-.brand-icon{width:42px;height:42px;border-radius:14px;background:#e7f0ff;display:grid;place-items:center;overflow:hidden}
-.brand-icon img{width:31px;height:31px;object-fit:contain}
-.brand-name{font-size:19px;font-weight:800;letter-spacing:-.6px}
-.brand-sub{font-size:12px;color:var(--muted);margin-top:1px}
-.top-link{color:var(--blue);font-size:13px;font-weight:700;text-decoration:none;padding:10px 14px;border-radius:12px}
-.top-link:hover{background:var(--soft)}
-.intro{margin:0 0 22px}
-h1{font-size:clamp(27px,4vw,36px);letter-spacing:-1.4px;margin:0 0 5px;font-weight:800}
-.intro p{margin:0;color:var(--muted);font-size:14px}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 245px;gap:18px;align-items:start}
-.calculator,.history-panel{background:var(--panel);border:1px solid var(--line);border-radius:23px;box-shadow:var(--shadow)}
-.calculator{padding:20px}
-.display{background:#f7f9fc;border:1px solid #edf0f5;border-radius:17px;min-height:132px;padding:17px 19px;display:flex;flex-direction:column;justify-content:space-between;margin-bottom:17px}
-.display-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.mode{border:0;border-radius:9px;background:#e8f0fc;color:var(--blue-dark);font-size:11px;font-weight:800;padding:7px 10px;cursor:pointer}
-.expression{width:100%;border:0;outline:0;background:transparent;color:#66758a;text-align:right;font:16px "Space Mono",monospace;padding:10px 0 5px}
-.result{font:clamp(28px,5vw,38px) "Space Mono",monospace;text-align:right;white-space:nowrap;overflow-x:auto;scrollbar-width:none;min-height:46px}
-.result::-webkit-scrollbar{display:none}
-.keypad{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
-.key{min-height:54px;border:1px solid #e9edf3;border-radius:13px;background:#fff;color:var(--ink);font-size:16px;font-weight:700;cursor:pointer;transition:background .14s,border-color .14s,transform .14s}
-.key:hover{background:#f1f6fd;border-color:#cbdcf4}
-.key:active{transform:scale(.96)}
-.key.function{background:#f3f6fa;color:#50627a;font-size:14px}
-.key.operator{background:#edf4ff;color:var(--blue-dark);border-color:#e3edfc}
-.key.action{background:#fff2ef;color:#d15b48;border-color:#f9e4df}
-.key.equals{background:var(--blue);color:#fff;border-color:var(--blue);font-size:20px}
-.key.equals:hover{background:var(--blue-dark)}
-.key.zero{grid-column:span 2}
-.history-panel{padding:19px;min-height:220px}
-.history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.history-head h2{font-size:14px;margin:0;font-weight:800}
-.clear-history{border:0;background:transparent;color:var(--blue);font-size:11px;font-weight:800;cursor:pointer;padding:5px}
-.history-list{display:flex;flex-direction:column;gap:7px}
-.history-item{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 11px;text-align:right;cursor:pointer}
-.history-item:hover{background:#f7faff}
-.history-expression{font:11px "Space Mono",monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.history-result{font:15px "Space Mono",monospace;font-weight:700;margin-top:5px}
-.empty-history{font-size:12px;color:#9aa5b4;text-align:center;padding:25px 5px}
-.footer{display:flex;justify-content:space-between;gap:12px;margin-top:15px;color:#98a3b2;font-size:11px}
-@media(max-width:760px){.page{padding:20px 14px 35px}.layout{grid-template-columns:1fr}.history-panel{min-height:unset}.history-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.calculator{padding:14px}.keypad{gap:7px}.key{min-height:52px}.intro{margin-bottom:17px}}
-@media(max-width:380px){.key{min-height:47px;font-size:14px}.calculator{padding:11px}.keypad{gap:6px}}
-</style>
-</head>
-<body>
-<div class="page">
-<header class="topbar">
-<a class="brand" href="/" aria-label="Cow Chalk home">
-<span class="brand-icon"><img src="/assets/pictures/favicon1.png" alt=""></span>
-<span><span class="brand-name">Cow Chalk</span><span class="brand-sub" style="display:block">Tools for the classroom</span></span>
-</a>
-<a class="top-link" href="/">Back to home</a>
-</header>
-<main>
-<div class="intro"><h1>Cow Calc</h1><p>A simple scientific calculator.</p></div>
-<div class="layout">
-<section class="calculator" aria-label="Scientific calculator">
-<div class="display">
-<div class="display-top"><button class="mode" id="angleMode" type="button">DEG</button><span style="font-size:11px;color:#9aa5b4;font-weight:700">COW CALC</span></div>
-<input class="expression" id="expression" aria-label="Expression" autocomplete="off" spellcheck="false" placeholder="Enter a calculation">
-<div class="result" id="result" aria-live="polite">0</div>
-</div>
-<div class="keypad" id="keypad">
-<button class="key function" data-value="sin(">sin</button><button class="key function" data-value="cos(">cos</button><button class="key function" data-value="tan(">tan</button><button class="key function" data-value="sqrt(">√</button><button class="key action" data-action="clear">AC</button>
-<button class="key function" data-value="asin(">sin⁻¹</button><button class="key function" data-value="acos(">cos⁻¹</button><button class="key function" data-value="atan(">tan⁻¹</button><button class="key function" data-value="^2">x²</button><button class="key action" data-action="backspace">⌫</button>
-<button class="key function" data-value="log(">log</button><button class="key function" data-value="ln(">ln</button><button class="key function" data-value="(">(</button><button class="key function" data-value=")">)</button><button class="key operator" data-value="÷">÷</button>
-<button class="key" data-value="7">7</button><button class="key" data-value="8">8</button><button class="key" data-value="9">9</button><button class="key operator" data-value="×">×</button><button class="key operator" data-value="−">−</button>
-<button class="key" data-value="4">4</button><button class="key" data-value="5">5</button><button class="key" data-value="6">6</button><button class="key operator" data-value="+">+</button><button class="key function" data-value="^">xʸ</button>
-<button class="key" data-value="1">1</button><button class="key" data-value="2">2</button><button class="key" data-value="3">3</button><button class="key function" data-value="π">π</button><button class="key function" data-value="e">e</button>
-<button class="key zero" data-value="0">0</button><button class="key" data-value=".">.</button><button class="key function" data-value="%">%</button><button class="key equals" data-action="equals">=</button>
-</div>
-<div class="footer"><span>Keyboard supported</span><span>Esc to clear · Enter to calculate</span></div>
-</section>
-<aside class="history-panel">
-<div class="history-head"><h2>Recent calculations</h2><button class="clear-history" id="clearHistory" type="button">CLEAR</button></div>
-<div class="history-list" id="history"><div class="empty-history">Your calculations will appear here.</div></div>
-</aside>
-</div>
-</main>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/14.8.1/math.min.js"></script>
-<script>
-(() => {
-  const expressionInput = document.getElementById("expression");
-  const resultDisplay = document.getElementById("result");
-  const keypad = document.getElementById("keypad");
-  const historyList = document.getElementById("history");
-  const angleButton = document.getElementById("angleMode");
-  let angleMode = "deg";
-  let history = [];
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cow Calc</title>
+    <link rel="icon" type="image/png" href="/assets/pictures/favicon1.png">
+    <link rel="apple-touch-icon" href="/assets/pictures/favicon1.png">
 
-  function insert(value) {
-    const start = expressionInput.selectionStart ?? expressionInput.value.length;
-    const end = expressionInput.selectionEnd ?? start;
-    const current = expressionInput.value;
-    expressionInput.value = current.slice(0, start) + value + current.slice(end);
-    expressionInput.focus();
-    const cursor = start + value.length;
-    expressionInput.setSelectionRange(cursor, cursor);
-  }
+    <!-- Google Fonts & Tailwind CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&family=VT323&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  function calculate() {
-    const raw = expressionInput.value.trim();
-    if (!raw) return;
-    if (!window.math) {
-      resultDisplay.textContent = "Calculator unavailable";
-      return;
-    }
-    try {
-      let prepared = raw.replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-").replace(/π/g, "pi");
-      const scope = {
-        sin: value => Math.sin(angleMode === "deg" ? value * Math.PI / 180 : value),
-        cos: value => Math.cos(angleMode === "deg" ? value * Math.PI / 180 : value),
-        tan: value => Math.tan(angleMode === "deg" ? value * Math.PI / 180 : value),
-        asin: value => angleMode === "deg" ? Math.asin(value) * 180 / Math.PI : Math.asin(value),
-        acos: value => angleMode === "deg" ? Math.acos(value) * 180 / Math.PI : Math.acos(value),
-        atan: value => angleMode === "deg" ? Math.atan(value) * 180 / Math.PI : Math.atan(value)
-      };
-      const value = window.math.evaluate(prepared, scope);
-      if (typeof value !== "number" || !Number.isFinite(value)) throw new Error("Invalid result");
-      const rounded = Math.abs(value) < 1e-12 ? 0 : Number(value.toPrecision(12));
-      const formatted = String(rounded);
-      resultDisplay.textContent = formatted;
-      history.unshift({ expression: raw, result: formatted });
-      history = history.slice(0, 8);
-      renderHistory();
-    } catch {
-      resultDisplay.textContent = "Error";
-    }
-  }
+    <!-- MathQuill CSS for the GCSE model (its JS is loaded dynamically by the hook) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mathquill@0.10.1/build/mathquill.min.css"/>
 
-  function renderHistory() {
-    historyList.replaceChildren();
-    if (!history.length) {
-      const empty = document.createElement("div");
-      empty.className = "empty-history";
-      empty.textContent = "Your calculations will appear here.";
-      historyList.append(empty);
-      return;
-    }
-    history.forEach(item => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "history-item";
-      const expression = document.createElement("div");
-      expression.className = "history-expression";
-      expression.textContent = item.expression;
-      const result = document.createElement("div");
-      result.className = "history-result";
-      result.textContent = item.result;
-      button.append(expression, result);
-      button.addEventListener("click", () => {
-        expressionInput.value = item.expression;
-        resultDisplay.textContent = item.result;
-        expressionInput.focus();
-      });
-      historyList.append(button);
-    });
-  }
-
-  keypad.addEventListener("click", event => {
-    const button = event.target.closest("button");
-    if (!button) return;
-    const action = button.dataset.action;
-    if (action === "clear") {
-      expressionInput.value = "";
-      resultDisplay.textContent = "0";
-      expressionInput.focus();
-    } else if (action === "backspace") {
-      const start = expressionInput.selectionStart ?? expressionInput.value.length;
-      const end = expressionInput.selectionEnd ?? start;
-      if (start === end && start > 0) {
-        expressionInput.value = expressionInput.value.slice(0, start - 1) + expressionInput.value.slice(end);
-        expressionInput.setSelectionRange(start - 1, start - 1);
-      } else {
-        expressionInput.setRangeText("", start, end, "end");
+    <!--
+      GCSE-model MathQuill overrides:
+      align the √ prefix symbol and thicken the input square root line.
+    -->
+    <style>
+      .mq-math-mode .mq-sqrt-prefix {
+        font-family: "STIX Two Math", "Cambria Math", "Times New Roman", serif !important;
+        position: relative !important;
+        top: -0.02em !important; /* The final, approved alignment value */
+        font-size: 1.1em !important;
       }
-      expressionInput.focus();
-    } else if (action === "equals") {
-      calculate();
-    } else if (button.dataset.value) {
-      insert(button.dataset.value);
-    }
-  });
-
-  angleButton.addEventListener("click", () => {
-    angleMode = angleMode === "deg" ? "rad" : "deg";
-    angleButton.textContent = angleMode.toUpperCase();
-  });
-
-  document.getElementById("clearHistory").addEventListener("click", () => {
-    history = [];
-    renderHistory();
-  });
-
-  expressionInput.addEventListener("keydown", event => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      calculate();
-    } else if (event.key === "Escape") {
-      expressionInput.value = "";
-      resultDisplay.textContent = "0";
-    }
-  });
-})();
-</script>
+      /*
+        Applies a single, continuous border to the PARENT container of the
+        content, not the individual child elements.
+      */
+      .mq-math-mode .mq-sqrt-stem {
+        border-top: 2px solid black !important;
+        padding-top: 1px !important; /* Minimal padding */
+        position: relative !important;
+        top: -2px !important;
+      }
+      /* Nudge the content *inside* the radical down, as padding wasn't working. */
+      .mq-math-mode .mq-sqrt-stem > span {
+        position: relative !important;
+        top: 2px !important;
+      }
+    </style>
+  <script type="module" src="./js.js"></script>
+  <link rel="stylesheet" href="./css.css">
+</head>
+<body class="bg-[#e0e0e0]">
+    <div id="root"></div>
 </body>
 </html>
