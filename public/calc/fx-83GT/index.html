@@ -454,7 +454,8 @@ function deleteAtom(){
  const prefix=expression.slice(0,cursor);
  const templateNames=["randint","sqrt","root","frac","asin","acos","atan","sinh","cosh","tanh","sin","cos","tan","log","ln","rec","ran"];
  for(const name of templateNames){
-  for(let start=prefix.lastIndexOf(name+"(");start>=0;start=prefix.lastIndexOf(name+"(",start-1)){
+  let start=prefix.lastIndexOf(name+"(");
+  while(start>=0){
    const close=matchingParen(expression,start+name.length,cursor);
    if(close===cursor-1){
     const body=expression.slice(start+name.length+1,close);
@@ -462,6 +463,7 @@ function deleteAtom(){
      deleteWhole(start,close+1);render();return;
     }
    }
+   start=start>0?prefix.lastIndexOf(name+"(",start-1):-1;
   }
  }
  const powerStart=prefix.lastIndexOf("^(");
