@@ -313,7 +313,12 @@ function append(value){
  saveUndo();
  expression=expression.slice(0,cursor)+value+expression.slice(cursor);cursor+=value.length;answer=null;answerDisplay="";render();
 }
-function insertFunction(name){append(name+"(");}
+function insertFunction(name){
+ if(lastWasResult){expression="";lastWasResult=false;cursor=0;}
+ append(name+"()");
+ cursor=Math.max(0,cursor-1);
+ render();
+}
 function insertFraction(){
  if(menu||homeOpen)return;
  if(lastWasResult){expression="";lastWasResult=false;cursor=0;}
@@ -336,7 +341,7 @@ function calculate(){
  try{
   const result=evaluate(expression);
   lastExpression=expression;history.unshift({expression,result});history=history.slice(0,50);
-  answer=result;answerDisplay=fmt(result);ansMemory=result;lastWasResult=true;historyCursor=-1;cursor=expression.length;undoStack=[];
+  answer=result;answerDisplay=standardResult(result);ansMemory=result;lastWasResult=true;historyCursor=-1;cursor=expression.length;undoStack=[];
   render();
  }catch(e){
   answer=null;answerDisplay=e.message||"Math ERROR";lastWasResult=false;render();
@@ -537,6 +542,13 @@ function toolsMenu(){
   if(v.label==="Variable List")variableMenu();
  });
 }
+function standardResult(value){
+ if(!Number.isFinite(value))return String(value);
+ const parts=fractionParts(value);
+ if(parts[1]===1)return fmt(value);
+ if(Math.abs(parts[0]/parts[1]-value)<1e-10)return parts[0]+"/"+parts[1];
+ return fmt(value);
+}
 function fractionParts(value){
  const sign=value<0?-1:1;value=Math.abs(value);
  let h1=1,h2=0,k1=0,k2=1,b=value;
@@ -562,8 +574,8 @@ function formatMenu(){
   items.push({label:"Recurring Decimal"},{label:"Improper Fraction"},{label:"Mixed Fraction"});
  }
  openMenu("",items,v=>{
-  if(v.label==="Standard")answerDisplay=fmt(answer);
-  if(v.label==="Decimal")answerDisplay=String(Number(answer.toPrecision(12)));
+  if(v.label==="Standard")answerDisplay=standardResult(answer);
+  if(v.label==="Decimal")answerDisplay=fmt(answer);
   if(v.label==="Prime Factor")answerDisplay=primeFactors(answer);
   if(v.label==="Recurring Decimal")answerDisplay=fmt(answer);
   if(v.label==="Improper Fraction")answerDisplay=num+"/"+den;
@@ -597,10 +609,7 @@ function applyShift(label){
  if(label==="LOG"){insertFunction("tenpow");return true;}
  if(label==="FRACTION"){insertFraction();return true;}
  if(label==="CATALOG"){shiftedCatalogMenu();return true;}
- if(label==="FORMAT"){
-  if(typeof answer==="number"){answerDisplay=answer.toExponential(3);render();}
-  return true;
- }
+ if(label==="FORMAT"){formatMenu();return true;}
  if(label==="AC"){powerOff=true;expression="";answer=null;answerDisplay="";render();return true;}
  if(label==="("){append("(-");return true;}
  if(label===")"){append(",");return true;}
@@ -649,10 +658,19 @@ function press(label){
   saveUndo();if(lastWasResult){expression=lastExpression;lastWasResult=false;cursor=expression.length;}
   expression=expression.slice(0,Math.max(0,cursor-1))+expression.slice(cursor);cursor=Math.max(0,cursor-1);answer=null;answerDisplay="";render();return;
  }
- if(label==="FORMAT"){formatMenu();return;}
+ if(label==="FORMAT"){
+  if(typeof answer!=="number")return;
+  const [n,d]=fractionParts(answer);
+  if(answerDisplay===fmt(answer)||answerDisplay===String(answer))answerDisplay=(d===1?fmt(answer):n+"/"+d);
+  else answerDisplay=fmt(answer);
+  render();return;
+ }
  if(label==="FRACTION"){insertFraction();return;}
  if(label==="SQUARE ROOT"){insertFunction("sqrt");return;}
- if(label==="POWER"){append("^(");return;}
+ if(label==="POWER"){
+  if(lastWasResult){expression=String(ansMemory);cursor=expression.length;lastWasResult=false;}
+  append("^()");cursor=Math.max(0,cursor-1);render();return;
+ }
  if(label==="SQUARE"){append("^2");return;}
  if(label==="LOG"){insertFunction("log");return;}
  if(label==="sin"||label==="cos"||label==="tan"){insertFunction(label);return;}
