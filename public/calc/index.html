@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>M4TH5 GCSE Calculator</title>
+
+    <!-- Google Fonts & Tailwind CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&family=VT323&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathQuill CSS for the GCSE model (its JS is loaded dynamically by the hook) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mathquill@0.10.1/build/mathquill.min.css"/>
+
+    <!--
+      GCSE-model MathQuill overrides:
+      align the √ prefix symbol and thicken the input square root line.
+    -->
+    <style>
+      .mq-math-mode .mq-sqrt-prefix {
+        font-family: "STIX Two Math", "Cambria Math", "Times New Roman", serif !important;
+        position: relative !important;
+        top: -0.02em !important; /* The final, approved alignment value */
+        font-size: 1.1em !important;
+      }
+      /*
+        Applies a single, continuous border to the PARENT container of the
+        content, not the individual child elements.
+      */
+      .mq-math-mode .mq-sqrt-stem {
+        border-top: 2px solid black !important;
+        padding-top: 1px !important; /* Minimal padding */
+        position: relative !important;
+        top: -2px !important;
+      }
+      /* Nudge the content *inside* the radical down, as padding wasn't working. */
+      .mq-math-mode .mq-sqrt-stem > span {
+        position: relative !important;
+        top: 2px !important;
+      }
+    </style>
+  <script type="module" crossorigin src="/calculator/assets/index-CnL_5Los.js"></script>
+  <link rel="stylesheet" crossorigin href="/calculator/assets/index-C-7iH41Q.css">
+</head>
+<body class="bg-[#e0e0e0]">
+    <div id="root"></div>
+</body>
+</html>
