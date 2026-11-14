@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Casio fx-83GT CW+ Calculator</title>
+<title>Cow Chalk fx-83GT CW+ Calculator</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/favicon1.png">
 <style>
 *{box-sizing:border-box}
@@ -505,7 +505,7 @@ function calculate(){
  try{
   const result=evaluate(expression);
   lastExpression=expression;history.unshift({expression,result});history=history.slice(0,50);
-  answer=result;answerDisplay=standardResult(result);ansMemory=result;lastWasResult=true;historyCursor=-1;cursor=expression.length;activeTemplate=null;undoStack=[];
+  answer=result;answerDisplay=expression.trim()==="ran()"?result.toFixed(3):standardResult(result);ansMemory=result;lastWasResult=true;historyCursor=-1;cursor=expression.length;activeTemplate=null;undoStack=[];
   persist();render();
  }catch(e){
   answer=null;answerDisplay=e.message||"Math ERROR";render();
@@ -582,6 +582,7 @@ function evaluate(source){
    const op=take().type;
    if(op==="!")v=factorial(v);
    else if(op==="%")v/=100;
+   else if(op==="°"){if(angleMode==="RAD")v*=Math.PI/180;else if(angleMode==="GRA")v*=200/180;}
   }
   return v;
  }
