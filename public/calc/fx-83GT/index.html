@@ -3,32 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Casio fx-83GT CW+</title>
+<title>Cow Chalk fx-83GT CW+ Calculator</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/favicon1.png">
 <style>
 *{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#fff;overscroll-behavior:none}
 body{display:flex;align-items:center;justify-content:center;touch-action:manipulation}
-#back{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:#2388ff;color:#fff;text-decoration:none;font:32px/1 Arial,sans-serif;box-shadow:0 2px 9px #0002;-webkit-tap-highlight-color:transparent}
+#back{position:fixed;left:14px;top:14px;transform:none;z-index:5;min-height:40px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;background:#2388ff;color:#fff;text-decoration:none;font:600 15px/1 Arial,sans-serif;box-shadow:0 2px 9px #0002;-webkit-tap-highlight-color:transparent}
 #back:hover{background:#0874ed}
 #calculator{position:relative;display:block;height:min(100dvh,calc(100vw * 913 / 435));width:min(100vw,calc(100dvh * 435 / 913));aspect-ratio:435/913;flex:none}
-#calculator img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
-#screen{position:absolute;left:12.4%;top:14.8%;width:77.5%;height:15.35%;display:flex;align-items:center;justify-content:center;padding:4px;background:#c2ccc8;color:#111;font:600 clamp(10px,2.4vw,18px)/1.2 Arial,sans-serif;text-align:center;overflow:hidden;pointer-events:none}
+#calculator>img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
+#screen{position:absolute;left:12.4%;top:14.8%;width:77.5%;height:15.35%;padding:2.2% 2.5%;background:#c2ccc8;color:#17201d;font-family:Arial,sans-serif;overflow:hidden;pointer-events:none;display:flex;flex-direction:column;container-type:inline-size}
+#indicators{height:12%;min-height:0;display:flex;align-items:center;gap:2.5%;white-space:nowrap;overflow:hidden}
+.indicator{height:82%;width:auto;max-width:5%;object-fit:contain;display:block}
+.indicator.text{width:auto;max-width:none;font:700 2.4cqw/1 Arial,sans-serif}
+#screenMain{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;font-size:7.1cqw;line-height:1.12}
+#expression{width:100%;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;min-height:1.15em;padding-top:1%;font-size:1em;font-weight:500}
+#answer{width:100%;text-align:right;white-space:nowrap;overflow:hidden;font-size:1.12em;min-height:1.2em;padding-bottom:1%;font-weight:500}
+#screenMain.menu{display:block;font-size:5.3cqw;line-height:1.1}
+#screenPanel{position:absolute;inset:0;display:none;overflow:hidden;background:transparent;pointer-events:auto}
+#screenPanel.visible{display:block}
+#screenPanel.home.visible{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:3% 2%;padding:1% 2%;overflow:hidden}
+.homeApp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2%;min-height:0;min-width:0;padding:2%;border-radius:1%;font-size:3.7cqw;font-weight:600;white-space:nowrap;overflow:hidden;cursor:pointer}
+.homeIcon{width:57%;height:62%;display:grid;place-items:center;background:transparent;border:0;font-size:1.5em;line-height:1;flex:none;color:#17201d}.homeIcon svg{width:100%;height:100%;display:block}
+.homeApp.selected{outline:0;background:#17201d;color:#fff}.homeApp.selected .homeIcon{color:#fff}.homeLabel{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#menuRows{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding-right:2%}
+.menuTitle{display:none}
+.menuRow{height:25%;min-height:0;flex:0 0 25%;display:flex;align-items:center;padding:0 2%;white-space:nowrap;overflow:hidden;font-family:ui-monospace,Consolas,monospace;font-size:1em;font-weight:500;cursor:pointer}.menuRow.blank{visibility:hidden;pointer-events:none}
+.menuRow.selected{background:#17201d;color:#fff;outline:0}
+.menuNumber{width:8%;flex:none;text-align:center;font-size:.82em}
+.menuLabel{flex:1;overflow:hidden;text-overflow:ellipsis}
+.menuArrow{width:7%;text-align:right;flex:none}
+.menuScroll{position:absolute;right:0;top:2%;bottom:2%;width:1.5%;background:#aeb9b2}
+.menuThumb{position:absolute;left:0;right:0;background:#53645a;border-radius:4px}
 #keys{position:absolute;inset:0}
 .key{position:absolute;transform:translate(-50%,-50%);border:0;border-radius:50%;padding:0;background:transparent;color:transparent;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .key:focus-visible{outline:2px solid #2388ff;background:#2388ff33}
 .key:active{background:#2388ff55}
+@media(hover:hover){.key:hover{background:#2388ff18}}
+
+.homeIcon .glyph{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter}
+.menuNumber{display:none}
+.menuLabel{flex:1;overflow:hidden;text-overflow:ellipsis}
+.menuValue{max-width:30%;overflow:hidden;text-overflow:ellipsis;text-align:right;font-size:.76em;font-weight:500}
+.menuArrow{width:7%;text-align:right;flex:none}
+.menuRow.selected .menuNumber,.menuRow.selected .menuArrow{color:#fff}
+.menuThumb{position:absolute;left:0;right:0;background:#53645a;border-radius:2px}
+.frac{display:inline-grid;grid-template-rows:auto 1px auto;vertical-align:middle;text-align:center;min-width:1.1em;margin:0 .08em;line-height:1.0}
+.frac .fraction-bar{height:1px;background:currentColor;width:100%;align-self:center}
+.frac .numerator,.frac .denominator{display:block;padding:0 .12em;min-height:.65em}
+.root{display:inline-flex;align-items:stretch;vertical-align:middle;white-space:nowrap}
+.root .radical{font-size:1.15em;line-height:1}
+.root .radicand{border-top:1px solid currentColor;padding:0 .08em 0 .02em;min-width:.3em}
+.caret{display:inline-block;width:.075em;height:1em;background:#17201d;vertical-align:-.12em;animation:blink 1s step-end infinite}.powerBox,.rootBox,.fracBox{display:inline-block;min-width:.52em;min-height:.72em;border:1px solid #34433c;vertical-align:middle;text-align:center;line-height:.68em}.powerBox{font-size:.72em;vertical-align:super;min-width:.48em;height:.72em}.rootBox{font-size:.68em;min-width:.55em}.customRoot{display:inline-flex;align-items:stretch;vertical-align:middle}.customRoot .rootIndex{font-size:.55em;align-self:flex-start;margin-right:-.05em}.customRoot .radical{font-size:1.3em;line-height:1}.customRoot .radicand{border-top:1px solid currentColor;padding:0 .1em}.fractionBar{height:1px;background:currentColor;width:100%}.recurringDigits{text-decoration:overline}.recurringTemplate{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:.8;margin:0 .04em}.recurringTemplate .recurringDot{font-size:.75em;height:.4em;line-height:.5em}.recurringTemplate .recurringBox{display:inline-block;border:1px solid #34433c;min-width:.48em;height:.55em;line-height:.5em;text-align:center}.off{filter:brightness(.75)}
+@keyframes blink{50%{opacity:0}}
+#screenPanel .homeApp:active,#screenPanel .menuRow:active{filter:brightness(.9)}
+
+#brand{position:absolute;left:29%;top:20.3%;width:42%;height:4%;display:none;align-items:center;justify-content:center;color:#18231e;background:transparent;font:700 clamp(8px,1.5vw,15px)/1 Arial,sans-serif;letter-spacing:.04em;pointer-events:none;z-index:3}
+#screen.powered-off{background:#c2ccc8;color:#17201d}
+#screen.powered-off #brand{display:flex}
+.root .radicand:has(.rootBox),.customRoot .radicand:has(.rootBox){border-top:0}
+.appTable{width:100%;border-collapse:collapse;font-size:3.1cqw;line-height:1.25;text-align:right}
+.appTable th,.appTable td{padding:.12em .2em;border-bottom:1px solid #87938d;white-space:nowrap}
+.appTable th:first-child,.appTable td:first-child{text-align:left}
+.appTable .selected{background:#26352e;color:#fff}
+.appTitle{font-weight:700;text-align:left;margin-bottom:.25em;font-size:3.8cqw}
+.appNote{font-size:2.7cqw;text-align:left;margin-top:.3em}
+.appResult{font-size:3.2cqw;text-align:left;line-height:1.4}
+.appAxis{height:22px;position:relative;border-top:1px solid #26352e;margin:18px 8px}
+.appAxis:before{content:"";position:absolute;left:50%;top:-5px;height:9px;border-left:1px solid #26352e}
+.appAxis span{position:absolute;top:-17px;font-size:2.8cqw}
+#screen.powered-off #indicators{visibility:hidden}
+#screen.powered-off #screenMain{visibility:hidden}
+#screenPanel .menuRow.blank{visibility:hidden}
+#screenPanel.statsEditor{bottom:25%}
+#brand{flex-direction:column;gap:2px}
+#brand span{font:400 clamp(5px,.75vw,8px)/1 Arial,sans-serif;letter-spacing:.02em}
 </style>
 </head>
 <body>
-<a id="back" href="/calc/" aria-label="Back to calculators">‹</a>
+<a id="back" href="/calc/" aria-label="Back to calculators"><span aria-hidden="true">←</span><span>Back</span></a>
 <div id="calculator" aria-label="Casio fx-83GT CW+ calculator">
-<img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Casio fx-83GT CW+ calculator">
-<div id="screen" aria-live="polite">Press a button</div>
+<img src="https://raw.githubusercontent.com/MrMoo-213/cow-chalk/calc/assets/pictures/fx-83GT.png" alt="Cow Chalk fx-83GT CW+ calculator"><div id="brand">Cow Chalk<span>The Larpulator</span></div>
+<div id="screen" aria-live="polite">
+<div id="indicators"><img class="indicator" id="shiftIndicator" alt=""><img class="indicator" id="mathIndicator" src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003F.png" alt="Natural input"><img class="indicator" id="angleIndicator" src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003b.png" alt="Degrees"><span class="indicator text" id="historyIndicator"></span><span class="indicator text" id="formatIndicator"></span></div>
+<div id="screenMain"><div id="expression"></div><div id="answer">0</div><div id="screenPanel"></div></div>
+</div>
 <div id="keys"></div>
 </div>
 <script>
-const keys=[
+
+const keyLayout=[
 ["ON",58,353],["HOME",122,357],["UP",250,357],["SCROLL UP",377,357],
 ["SETTINGS",58,413],["BACK",122,413],["LEFT",185,413],["OK",250,413],["RIGHT",314,413],["SCROLL DOWN",377,411],
 ["SHIFT",58,481],["VARIABLE",122,481],["FUNCTION",185,481],["DOWN",250,470],["CATALOG",314,481],["TOOLS",377,479],
@@ -39,23 +104,1152 @@ const keys=[
 ["1",62,785],["2",140,785],["3",218,785],["+",296,785],["−",374,785],
 ["0",62,851],[".",140,850],["×10ˣ",218,850],["FORMAT",296,850],["EXE",374,850]
 ];
-const container=document.getElementById("keys");
-const screen=document.getElementById("screen");
-for(const [label,x,y] of keys){
- const button=document.createElement("button");
- button.type="button";
- button.className="key";
- button.setAttribute("aria-label",label);
- button.title=label;
- button.style.left=(x/435*100)+"%";
- button.style.top=(y/913*100)+"%";
- const isScroll=label==="SCROLL UP"||label==="SCROLL DOWN";
- const isBottom=y>=650;
- button.style.width=isScroll?"9.5%":isBottom?"12.2%":y<390?"9%":"10.2%";
- button.style.height=isScroll?"7%":isBottom?"5.9%":y<390?"4.3%":"4.8%";
- button.addEventListener("click",()=>{screen.textContent=label+" pressed";});
- container.appendChild(button);
+
+const $=id=>document.getElementById(id);
+const container=$("keys"),expressionEl=$("expression"),answerEl=$("answer"),mainEl=$("screenMain");
+const shiftEl=$("shiftIndicator"),angleEl=$("angleIndicator"),historyEl=$("historyIndicator"),formatEl=$("formatIndicator");
+const panelEl=$("screenPanel"),screenEl=$("screen"),brandEl=$("brand");
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const escapeHtml=s=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+const KEY="cowChalkFx83GTState";
+
+let expression="";
+let answer=null;
+let answerDisplay="";
+let ansMemory=0;
+let lastExpression="";
+let lastWasResult=false;
+let cursor=0;
+let activeTemplate=null;
+let shift=false;
+let powerOff=false;
+let angleMode="DEG";
+let inputMode="MathI/MathO";
+let resultMode="Norm 2";
+let fixDigits=2;
+let sciDigits=3;
+let fractionResult="Improper Fraction";
+let decimalMark="Dot";
+let digitSeparator="On";
+let formatKeyMode="Format Menu";
+let systemSettings={contrast:5,autoPowerOff:"10 Min.",multilineFont:"Normal Font",qrVersion:"Version 11"};
+let memory=0;
+let variables={A:0,B:0,C:0,D:0,E:0,F:0,x:0,y:0,z:0};
+let functions={f:"",g:""};
+let history=[];
+let historyCursor=-1;
+let menu=null;
+let menuFrames=[];
+let menuIndex=0;
+let menuScroll=0;
+let homeOpen=false;
+let homeIndex=0;
+let editor=null;
+let editorReturn=null;
+let undoStack=[];
+let appState=null;
+
+function loadState(){
+ try{
+  let packed="";
+  try{if(typeof localStorage!=="undefined")packed=localStorage.getItem(KEY)||"";}catch(e){}
+  if(!packed){
+   const match=String(document.cookie||"").split("; ").find(v=>v.startsWith(KEY+"="));
+   if(match)packed=decodeURIComponent(match.slice(KEY.length+1));
+  }
+  if(!packed)return;
+  const data=JSON.parse(packed);
+  if(data.variables)variables={...variables,...data.variables};
+  if(data.functions)functions={...functions,...data.functions};
+  if(data.systemSettings)systemSettings={...systemSettings,...data.systemSettings};
+  if(data.settings){
+   angleMode=data.settings.angleMode||angleMode;inputMode=data.settings.inputMode||inputMode;
+   resultMode=data.settings.resultMode||resultMode;fixDigits=data.settings.fixDigits??fixDigits;
+   sciDigits=data.settings.sciDigits??sciDigits;fractionResult=data.settings.fractionResult||fractionResult;
+   decimalMark=data.settings.decimalMark||decimalMark;digitSeparator=data.settings.digitSeparator||digitSeparator;
+   formatKeyMode=data.settings.formatKeyMode||formatKeyMode;
+  }
+  ansMemory=Number.isFinite(data.ansMemory)?data.ansMemory:0;
+  memory=Number.isFinite(data.memory)?data.memory:0;
+  if(Array.isArray(data.history))history=data.history.slice(0,50);
+  if(typeof data.expression==="string")expression=data.expression;
+  if(typeof data.answer==="number"&&Number.isFinite(data.answer)){answer=data.answer;answerDisplay=data.answerDisplay||standardResult(answer);lastExpression=expression;lastWasResult=true;cursor=expression.length;}
+ }catch(e){}
 }
+function persist(){
+ try{
+  const data={
+   variables,functions,systemSettings,ansMemory,memory,history:history.slice(0,50),expression,
+   answer:typeof answer==="number"?answer:null,answerDisplay,
+   settings:{angleMode,inputMode,resultMode,fixDigits,sciDigits,fractionResult,decimalMark,digitSeparator,formatKeyMode}
+  };
+  const packed=JSON.stringify(data);
+  try{if(typeof localStorage!=="undefined")localStorage.setItem(KEY,packed);}catch(e){}
+  document.cookie=KEY+"="+encodeURIComponent(packed)+"; path=/; max-age=31536000; SameSite=Lax";
+ }catch(e){}
+}
+function fmt(n){
+ if(typeof n!=="number"||!Number.isFinite(n))return String(n);
+ if(Math.abs(n)<1e-12)n=0;
+ let out;
+ if(resultMode==="Fix"){const places=Math.max(0,Math.min(fixDigits,9-Math.floor(Math.log10(Math.max(Math.abs(n),1)))));out=Number(n.toPrecision(10)).toFixed(places);}
+ else if(resultMode==="Sci")out=n.toExponential(Math.max(0,sciDigits-1)).replace("e","E");
+ else if(Number.isInteger(n)&&Math.abs(n)<1e10)out=String(n);
+ else out=Number(n.toPrecision(10)).toString();
+ if(decimalMark==="Comma")out=out.replace(".",",");
+ if(digitSeparator==="On"){
+  const marker=decimalMark==="Comma"?",":".";
+  const parts=out.split(/[eE]/);
+  const mantissa=parts[0].split(marker);
+  mantissa[0]=mantissa[0].replace(/\B(?=(\d{3})+(?!\d))/g,decimalMark==="Comma"?".":",");
+  out=mantissa.join(marker)+(parts.length>1?"E"+parts[1]:"");
+ }
+ return out;
+}
+function fractionParts(value){
+ const sign=value<0?-1:1;value=Math.abs(value);
+ let h1=1,h2=0,k1=0,k2=1,b=value;
+ for(let i=0;i<32;i++){
+  const a=Math.floor(b),h=a*h1+h2,k=a*k1+k2;
+  if(k>100000||Math.abs(value-h/k)<1e-10)return [sign*h,k];
+  h2=h1;h1=h;k2=k1;k1=k;
+  const f=b-a;if(f===0)break;b=1/f;
+ }
+ return [sign*Math.round(value*100000),100000];
+}
+function exactFraction(value,maxDen=100000){
+ const [n,d]=fractionParts(value);
+ return Math.abs(n/d-value)<1e-12&&d<=maxDen?[n,d]:null;
+}
+function coefficientText(n,d){
+ const sign=n<0?"−":"",abs=Math.abs(n);
+ if(d===1)return sign+(abs===1?"":abs);
+ if(abs===1)return sign+"1/"+d;
+ return sign+abs+"/"+d;
+}
+function standardResult(value){
+ if(!Number.isFinite(value))return String(value);
+ const rational=exactFraction(value);
+ if(rational){
+  if(rational[1]===1)return fmt(value);
+  return fractionResult==="Mixed Fraction"?mixedFraction(value):rational[0]+"/"+rational[1];
+ }
+ const piCoefficient=exactFraction(value/Math.PI,1000);
+ if(piCoefficient&&Math.abs(piCoefficient[0])<=1000){
+  const n=piCoefficient[0],d=piCoefficient[1],coefficient=Math.abs(n)===1?"":Math.abs(n);
+  if(d===1)return (n<0?"−":"")+coefficient+"π";
+  return (n<0?"−":"")+coefficient+"π/"+d;
+ }
+ for(let radicand=2;radicand<=1000;radicand++){
+  const coefficient=exactFraction(value/Math.sqrt(radicand),100);
+  if(coefficient&&Math.abs(coefficient[0])<=1000){
+   const coeff=coefficientText(coefficient[0],coefficient[1]);
+   return (coeff==="1"?"":coeff==="−1"?"−":coeff)+"√"+radicand;
+  }
+ }
+ return fmt(value);
+}
+function mixedFraction(value){
+ const [n,d]=fractionParts(value),whole=Math.trunc(n/d),rem=Math.abs(n%d);
+ if(!rem)return String(whole);
+ return (whole?whole+" ":"")+(rem+"/"+d);
+}
+function recurringDecimal(value){
+ const [signedNum,den]=fractionParts(value),sign=signedNum<0?"−":"";
+ const num=Math.abs(signedNum),whole=Math.floor(num/den);
+ let remainder=num%den,digits="",seen={};
+ while(remainder&&digits.length<30){
+  if(seen[remainder]!==undefined){
+   const split=seen[remainder];digits=digits.slice(0,split)+"("+digits.slice(split)+")";break;
+  }
+  seen[remainder]=digits.length;remainder*=10;
+  digits+=String(Math.floor(remainder/den));remainder%=den;
+ }
+ return digits?sign+whole+"."+digits:sign+whole;
+}
+function primeFactors(n){
+ const sign=n<0?"−":"";n=Math.abs(Math.trunc(n));if(!n)return "0";
+ const factors=[];
+ for(let d=2;d*d<=n;d++){let count=0;while(n%d===0){n/=d;count++;}if(count)factors.push(d+(count>1?"^"+count:""));}
+ if(n>1)factors.push(String(n));return sign+(factors.join(" × ")||"1");
+}
+function sexagesimal(value){
+ const sign=value<0?"−":"";let n=Math.abs(value);
+ let d=Math.floor(n+1e-12);n=(n-d)*60;let m=Math.floor(n+1e-10);let sec=Math.round((n-m)*60);
+ if(sec>=60){sec=0;m++;}if(m>=60){m=0;d++;}
+ return sign+d+"°"+m+"'"+sec+'"';
+}
+function renderRich(s,from,to,caretPos){
+ let out="",i=from;
+ const names=["randint","sqrt","root","frac","mfrac","asin","acos","atan","sinh","cosh","tanh","sin","cos","tan","log","ln","exp","abs","floor","ceil","round","f","g","rec","ran"];
+ while(i<to){
+  if(caretPos===i)out+='<span class="caret"></span>';
+  let found=null;
+  for(const name of names){
+   const prefix=name+"(";
+   if(s.slice(i,i+prefix.length).toLowerCase()===prefix){found=name;break;}
+  }
+  if(found){
+   const open=i+found.length,close=matchingParen(s,open,to);
+   if(close>=0){
+    const bodyStart=open+1,bodyEnd=close;
+    if(found==="sqrt"){
+     out+='<span class="root"><span class="radical">√</span><span class="radicand">'+(bodyStart===bodyEnd?'<span class="rootBox">'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,bodyEnd,caretPos))+'</span></span>';
+    }else if(found==="root"){
+     const comma=findTopComma(s,bodyStart,bodyEnd);
+     if(comma>=0)out+='<span class="customRoot"><span class="rootIndex">'+(bodyStart===comma?'<span class="rootBox">'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="radical">√</span><span class="radicand">'+(comma+1===bodyEnd?'<span class="rootBox">'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
+     else out+='root('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
+    }else if(found==="frac"){
+     const comma=findTopComma(s,bodyStart,bodyEnd);
+     if(comma>=0)out+='<span class="frac"><span class="numerator">'+(bodyStart===comma?'<span class="fracBox">'+(caretPos===bodyStart?'<span class="caret"></span>':'')+'</span>':renderRich(s,bodyStart,comma,caretPos))+'</span><span class="fraction-bar"></span><span class="denominator">'+(comma+1===bodyEnd?'<span class="fracBox">'+(caretPos===comma+1?'<span class="caret"></span>':'')+'</span>':renderRich(s,comma+1,bodyEnd,caretPos))+'</span></span>';
+     else out+='frac('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
+    }else if(found==="mfrac"){
+     const commas=[];let depth=0;for(let k=bodyStart;k<bodyEnd;k++){if(s[k]==="(")depth++;else if(s[k]===")")depth--;else if(s[k]===","&&depth===0)commas.push(k);}
+     if(commas.length===2){
+      const a=commas[0],b=commas[1];
+      const slot=(x,y)=>x===y?'<span class="fracBox">'+(caretPos===x?'<span class="caret"></span>':'')+'</span>':renderRich(s,x,y,caretPos);
+      out+='<span class="mixedFraction"><span class="whole">'+slot(bodyStart,a)+'</span><span class="frac"><span class="numerator">'+slot(a+1,b)+'</span><span class="fraction-bar"></span><span class="denominator">'+slot(b+1,bodyEnd)+'</span></span></span>';
+     }else out+='mfrac('+renderRich(s,bodyStart,bodyEnd,caretPos)+')';
+    }else if(found==="randint"){
+     out+='<span>RanInt#('+renderRich(s,bodyStart,bodyEnd,caretPos)+')</span>';
+    }else if(found==="ran"){
+     out+='<span>Ran#</span>';
+    }else if(found==="rec"){
+     out+='<span class="recurringTemplate"><span class="recurringDot">·</span><span class="recurringBox">'+(bodyStart===bodyEnd?(caretPos===bodyStart?'<span class="caret"></span>':""):renderRich(s,bodyStart,bodyEnd,caretPos))+'</span></span>';
+    }else{
+     const label={asin:"sin⁻¹",acos:"cos⁻¹",atan:"tan⁻¹",sinh:"sinh",cosh:"cosh",tanh:"tanh",sin:"sin",cos:"cos",tan:"tan",log:"log",ln:"ln",exp:"exp",abs:"Abs",floor:"floor",ceil:"ceil",round:"Rnd",f:"f",g:"g"}[found]||found;
+     out+=escapeHtml(label)+"("+renderRich(s,bodyStart,bodyEnd,caretPos)+")";
+    }
+    i=close+1;continue;
+   }
+  }
+  if(s[i]==="^"&&s[i+1]==="2"){out+="<sup>2</sup>";i+=2;continue;}
+  if(s[i]==="^"&&s[i+1]==="("){
+   const close=matchingParen(s,i+1,to);
+   if(close>=0){const exponent=close===i+2?'<span class="powerBox">'+(caretPos===i+2?'<span class="caret"></span>':'')+'</span>':renderRich(s,i+2,close,caretPos);out+='<sup>'+exponent+'</sup>';i=close+1;continue;}
+  }
+  const ch=s[i];
+  if(ch==="~"||ch==="-")out+="−";
+  else if(ch==="*")out+="×";
+  else if(ch==="/")out+="÷";
+  else if(ch==="p"&&s.slice(i,i+2)==="pi"){out+="π";i+=2;continue;}
+  else if(s.slice(i,i+3).toLowerCase()==="ans"){out+="Ans";i+=3;continue;}
+  else if(ch==="¤"){const prefix=s.slice(0,i),breakAt=Math.max(prefix.lastIndexOf("+"),prefix.lastIndexOf("-"),prefix.lastIndexOf("*"),prefix.lastIndexOf("/"),prefix.lastIndexOf("("),prefix.lastIndexOf(",")),prior=prefix.slice(breakAt+1).split("¤").length-1;out+=prior===0?"°":prior===1?"'":'"';}
+  else if(ch===",")out+=",";
+  else out+=escapeHtml(ch);
+  i++;
+ }
+ if(caretPos===to)out+='<span class="caret"></span>';
+ return out;
+}
+function matchingParen(s,open,end){
+ let depth=0;
+ for(let i=open;i<end;i++){if(s[i]==="(")depth++;else if(s[i]===")"&&--depth===0)return i;}
+ return -1;
+}
+function findTopComma(s,start,end){
+ let depth=0;
+ for(let i=start;i<end;i++){if(s[i]==="(")depth++;else if(s[i]===")")depth--;else if(s[i]===","&&depth===0)return i;}
+ return -1;
+}
+function renderMenu(){
+ const count=menu.items.length;
+ if(menuIndex<menuScroll)menuScroll=menuIndex;
+ if(menuIndex>=menuScroll+4)menuScroll=menuIndex-3;
+ const rows=[];
+ for(let i=0;i<4;i++){
+  const index=menuScroll+i,item=menu.items[index];
+  if(!item){rows.push('<div class="menuRow blank" aria-hidden="true"></div>');continue;}
+  rows.push('<div class="menuRow '+(index===menuIndex?"selected":"")+'" data-index="'+index+'"><span class="menuLabel">'+escapeHtml(item.label)+'</span><span class="menuValue">'+escapeHtml(item.value||"")+'</span><span class="menuArrow">'+(item.children?"›":"")+'</span></div>');
+ }
+ const thumbHeight=count>4?Math.max(14,400/count):100;
+ const thumbTop=count>4?(100*menuScroll/Math.max(1,count)):0;
+ panelEl.innerHTML='<div id="menuRows">'+rows.join("")+'</div>'+(count>4?'<div class="menuScroll"><div class="menuThumb" style="height:'+thumbHeight+'%;top:'+thumbTop+'%"></div></div>':"");
+}
+function renderHome(){
+ panelEl.innerHTML=homeApps.map((app,i)=>'<div class="homeApp '+(i===homeIndex?"selected":"")+'" data-home="'+i+'"><span class="homeIcon">'+app.icon+'</span><span class="homeLabel">'+app.label+'</span></div>').join("");
+}
+const homeApps=[
+ {label:"Calculate",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M8 8h24v24H8zM13 14h4m-2-2v4m8 0h4M13 22h4m-2-2v4m8 0h4M13 29h4m8 0h4"/></svg>'},
+ {label:"Statistics",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M6 34V6M6 34h29M11 29V21h5v8M21 29V13h5v16M31 29V5h5v24"/></svg>'},
+ {label:"Table",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M5 8h30v25H5zM5 16h30M5 24h30M15 8v25M25 8v25"/></svg>'},
+ {label:"Ratio",icon:'<svg viewBox="0 0 40 40"><path class="glyph" d="M4 10h13v20H4zM23 10h13v20H23zM18 15h4m-4 10h4"/></svg>'},
+ {label:"Math Box",icon:'<svg viewBox="0 0 40 40"><rect class="glyph" x="5" y="5" width="13" height="13" rx="2"/><rect class="glyph" x="22" y="22" width="13" height="13" rx="2"/><circle cx="11.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="26" cy="26" r="1.7" fill="currentColor"/><circle cx="31" cy="31" r="1.7" fill="currentColor"/></svg>'}
+];
+function beginAppInput(prompt,target){
+ menu=null;menuFrames=[];menuIndex=0;menuScroll=0;
+ appState.inputPrompt=prompt;appState.inputTarget=target;expression="";answer=null;answerDisplay="";cursor=0;render();
+}
+function calculateAppInput(){
+ if(appState.inputPrompt){
+  const target=appState.inputTarget,raw=expression.trim();
+  if(!raw)return;
+  try{
+   if(target==="f"||target==="g"){functions[target]=raw;persist();}
+   else if(target==="line"){appState.lines.push(raw);}
+   else{
+    if(target==="attempts"){
+     const attempts=Number(raw);
+     if(!/^\\d+$/.test(raw)||!Number.isSafeInteger(attempts)||attempts<1)throw new Error("Integer ERROR");
+     appState.attempts=attempts;
+    }else{
+     const value=evaluate(raw);
+     if(target==="start"||target==="end"||target==="step")appState[target]=value;
+     else if(target==="angle"){appState.angle=value;appState.input=false;}
+     else if(target==="ratio")appState.values.push(value);
+     else if(target==="stats"){const list=appState.column===0?appState.x:appState.y;list[appState.row]=value;appState.row++;}
+    }
+   }
+   appState.inputPrompt="";appState.inputTarget="";expression="";cursor=0;
+   if(target==="start"){appState.inputPrompt="End = ";appState.inputTarget="end";}
+   else if(target==="end"){appState.inputPrompt="Step = ";appState.inputTarget="step";}
+   if(target==="stats"){appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
+   if(target==="ratio"&&appState.values.length<3){appState.inputPrompt=(appState.values.length===1?"B":appState.equation==="A:B=X:D"?"D":"C")+" = ";appState.inputTarget="ratio";}
+   if(appState.type==="Ratio"&&appState.values.length>=3)solveRatio();
+   if(appState.type==="Math Box"&&appState.mode==="Number Line"&&appState.lines.length<3){appState.input=true;appState.inputPrompt="Inequality "+(appState.lines.length+1)+" = ";appState.inputTarget="line";}
+   render();
+  }catch(e){answerDisplay=e.message||"Math ERROR";answer=null;render();}
+  return;
+ }
+ if(appState.type==="Statistics"){
+  if(!expression.trim())return;
+  try{const value=evaluate(expression);const list=appState.column===0?appState.x:appState.y;list[appState.row]=value;appState.row++;expression="";cursor=0;render();}catch(e){answerDisplay=e.message;render();}
+  return;
+ }
+ if(appState.type==="Ratio"){
+  if(!expression.trim())return;
+  try{appState.values.push(evaluate(expression));expression="";cursor=0;if(appState.values.length>=3)solveRatio();render();}catch(e){answerDisplay=e.message;render();}
+ }
+}
+function solveRatio(){
+ const [a,b,c]=appState.values;
+ if(!a||!b||!c){appState.error="Math ERROR";return;}
+ const x=appState.equation==="A:B=X:D"?a*c/b:b*c/a;
+ appState.result=x;appState.solved=true;
+}
+function appStatistics(){
+ const x=appState.x.filter(Number.isFinite),n=x.length;
+ if(!n)return [];
+ const sorted=x.slice().sort((a,b)=>a-b),sum=x.reduce((a,b)=>a+b,0),mean=sum/n;
+ const variance=x.reduce((a,b)=>a+(b-mean)**2,0)/n;
+ const median=arr=>!arr.length?0:arr.length%2?arr[(arr.length-1)/2]:(arr[arr.length/2-1]+arr[arr.length/2])/2;
+ const rows=[["n",n],["x̄",mean],["Σx",sum],["σx",Math.sqrt(variance)],["sx",n>1?Math.sqrt(variance*n/(n-1)):0],["min(x)",sorted[0]],["Q1",median(sorted.slice(0,Math.floor(n/2)))],["Med",median(sorted)],["Q3",median(sorted.slice(Math.ceil(n/2)))],["max(x)",sorted[n-1]]];
+ if(appState.paired){
+  const pairs=x.map((v,i)=>[v,appState.y[i]]).filter(p=>Number.isFinite(p[1]));
+  const m=pairs.length;if(m){
+   const mx=pairs.reduce((s,p)=>s+p[0],0)/m,my=pairs.reduce((s,p)=>s+p[1],0)/m;
+   const sxx=pairs.reduce((s,p)=>s+(p[0]-mx)**2,0),syy=pairs.reduce((s,p)=>s+(p[1]-my)**2,0),sxy=pairs.reduce((s,p)=>s+(p[0]-mx)*(p[1]-my),0);
+   const slope=sxx?sxy/sxx:0;
+   return [["n",m],["x̄",mx],["ȳ",my],["Σx",pairs.reduce((s,p)=>s+p[0],0)],["Σy",pairs.reduce((s,p)=>s+p[1],0)],["a",my-slope*mx],["b",slope],["r",sxx&&syy?sxy/Math.sqrt(sxx*syy):0],["min(x)",Math.min(...pairs.map(p=>p[0]))],["max(x)",Math.max(...pairs.map(p=>p[0]))]];
+  }
+ }
+ return rows;
+}
+function generateTable(){
+ const rows=[],oldX=variables.x;
+ const limit=Math.min(45,Math.floor((appState.end-appState.start)/appState.step)+1);
+ if(!Number.isFinite(limit)||limit<1||limit>45||appState.step===0){appState.error="Range ERROR";return;}
+ for(let i=0;i<limit;i++){
+  const x=appState.start+i*appState.step;variables.x=x;
+  let f="",g="";
+  try{if(functions.f)f=fmt(evaluate(functions.f));}catch(e){f="Math ERROR";}
+  try{if(functions.g)g=fmt(evaluate(functions.g));}catch(e){g="Math ERROR";}
+  rows.push({x,f,g});
+ }
+variables.x=oldX;appState.rows=rows;appState.generated=true;appState.tableRow=0;appState.tableStart=0;
+}
+function runMathBoxSimulation(){
+ const rows=[];
+ for(let i=0;i<appState.attempts;i++){
+  const vals=Array.from({length:appState.count},()=>appState.mode==="Dice Roll"?1+Math.floor(Math.random()*6):Math.random()<.5?1:0);
+  rows.push(vals);
+ }
+ appState.rows=rows;
+appState.resultType=item.label;appState.result=true;appState.tableRow=0;appState.tableStart=0;
+}
+function handleAppArrow(label){
+ if(appState.type==="Statistics"){
+  if(label==="LEFT"||label==="RIGHT"){appState.column=appState.paired?(label==="RIGHT"?1:0):0;appState.row=0;appState.rowStart=0;appState.inputPrompt=(appState.column===0?"x":"y")+"1 = ";appState.inputTarget="stats";}
+  else if(label==="UP"){appState.row=Math.max(0,appState.row-1);if(appState.row<appState.rowStart)appState.rowStart=appState.row;appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
+  else if(label==="DOWN"){appState.row++;if(appState.row>=appState.rowStart+4)appState.rowStart=appState.row-3;appState.inputPrompt=(appState.column===0?"x":"y")+(appState.row+1)+" = ";appState.inputTarget="stats";}
+  render();return;
+ }
+ if(appState.type==="Math Box"&&appState.mode==="Number Line"&&label==="RIGHT"&&appState.lines.length<3){beginAppInput("Inequality "+(appState.lines.length+1)+" = ","line");return;}
+ if(appState.type==="Table"&&appState.generated&&(label==="UP"||label==="DOWN")){
+  const max=appState.rows.length-1;
+  if(max>=0){appState.tableRow=(appState.tableRow+(label==="DOWN"?1:-1)+max+1)%(max+1);if(appState.tableRow<appState.tableStart)appState.tableStart=appState.tableRow;else if(appState.tableRow>=appState.tableStart+4)appState.tableStart=appState.tableRow-3;}
+  render();return;
+ }
+ if(appState.type==="Math Box"&&appState.result&&(label==="UP"||label==="DOWN")){
+  let max=appState.rows.length-1;
+  if(appState.resultType==="Relative Freq"){const heads=appState.rows.map(r=>r.reduce((a,b)=>a+b,0));max=new Set(heads).size-1;}
+  if(max>=0){appState.tableRow=(appState.tableRow+(label==="DOWN"?1:-1)+max+1)%(max+1);if(appState.tableRow<appState.tableStart)appState.tableStart=appState.tableRow;else if(appState.tableRow>=appState.tableStart+4)appState.tableStart=appState.tableRow-3;}
+  render();return;
+ }
+}
+
+function handleAppBack(){
+ if(appState.type==="Math Box"&&appState.result){appState.result=false;openMenu("",[{label:"List"},{label:"Relative Freq"}],item=>{menu=null;menuFrames=[];appState.resultType=item.label;appState.result=true;render();});return;}
+ if(appState.type==="Math Box"){
+  appState=null;openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>startMathBox(item.label));return;
+ }
+ if(appState.type==="Statistics"&&appState.showResults){appState.showResults=false;render();return;}
+ appState=null;expression="";homeMenu();
+}
+function startMathBox(mode){
+if(mode==="Dice Roll"||mode==="Coin Toss")appState={type:"Math Box",mode,count:1,attempts:5,rows:[],result:false,tableRow:0,tableStart:0};
+ else if(mode==="Number Line")appState={type:"Math Box",mode,lines:[],input:true};
+ else appState={type:"Math Box",mode,input:true};
+ expression="";render();
+}
+function renderAppScreen(){
+ expressionEl.style.display="";answerEl.style.display="";panelEl.className="visible app"+(appState.type==="Statistics"&&!appState.showResults?" statsEditor":"");
+  const input=appState.inputPrompt?escapeHtml(appState.inputPrompt)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):"";
+  expressionEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?"":(input||(appState.type==="Math Box"&&appState.mode==="Circle"?"Angle = "+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>'):""));
+  answerEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?input:"";
+ let html="";
+ if(appState.type==="Statistics"){
+  if(appState.showResults){
+   const rows=appStatistics();html='<div class="appTitle">'+(appState.paired?"2-Var Results":"1-Var Results")+'</div><div class="appResult">'+rows.map(v=>escapeHtml(v[0])+" = "+escapeHtml(fmt(v[1]))).join("<br>")+'</div>';
+  }else{
+   const cols=appState.paired?["x","y"]:["x"],rows=[];
+   for(let i=0;i<Math.max(4,appState.x.length,appState.y.length,appState.row+1);i++)rows.push('<tr class="'+(appState.row===i?"selected":"")+'"><td>'+(i+1)+'</td>'+cols.map((col,j)=>'<td>'+(appState[col][i]===undefined?"":escapeHtml(fmt(appState[col][i])))+'</td>').join("")+'</tr>');
+    const start=appState.rowStart||0;html='<table class="appTable"><tr><th></th>'+cols.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.slice(start,start+4).join("")+'</table>';
+  }
+ }else if(appState.type==="Table"){
+  const rows=appState.rows||[];
+   const start=appState.tableStart||0;html='<table class="appTable"><tr><th>x</th>'+(appState.tableType!=="g(x)"?'<th>f(x)</th>':"")+(appState.tableType!=="f(x)"?'<th>g(x)</th>':"")+'</tr>'+rows.slice(start,start+4).map((r,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+fmt(r.x)+'</td>'+(appState.tableType!=="g(x)"?'<td>'+r.f+'</td>':"")+(appState.tableType!=="f(x)"?'<td>'+r.g+'</td>':"")+'</tr>').join("")+'</table>';
+ }else if(appState.type==="Ratio"){
+  const form=appState.equation||"A:B=X:D";
+  const labels=form==="A:B=X:D"?["A","B","D"]:["A","B","C"];
+  html='<div class="appTitle">Ratio</div><div class="appResult">'+(form==="A:B=X:D"?"A : B = X : D":"A : B = C : X")+'</div><div class="appResult">'+labels.map((v,i)=>v+" = "+(appState.values[i]===undefined?"□":fmt(appState.values[i]))).join("<br>")+'</div>'+(appState.solved?'<div class="appTitle">X = '+fmt(appState.result)+'</div>':'<div class="appNote">Enter each value and press EXE.</div>');
+ }else if(appState.type==="Math Box"){
+  if(appState.mode==="Dice Roll"||appState.mode==="Coin Toss"){
+   html='<div class="appTitle">'+appState.mode+'</div>';
+   if(appState.result){
+    const heads=appState.rows.map(r=>r.reduce((a,b)=>a+b,0));
+    if(appState.resultType==="Relative Freq"){
+    const counts={};heads.forEach(v=>counts[v]=(counts[v]||0)+1);
+     const entries=Object.keys(counts).sort((a,b)=>Number(a)-Number(b));const start=appState.tableStart||0;html+='<table class="appTable"><tr><th>'+(appState.mode==="Dice Roll"?"Sum":"Heads")+'</th><th>Freq</th><th>Rel Fr</th></tr>'+entries.slice(start,start+4).map((k,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+k+'</td><td>'+counts[k]+'</td><td>'+fmt(counts[k]/appState.attempts)+'</td></tr>').join("")+'</table>';
+    }else {const start=appState.tableStart||0;html+='<table class="appTable"><tr><th>#</th>'+appState.rows[0].map((_,i)=>'<th>'+String.fromCharCode(65+i)+'</th>').join("")+'<th>'+ (appState.mode==="Dice Roll"?"Sum":"Heads")+'</th></tr>'+appState.rows.slice(start,start+4).map((r,i)=>'<tr class="'+(appState.tableRow===start+i?"selected":"")+'"><td>'+(start+i+1)+'</td>'+r.map(v=>'<td>'+(appState.mode==="Dice Roll"?v:v?"●":"○")+'</td>').join("")+'<td>'+heads[start+i]+'</td></tr>').join("")+'</table>';}
+    
+   }else html+='<div class="appResult">'+(appState.mode==="Dice Roll"?"Dice":"Coins")+' = '+appState.count+'<br>Attempts = '+appState.attempts+'<br>Select TOOLS → Execute.</div>';
+  }else if(appState.mode==="Circle"){
+   const a=appState.angle||0,rad=angleMode==="DEG"?a*Math.PI/180:a;
+   const px=50+38*Math.cos(rad-Math.PI/2),py=50+38*Math.sin(rad-Math.PI/2);
+   html='<div class="appTitle">Circle</div><svg viewBox="0 0 100 100" style="width:46%;height:auto;float:left"><circle cx="50" cy="50" r="38" fill="none" stroke="#26352e" stroke-width="1.5"/><path d="M12 50H88 M50 12V88" stroke="#87938d" stroke-width=".8"/><path d="M50 50L'+px+' '+py+'" stroke="#26352e" stroke-width="2"/><circle cx="'+px+'" cy="'+py+'" r="2.5" fill="#26352e"/></svg><div class="appResult">Angle: '+fmt(a)+' '+angleMode+'<br>sin = '+fmt(Math.sin(rad))+'<br>cos = '+fmt(Math.cos(rad))+'<br>tan = '+fmt(Math.tan(rad))+'</div>';
+  }else{
+   const graphs=appState.lines.map((line,index)=>{
+    const match=line.match(/^\s*x\s*(<=|>=|<|>)\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if(!match)return '<div class="appNote">'+escapeHtml(line)+'</div>';
+    const op=match[1],value=Number(match[2]),x=8+Math.max(0,Math.min(1,(value+10)/20))*84,y=12+index*22,filled=op.includes("="),left=op[0]==="<";
+    const segment=left?'M8 '+y+' H'+x:'M'+x+' '+y+' H92';
+    return '<svg viewBox="0 0 100 '+(y+9)+'" style="width:100%;height:24px;display:block"><path d="M8 '+y+' H92" stroke="#87938d" stroke-width="1"/><path d="'+segment+'" stroke="#26352e" stroke-width="3"/><path d="M'+(left?8:92)+' '+y+' l'+(left?4:-4)+' -3 v6 z" fill="#26352e"/><circle cx="'+x+'" cy="'+y+'" r="3" fill="'+(filled?"#26352e":"#c2ccc8")+'" stroke="#26352e" stroke-width="1.5"/></svg>';
+   }).join("");
+   html='<div class="appTitle">Number Line</div>'+graphs+'<div class="appNote">Enter up to three inequalities. Press RIGHT for another line.</div>';
+  }
+ }
+ panelEl.innerHTML=html;
+}
+function renderAnswer(value){
+ if(typeof value!=="number"||!Number.isFinite(value))return escapeHtml(answerDisplay);
+ const shown=answerDisplay||standardResult(value);
+ const recurring=shown.match(/^(-?\d+)\.\((\d+)\)$/);
+ if(recurring)return escapeHtml(recurring[1])+".<span class=\"recurringDigits\">"+escapeHtml(recurring[2])+"</span>";
+ const eng=shown.match(/^(.+?)\s×\s10\^(-?\d+)$/);
+ if(eng)return escapeHtml(eng[1])+" × 10<sup>"+escapeHtml(eng[2])+"</sup>";
+ const frac=shown.match(/^(-?\d+)\/(\d+)$/);
+ if(frac)return '<span class="frac"><span class="numerator">'+escapeHtml(frac[1])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(frac[2])+'</span></span>';
+ const mixed=shown.match(/^(-?\d+) (\d+)\/(\d+)$/);
+ if(mixed)return escapeHtml(mixed[1])+' <span class="frac"><span class="numerator">'+escapeHtml(mixed[2])+'</span><span class="fraction-bar"></span><span class="denominator">'+escapeHtml(mixed[3])+'</span></span>';
+ return escapeHtml(shown).replaceAll("-","−").replaceAll("*","×");
+}
+function render(){
+
+ shiftEl.src=shift?"https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/003a.png":"";
+ shiftEl.style.display=shift?"block":"none";
+ angleEl.src="https://support.casio.com/global/en/calc/manual/fx-83GTCW_85GTCW_en/img/key/"+(angleMode==="DEG"?"003b":angleMode==="RAD"?"003c":"003d")+".png";
+ historyEl.textContent=history.length>1?"↕":"";
+ formatEl.textContent=resultMode==="Fix"?"FIX":resultMode==="Sci"?"SCI":"";
+ screenEl.classList.toggle("powered-off",powerOff);
+ panelEl.className="";
+ panelEl.innerHTML="";
+ expressionEl.style.display="";
+ answerEl.style.display="";
+ mainEl.classList.remove("menu","home");
+ brandEl.style.display=powerOff?"flex":"none";
+ if(powerOff){expressionEl.style.display="none";answerEl.style.display="none";return;}
+ if(homeOpen){mainEl.classList.add("home");expressionEl.style.display="none";answerEl.style.display="none";panelEl.className="visible home";renderHome();return;}
+ if(menu){mainEl.classList.add("menu");expressionEl.style.display="none";answerEl.style.display="none";panelEl.className="visible";renderMenu();return;}
+ if(appState&&!editor){renderAppScreen();return;}
+ if(editor){
+  const prefix=editor.prefix;
+  expressionEl.innerHTML=escapeHtml(prefix)+(expression?renderRich(expression,0,expression.length,cursor):'<span class="caret"></span>');
+  answerEl.innerHTML="";
+  answerEl.innerHTML=appState.type==="Statistics"&&!appState.showResults?input:"";
+  return;
+ }
+ let shownExpression=expression,shownAnswer=answer;
+ if(historyCursor>=0&&history[historyCursor]){shownExpression=history[historyCursor].expression;shownAnswer=history[historyCursor].result;}
+ if(shownExpression){
+  const caret=(historyCursor<0&&!lastWasResult&&answer===null)?cursor:-1;
+  expressionEl.innerHTML=renderRich(shownExpression,0,shownExpression.length,caret);
+ }else if(answer===null)expressionEl.innerHTML='<span class="caret"></span>';
+ else expressionEl.innerHTML="";
+ answerEl.innerHTML=shownAnswer!==null?renderAnswer(shownAnswer):"";
+}
+function pushUndo(){undoStack.push({expression,answer,answerDisplay,cursor,lastWasResult});if(undoStack.length>80)undoStack.shift();}
+function startNewFromAnswer(value){
+ if(lastWasResult){
+  if(/^[0-9.(]/.test(value)||value==="sqrt()"||value==="frac(,)"||value==="ans"||/^[A-Za-z]$/.test(value))expression="";
+  else expression=String(ansMemory);
+  cursor=expression.length;lastWasResult=false;
+ }
+}
+function append(value){
+ if(menu||homeOpen||powerOff)return;
+ if(editor){expression=expression.slice(0,cursor)+value+expression.slice(cursor);cursor+=value.length;answer=null;answerDisplay="";render();return;}
+ if(historyCursor>=0){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ startNewFromAnswer(value);
+ pushUndo();
+ expression=expression.slice(0,cursor)+value+expression.slice(cursor);
+ if(activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end)activeTemplate.end+=value.length;
+ cursor+=value.length;answer=null;answerDisplay="";render();
+}
+function insertTemplate(raw,kind,offset){
+ if(lastWasResult){expression="";cursor=0;lastWasResult=false;}
+ pushUndo();
+ const start=cursor;
+ expression=expression.slice(0,cursor)+raw+expression.slice(cursor);
+ cursor=start+offset;activeTemplate={kind,start,end:start+raw.length};
+ answer=null;answerDisplay="";render();
+}
+function insertFunction(name){insertTemplate(name+"()",name,name.length+1);}
+function insertFraction(){insertTemplate("frac(,)","fraction",5);}
+function insertMixedFraction(){insertTemplate("mfrac(,,)","mixedfraction",6);}
+function insertSquareRoot(){insertTemplate("sqrt()","sqrt",5);}
+function insertPower(){
+ if(lastWasResult){expression=String(ansMemory);cursor=expression.length;lastWasResult=false;}
+ insertTemplate("^()","power",2);
+}
+function insertNthRoot(){insertTemplate("root(,)","root",5);}
+function insertRecurring(){insertTemplate("rec()","recurring",4);}
+function insertRanInt(){insertTemplate("randint()","randint",8);}
+function moveCursor(d){
+ if(editor){cursor=clamp(cursor+d,0,expression.length);render();return;}
+ if(historyCursor>=0){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ if(lastWasResult){lastWasResult=false;cursor=expression.length;answer=null;answerDisplay="";}
+ if(d>0&&activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end){
+  const start=activeTemplate.start,kind=activeTemplate.kind;
+  if(kind==="mixedfraction"){
+   const commas=[];for(let k=start;k<activeTemplate.end;k++)if(expression[k]===",")commas.push(k);
+   if(commas.length===2){if(cursor<=commas[0])cursor=commas[0]+1;else if(cursor<=commas[1])cursor=commas[1]+1;else{cursor=activeTemplate.end;activeTemplate=null;}render();return;}
+  }else if(kind==="fraction"||kind==="root"||kind==="randint"){
+   const comma=expression.indexOf(",",start);
+   const close=expression.indexOf(")",comma<0?start:comma);
+   if(comma>=0&&cursor<=comma){cursor=comma+1;render();return;}
+   if(close>=0&&cursor<=close){cursor=close+1;activeTemplate=null;render();return;}
+  }else{
+   const close=expression.indexOf(")",start);
+   if(close>=0&&cursor<=close){cursor=close+1;activeTemplate=null;render();return;}
+  }
+ }
+ cursor=clamp(cursor+d,0,expression.length);
+ if(activeTemplate&&(cursor<activeTemplate.start||cursor>activeTemplate.end))activeTemplate=null;
+ render();
+}
+function moveTemplateVertical(direction){
+ if(!activeTemplate)return false;
+ const start=activeTemplate.start,kind=activeTemplate.kind;
+ if(kind==="fraction"||kind==="root"||kind==="randint"){
+  const open=start+kind.length,close=matchingParen(expression,open,expression.length);
+  if(close<0)return false;
+  const comma=findTopComma(expression,open+1,close);
+  if(comma<0)return false;
+  if(direction==="DOWN"&&cursor<=comma){cursor=comma+1;render();return true;}
+  if(direction==="UP"&&cursor>comma){cursor=comma;render();return true;}
+ }
+ return false;
+}
+
+function deleteWhole(start,end){
+ expression=expression.slice(0,start)+expression.slice(end);
+ cursor=start;activeTemplate=null;answer=null;answerDisplay="";
+}
+function deleteAtom(){
+ if(menu||homeOpen||powerOff)return;
+ if(editor){if(cursor>0){expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor--;render();}return;}
+ if(historyCursor>=0){expression=history[historyCursor].expression;cursor=expression.length;historyCursor=-1;lastWasResult=false;}
+ if(lastWasResult){expression=lastExpression;cursor=expression.length;lastWasResult=false;}
+ if(cursor<=0)return;
+ pushUndo();
+ if(activeTemplate&&cursor>=activeTemplate.start&&cursor<=activeTemplate.end){
+  const t=activeTemplate;
+  if(t.kind==="fraction"||t.kind==="power"||t.kind==="root"||t.kind==="sqrt"||t.kind==="randint"||t.kind==="ran"||t.kind==="recurring"){deleteWhole(t.start,t.end);render();return;}
+  if(["sin","cos","tan","asin","acos","atan","log","ln"].includes(t.kind)&&expression.slice(t.start+t.kind.length+1,t.end-1)===""){deleteWhole(t.start,t.end);render();return;}
+ }
+ const prefix=expression.slice(0,cursor);
+ const templateNames=["randint","sqrt","root","frac","asin","acos","atan","sinh","cosh","tanh","sin","cos","tan","log","ln","rec","ran"];
+ for(const name of templateNames){
+  let start=prefix.lastIndexOf(name+"(");
+  while(start>=0){
+   const close=matchingParen(expression,start+name.length,cursor);
+   if(close===cursor-1){
+    const body=expression.slice(start+name.length+1,close);
+    if(["randint","sqrt","root","frac","rec","ran"].includes(name)||body===""){
+     deleteWhole(start,close+1);render();return;
+    }
+    if(close===cursor-1){
+     cursor=close;activeTemplate=null;deleteAtom();return;
+    }
+   }
+   start=start>0?prefix.lastIndexOf(name+"(",start-1):-1;
+  }
+ }
+ const powerStart=prefix.lastIndexOf("^(");
+ if(powerStart>=0){
+  const close=matchingParen(expression,powerStart+1,cursor);
+  if(close===cursor-1){deleteWhole(powerStart,close+1);render();return;}
+ }
+ const prefix2=expression.slice(0,cursor);
+ const atomic=prefix2.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)\($/i);
+ if(atomic){const start=cursor-atomic[0].length;const close=expression.indexOf(")",cursor);if(close>=0){deleteWhole(start,close+1);render();return;}deleteWhole(start,cursor);render();return;}
+ const word=prefix2.match(/(?:randint|sqrt|root|frac|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log|ln|exp|abs|floor|ceil|round|ans|ran|rec)$/i);
+ if(word){deleteWhole(cursor-word[0].length,cursor);render();return;}
+ if(prefix.endsWith("pi")){deleteWhole(cursor-2,cursor);render();return;}
+ expression=expression.slice(0,cursor-1)+expression.slice(cursor);cursor--;activeTemplate=null;answer=null;answerDisplay="";render();
+}
+function clearEntry(){expression="";answer=null;answerDisplay="";lastExpression="";lastWasResult=false;cursor=0;historyCursor=-1;activeTemplate=null;undoStack=[];persist();render();}
+function powerOn(){
+ powerOff=false;shift=false;expression="";answer=null;answerDisplay="";lastExpression="";lastWasResult=false;cursor=0;activeTemplate=null;history=[];historyCursor=-1;menu=null;menuFrames=[];homeOpen=false;undoStack=[];persist();render();
+}
+function powerDown(){powerOff=true;shift=false;menu=null;menuFrames=[];homeOpen=false;editor=null;render();}
+function calculate(){
+ if(appState&&!editor){calculateAppInput();return;}
+ if(editor){
+  if(!expression.trim())return;
+  try{
+   const v=evaluate(expression);
+   if(editor.kind==="variable")variables[editor.name]=v;
+   else functions[editor.name]=expression;
+   persist();
+   if(editor.kind==="variable"){
+    const ret=editorReturn;
+    const savedItem=ret.menu&&ret.menu.items?ret.menu.items.find(item=>item.name===editor.name):null;
+    if(savedItem)savedItem.value=fmt(v);
+    editor=null;expression=ret.expression;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;cursor=ret.cursor;activeTemplate=null;
+    menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;
+   }else{
+    const ret=editorReturn;editor=null;expression=ret.expression;cursor=ret.cursor;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;
+   }
+   render();return;
+  }catch(e){answerDisplay=e.message||"Math ERROR";answer=null;render();return;}
+ }
+ if(!expression.trim())return;
+ try{
+  const result=evaluate(expression);
+  lastExpression=expression;history.unshift({expression,result});history=history.slice(0,50);
+  answer=result;answerDisplay=expression.trim()==="ran()"?result.toFixed(3):standardResult(result);ansMemory=result;lastWasResult=true;historyCursor=-1;cursor=expression.length;activeTemplate=null;undoStack=[];
+  persist();render();
+ }catch(e){
+  answer=null;answerDisplay=e.message||"Math ERROR";render();
+ }
+}
+function evaluate(source){
+ const s=source.replaceAll("×","*").replaceAll("÷","/").replaceAll("−","-").replaceAll("π","pi");
+ const tokens=[];let i=0;
+ while(i<s.length){
+  if(/\s/.test(s[i])){i++;continue;}
+  const rest=s.slice(i);
+  const number=rest.match(/^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/i);
+  if(number){tokens.push({type:"number",value:Number(number[0])});i+=number[0].length;continue;}
+  const id=rest.match(/^[a-zA-Z]+/);
+  if(id){tokens.push({type:"id",value:id[0]});i+=id[0].length;continue;}
+  if("+-*/^!%(),~°ʳᵍ¤".includes(s[i])){tokens.push({type:s[i],value:s[i]});i++;continue;}
+  throw Error("Syntax ERROR");
+ }
+ const out=[];
+ for(let j=0;j<tokens.length;j++){
+  const a=tokens[j],b=tokens[j+1];out.push(a);
+  if(b&&a.type!=="¤"&&b.type!=="¤"&&((a.type==="number"||a.type==="id"||a.type===")"||a.type==="!"||a.type==="%"||a.type==="°")&&(b.type==="number"||b.type==="id"||b.type==="("))){
+   if(!(a.type==="id"&&b.type==="("))out.push({type:"*",value:"*"});
+  }
+ }
+ let p=0;
+ const peek=()=>out[p],take=()=>out[p++];
+ const expect=t=>{if(!peek()||peek().type!==t)throw Error("Syntax ERROR");return take();};
+ const factorial=n=>{if(n<0||!Number.isInteger(n)||n>170)throw Error("Math ERROR");let r=1;for(let k=2;k<=n;k++)r*=k;return r;};
+ const toRad=x=>angleMode==="DEG"?x*Math.PI/180:angleMode==="GRA"?x*Math.PI/200:x;
+ const fromRad=x=>angleMode==="DEG"?x*180/Math.PI:angleMode==="GRA"?x*200/Math.PI:x;
+ const gcd=(a,b)=>{a=Math.abs(Math.trunc(a));b=Math.abs(Math.trunc(b));while(b){const t=a%b;a=b;b=t;}return a;};
+ function primary(){
+  const q=peek();if(!q)throw Error("Syntax ERROR");
+  if(q.type==="number"){
+   take();let value=q.value;
+   if(peek()&&peek().type==="¤"){
+    take();const minutes=peek()&&peek().type==="number"?take().value:0;
+    if(!peek()||peek().type!=="¤")throw Error("Syntax ERROR");take();
+    const seconds=peek()&&peek().type==="number"?take().value:0;
+    if(!peek()||peek().type!=="¤")throw Error("Syntax ERROR");take();
+    if(minutes>=60||seconds>=60||minutes<0||seconds<0)throw Error("Math ERROR");
+    value+=minutes/60+seconds/3600;
+   }
+   return value;
+  }
+  if(q.type==="+"){take();return unary();}
+  if(q.type==="- "){take();return -unary();}
+  if(q.type==="-"){take();return -unary();}
+  if(q.type==="~"){take();return -unary();}
+  if(q.type==="("){take();const v=add();expect(")");return v;}
+  if(q.type==="id"){
+   const rawName=take().value,name=rawName.toLowerCase();
+   if(["A","B","C","D","E","F"].includes(rawName))return variables[rawName]??0;
+   if(name==="pi")return Math.PI;if(name==="e")return Math.E;if(name==="ans")return ansMemory;
+   if(name==="ran"&&!peek())return Math.floor(Math.random()*1000)/1000;
+   if(["x","y","z"].includes(name))return variables[name]??0;
+   if(peek()&&peek().type==="("){
+    take();
+    if(name==="ran"){expect(")");return Math.floor(Math.random()*1000)/1000;}
+    if(name==="frac"||name==="mfrac"||name==="root"||name==="randint"||name==="log"||name==="gcd"||name==="lcm"||name==="npr"||name==="ncr"||name==="round"||name==="pol"||name==="rect"){
+     const a=add();let b=null,c=null;if(peek()&&peek().type===","){take();b=add();if(name==="mfrac"&&peek()&&peek().type===","){take();c=add();}}expect(")");
+     if(name==="frac"){if(b===null)throw Error("Syntax ERROR");if(b===0)throw Error("Math ERROR");return a/b;}
+     if(name==="mfrac"){if(b===null||c===null||c===0)throw Error("Syntax ERROR");return a+b/c;}
+     if(name==="root"){if(b===null||a===0)throw Error("Math ERROR");return Math.sign(b)*Math.pow(Math.abs(b),1/a);}
+     if(name==="randint"){if(b===null||!Number.isInteger(a)||!Number.isInteger(b)||a>b)throw Error("Math ERROR");return Math.floor(Math.random()*(b-a+1))+a;}
+     if(name==="log")return b===null?Math.log10(a):Math.log(b)/Math.log(a);
+     if(name==="gcd"||name==="lcm"){if(b===null)throw Error("Syntax ERROR");const d=gcd(a,b);return name==="gcd"?d:Math.abs(a*b)/(d||1);}
+     if(name==="npr"||name==="ncr"){if(b===null||!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||b>a)throw Error("Math ERROR");return factorial(a)/(name==="npr"?factorial(a-b):factorial(b)*factorial(a-b));}
+     if(name==="round"){const places=b===null?0:b,scale=10**places;return Math.round(a*scale)/scale;}
+     if(name==="pol"){if(b===null)throw Error("Syntax ERROR");variables.x=Math.hypot(a,b);variables.y=fromRad(Math.atan2(b,a));return variables.x;}
+     if(name==="rect"){if(b===null)throw Error("Syntax ERROR");variables.x=a*Math.cos(toRad(b));variables.y=a*Math.sin(toRad(b));return variables.x;}
+    }
+    if(name==="f"||name==="g"){
+     const value=add();expect(")");
+     if(!functions[name])throw Error("Math ERROR");
+     return evaluate(functions[name].replace(/\bx\b/gi,"("+value+")"));
+    }
+    const v=add();expect(")");
+    const f={sqrt:Math.sqrt,log:Math.log10,ln:Math.log,exp:Math.exp,abs:Math.abs,floor:Math.floor,ceil:Math.ceil,round:Math.round,asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),asinh:Math.asinh,acosh:Math.acosh,atanh:Math.atanh,sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,rec:x=>{const d=String(Math.trunc(Math.abs(x)));return Number(d)/((10**d.length)-1);}};
+    if(!f[name])throw Error("Syntax ERROR");return f[name](v);
+   }
+   throw Error("Syntax ERROR");
+  }
+  throw Error("Syntax ERROR");
+ }
+ function postfix(){
+  let v=primary();
+  while(peek()&&["!","%","°"].includes(peek().type)){
+   const op=take().type;
+   if(op==="!")v=factorial(v);
+   else if(op==="%")v/=100;
+   else if(op==="°"){if(angleMode==="RAD")v*=Math.PI/180;else if(angleMode==="GRA")v*=200/180;}
+   else if(op==="ʳ"){if(angleMode==="DEG")v*=180/Math.PI;else if(angleMode==="GRA")v*=200/Math.PI;}
+   else if(op==="ᵍ"){if(angleMode==="DEG")v*=.9;else if(angleMode==="RAD")v*=Math.PI/200;}
+  }
+  return v;
+ }
+ function power(){let v=postfix();if(peek()&&peek().type==="^"){take();v=Math.pow(v,unary());}return v;}
+ function unary(){return power();}
+ function mul(){let v=unary();while(peek()&&["*","/"].includes(peek().type)){const op=take().type;const n=unary();v=op==="*"?v*n:v/n;}return v;}
+ function add(){let v=mul();while(peek()&&["+","-"].includes(peek().type)){const op=take().type;const n=mul();v=op==="+"?v+n:v-n;}return v;}
+ const result=add();if(p<out.length)throw Error("Syntax ERROR");if(!Number.isFinite(result))throw Error("Math ERROR");return result;
+}
+function openMenu(title,items,action){
+ if(menu)menuFrames.push({menu,index:menuIndex,scroll:menuScroll});
+ else menuFrames=[];
+ menu={title:title||"",items:items||[],action:action||null};
+ menuIndex=0;menuScroll=0;render();
+}
+function closeMenu(){
+ if(menuFrames.length){const frame=menuFrames.pop();menu=frame.menu;menuIndex=frame.index;menuScroll=frame.scroll;}
+ else{menu=null;menuIndex=0;menuScroll=0;}
+ render();
+}
+function chooseMenu(index){
+ if(!menu)return;
+ if(index!==undefined)menuIndex=clamp(index,0,menu.items.length-1);
+ const item=menu.items[menuIndex];if(!item)return;
+ const current=menu,action=current.action;
+ if(action)action(item);
+ else if(item.items)openMenu("",item.items,item.action);
+ if(menu===current)closeMenu();
+ else render();
+}
+function moveMenu(direction){
+ if(!menu||!menu.items.length)return;
+ menuIndex=(menuIndex+(direction==="UP"?menu.items.length-1:1))%menu.items.length;
+ if(menuIndex<menuScroll)menuScroll=menuIndex;
+ if(menuIndex>=menuScroll+4)menuScroll=menuIndex-3;
+ render();
+}
+function pageMenu(direction){
+ if(!menu)return;
+ const maxStart=Math.max(0,menu.items.length-4);
+ if(direction==="UP"){menuScroll=maxStart;menuIndex=menu.items.length-1;}
+ else{menuScroll=0;menuIndex=0;}
+ render();
+}
+function openOptions(labels,current,setter){
+ openMenu("",labels.map(label=>({label,value:label===current?"✓":""})),item=>{setter(item.label);persist();});
+}
+function settingsMenu(){
+ openMenu("",[{label:"Calc Settings",children:true},{label:"System Settings",children:true},{label:"Reset",children:true}],item=>{
+  if(item.label==="Calc Settings")openMenu("",[
+   {label:"Input/Output",value:inputMode},{label:"Angle Unit",value:angleMode==="DEG"?"Degree":angleMode==="RAD"?"Radian":"Gradian"},
+   {label:"Number Format",value:resultMode},{label:"Fraction Result",value:fractionResult},
+   {label:"Decimal Mark",value:decimalMark},{label:"Digit Separator",value:digitSeparator},{label:"FORMAT Key",value:formatKeyMode}
+  ],choice=>{
+   if(choice.label==="Input/Output")openOptions(["MathI/MathO","MathI/DecimalO","LineI/LineO","LineI/DecimalO"],inputMode,v=>{inputMode=v;});
+   if(choice.label==="Angle Unit")openOptions(["Degree","Radian","Gradian"],angleMode==="DEG"?"Degree":angleMode==="RAD"?"Radian":"Gradian",v=>{angleMode=v==="Degree"?"DEG":v==="Radian"?"RAD":"GRA";});
+   if(choice.label==="Number Format")openOptions(["Norm 1","Norm 2","Fix","Sci"],resultMode,v=>{resultMode=v;});
+   if(choice.label==="Fraction Result")openOptions(["Improper Fraction","Mixed Fraction"],fractionResult,v=>{fractionResult=v;});
+   if(choice.label==="Decimal Mark")openOptions(["Dot","Comma"],decimalMark,v=>{decimalMark=v;});
+   if(choice.label==="Digit Separator")openOptions(["On","Off"],digitSeparator,v=>{digitSeparator=v;});
+   if(choice.label==="FORMAT Key")openOptions(["Format Menu","S↔D Decimal"],formatKeyMode,v=>{formatKeyMode=v;});
+  });
+  if(item.label==="System Settings")openMenu("",[
+   {label:"Contrast",value:String(systemSettings.contrast)},{label:"Auto Power Off",value:systemSettings.autoPowerOff},{label:"MultiLine Font",value:systemSettings.multilineFont},{label:"QR Code",value:systemSettings.qrVersion}
+  ],v=>{
+   if(v.label==="Auto Power Off")openOptions(["10 Min.","60 Min."],systemSettings.autoPowerOff,value=>{systemSettings.autoPowerOff=value;});
+   else if(v.label==="MultiLine Font")openOptions(["Normal Font","Small Font"],systemSettings.multilineFont,value=>{systemSettings.multilineFont=value;});
+   else if(v.label==="QR Code")openOptions(["Version 3","Version 11"],systemSettings.qrVersion,value=>{systemSettings.qrVersion=value;});
+   else openOptions(["1","2","3","4","5","6","7","8","9"],String(systemSettings.contrast),value=>{systemSettings.contrast=Number(value);});
+  });
+  if(item.label==="Reset")openMenu("",[{label:"Settings & Data"},{label:"Variable Memory"},{label:"Initialize All"}],v=>{
+   openMenu("",[{label:"No"},{label:"Yes"}],confirm=>{
+    if(confirm.label!=="Yes")return;
+    if(v.label!=="Settings & Data"){variables={A:0,B:0,C:0,D:0,E:0,F:0,x:0,y:0,z:0};memory=0;}
+    if(v.label!=="Variable Memory"){angleMode="DEG";inputMode="MathI/MathO";resultMode="Norm 2";fractionResult="Improper Fraction";decimalMark="Dot";digitSeparator="On";formatKeyMode="Format Menu";history=[];expression="";answer=null;answerDisplay="";}
+    functions={f:"",g:""};systemSettings={contrast:5,autoPowerOff:"10 Min.",multilineFont:"Normal Font",qrVersion:"Version 11"};persist();
+   });
+  });
+ });
+}
+function beginEditor(kind,name){
+ let returnMenu=menu,returnFrames=menuFrames.slice(),returnIndex=menuIndex,returnScroll=menuScroll;
+ if(kind==="variable"&&menuFrames.length){
+  const parent=menuFrames[menuFrames.length-1];
+  returnMenu=parent.menu;returnIndex=parent.index;returnScroll=parent.scroll;returnFrames=menuFrames.slice(0,-1);
+ }
+ if(kind==="function"){returnMenu=null;returnFrames=[];returnIndex=0;returnScroll=0;}
+ const returnState={
+  expression,answer,answerDisplay,lastExpression,lastWasResult,cursor,
+  menu:returnMenu,frames:returnFrames,index:returnIndex,scroll:returnScroll
+ };
+ editorReturn=returnState;
+ editor={kind,name,prefix:kind==="variable"?name+" = ":""+name+"(x) = "};
+ expression="";answer=null;answerDisplay="";lastWasResult=false;cursor=0;activeTemplate=null;menu=null;menuFrames=[];
+ render();
+}
+function variableMenu(){
+ const names=["A","B","C","D","E","F","x","y","z"];
+ openMenu("",names.map(name=>({label:name+" =",value:fmt(variables[name]||0),name})),item=>{
+  const options=[{label:"Recall"},{label:"Edit"}];
+  if(answer!==null&&typeof answer==="number")options.push({label:"Store"});
+  openMenu("",options,choice=>{
+   if(choice.label==="Recall"){
+    menu=null;menuFrames=[];append(item.name);render();
+   }else if(choice.label==="Edit")beginEditor("variable",item.name);
+   else if(choice.label==="Store"){
+    variables[item.name]=ansMemory;persist();menu=null;menuFrames=[];render();
+   }
+  });
+ });
+}
+function functionMenu(){
+ openMenu("",[{label:"Define f(x)"},{label:"Define g(x)"},{label:"f(x)"},{label:"g(x)"}],item=>{
+  if(item.label==="Define f(x)")beginEditor("function","f");
+  else if(item.label==="Define g(x)")beginEditor("function","g");
+  else{menu=null;menuFrames=[];insertFunction(item.label[0]);render();}
+ });
+}
+function catalogMenu(){
+ const groups=[
+  {label:"Func Analysis",values:["Logarithm (log)","Natural Logarithm"]},
+  {label:"Probability",values:["%","Factorial (!)","Permutation (P)","Combination (C)","Random Number","Random Integer"]},
+  {label:"Numeric Calc",values:["GCD","LCM","Absolute Value","Recurring Decimal","Round Off"]},
+  {label:"Angle/Coord/Sexa...",values:["Degrees","Radians","Gradians","Rect to Polar","Polar to Rect","Degs Mins Secs"]},
+  {label:"Hyperbolic/Trig",values:["sinh","cosh","tanh","sinh⁻¹","cosh⁻¹","tanh⁻¹","sin","cos","tan","sin⁻¹","cos⁻¹","tan⁻¹"]},
+  {label:"Others",values:["Ans","π","e","√(","x√(","x⁻¹","x²","^(","(−)",",","(",")"]}
+ ];
+ openMenu("",groups.map(g=>({label:g.label,children:true,items:g.values.map(label=>({label}))})),group=>{
+  openMenu("",group.items,item=>{
+   const v=item.label;menu=null;menuFrames=[];
+   if(v==="Logarithm (log)")insertTemplate("log(,)","log",4);
+   else if(v==="Natural Logarithm")insertFunction("ln");
+   else if(v==="Random Number")insertTemplate("ran()","ran",5);
+   else if(v==="Random Integer")insertRanInt();
+   else if(v==="Factorial (!)")append("!");
+   else if(v==="Permutation (P)")insertTemplate("nPr(,)","npr",4);
+   else if(v==="Combination (C)")insertTemplate("nCr(,)","ncr",4);
+   else if(v==="GCD")insertTemplate("gcd(,)","gcd",4);
+   else if(v==="LCM")insertTemplate("lcm(,)","lcm",4);
+   else if(v==="Absolute Value")insertFunction("abs");
+   else if(v==="Recurring Decimal")insertRecurring();
+   else if(v==="Round Off")insertTemplate("round(,)","round",6);
+   else if(v==="Degrees")append("°");
+   else if(v==="Radians")append("ʳ");
+   else if(v==="Gradians")append("ᵍ");
+   else if(v==="Rect to Polar")insertTemplate("pol(,)","pol",4);
+   else if(v==="Polar to Rect")insertTemplate("rect(,)","rect",5);
+   else if(v==="Degs Mins Secs")append("°");
+   else if(v==="sinh⁻¹")insertFunction("asinh");
+   else if(v==="cosh⁻¹")insertFunction("acosh");
+   else if(v==="tanh⁻¹")insertFunction("atanh");
+   else if(["sinh","cosh","tanh","sin","cos","tan"].includes(v))insertFunction(v);
+   else if(v==="Ans")append("ans");
+   else if(v==="π")append("pi");
+   else if(v==="e")append("e");
+   else if(v==="√(")insertSquareRoot();
+   else if(v==="x√(")insertNthRoot();
+   else if(v==="x⁻¹")append("^(-1)");
+   else if(v==="x²")append("^2");
+   else if(v==="^(")insertPower();
+   else if(v==="(−)")append("~");
+   else if(v===",")append(",");
+   else if(v==="("||v===")")append(v);
+   else append(v);
+   render();
+  });
+ });
+}
+function formatMenu(){
+ if(answer===null||typeof answer!=="number")return;
+ const options=["Standard","Decimal","Recurring Decimal","Improper Fraction","Mixed Fraction","ENG Notation","Sexagesimal"];
+ openMenu("",options.map(label=>({label,value:""})),item=>{
+  if(item.label==="Standard")answerDisplay=standardResult(answer);
+  if(item.label==="Decimal")answerDisplay=fmt(answer);
+  if(item.label==="Recurring Decimal")answerDisplay=exactFraction(answer)?recurringDecimal(answer):fmt(answer);
+  if(item.label==="Improper Fraction"){const p=exactFraction(answer);answerDisplay=p?p[0]+"/"+p[1]:standardResult(answer);}
+  if(item.label==="Mixed Fraction")answerDisplay=exactFraction(answer)?mixedFraction(answer):standardResult(answer);
+  if(item.label==="ENG Notation"){
+   const exponent=Number.isFinite(answer)&&answer!==0?Math.floor(Math.log10(Math.abs(answer))/3)*3:0;
+   answerDisplay=fmt(answer/Math.pow(10,exponent))+" × 10^"+exponent;
+  }
+  if(item.label==="Sexagesimal")answerDisplay=sexagesimal(answer);
+  menu=null;menuFrames=[];persist();render();
+ });
+}
+function memoryMenu(){
+ openMenu("",[{label:"M = "+fmt(memory)},{label:"M+"},{label:"M−"},{label:"MR"},{label:"MC"}],v=>{
+  if(v.label==="M+")memory+=ansMemory;
+  if(v.label==="M−")memory-=ansMemory;
+  if(v.label==="MR"){menu=null;menuFrames=[];append(String(memory));}
+  if(v.label==="MC")memory=0;
+  persist();render();
+ });
+}
+function toolsMenu(){
+ if(!appState){
+  openMenu("",[{label:"Undo"}],()=>{
+   const old=undoStack.pop();
+   if(old){expression=old.expression;answer=old.answer;answerDisplay=old.answerDisplay;cursor=old.cursor;lastWasResult=old.lastWasResult;activeTemplate=null;render();}
+  });
+  return;
+ }
+ if(appState.type==="Statistics"){
+  openMenu("",[{label:appState.paired?"2-Var Results":"1-Var Results"},{label:"Delete All"}],item=>{
+   if(item.label==="Delete All"){appState.x=[];appState.y=[];render();}
+   else{appState.showResults=true;render();}
+  });return;
+ }
+ if(appState.type==="Table"){
+  openMenu("",[{label:"Table Range"},{label:"Define f(x)"},{label:"Define g(x)"},{label:"Table Type"},{label:"Generate"}],item=>{
+   if(item.label==="Define f(x)"||item.label==="Define g(x)"){beginEditor("function",item.label.includes("f")?"f":"g");return;}
+   if(item.label==="Table Range"){
+    openMenu("",[{label:"Start",value:String(appState.start)},{label:"End",value:String(appState.end)},{label:"Step",value:String(appState.step)}],v=>beginAppInput(v.label+" = ",v.label.toLowerCase()));
+   }else if(item.label==="Table Type")openOptions(["f(x)","g(x)","f(x)/g(x)"],appState.tableType,v=>{appState.tableType=v;render();});
+   else generateTable();
+  });return;
+ }
+ if(appState.type==="Math Box"&&(appState.mode==="Dice Roll"||appState.mode==="Coin Toss")){
+  openMenu("",[{label:(appState.mode==="Dice Roll"?"Dice: ":"Coins: ")+appState.count},{label:"Attempts: "+appState.attempts},{label:"Execute"}],item=>{
+   if(item.label.startsWith("Dice:")||item.label.startsWith("Coins:"))openOptions(["1","2","3"],String(appState.count),v=>{appState.count=Number(v);render();});
+   else if(item.label.startsWith("Attempts:"))beginAppInput("Attempts = ","attempts");
+   else runMathBoxSimulation();
+  });return;
+ }
+ openMenu("",[{label:"Undo"}],()=>{});
+}
+function historyMove(direction){
+ if(!history.length)return;
+ if(direction==="UP")historyCursor=historyCursor<0?0:Math.min(history.length-1,historyCursor+1);
+ else historyCursor=historyCursor<=0?-1:historyCursor-1;
+ render();
+}
+function homeMenu(){menu=null;menuFrames=[];homeOpen=true;homeIndex=0;shift=false;render();}
+function chooseHome(){
+ const app=homeApps[homeIndex].label;homeOpen=false;appState=null;expression="";answer=null;answerDisplay="";lastExpression="";lastWasResult=false;historyCursor=-1;cursor=0;activeTemplate=null;
+ if(app==="Calculate"){render();return;}
+ if(app==="Statistics"){
+  openMenu("",[{label:"1-Variable"},{label:"2-Variable"}],item=>{appState={type:"Statistics",paired:item.label==="2-Variable",x:[],y:[],column:0,row:0,rowStart:0,showResults:false,inputPrompt:"x1 = ",inputTarget:"stats"};expression="";render();});return;
+ }
+ if(app==="Table"){appState={type:"Table",start:-5,end:5,step:1,tableType:"f(x)",rows:[],tableRow:0,tableStart:0};render();return;}
+ if(app==="Ratio"){
+  openMenu("",[{label:"A:B=X:D"},{label:"A:B=C:X"}],item=>{appState={type:"Ratio",equation:item.label,values:[],solved:false,inputPrompt:"A = ",inputTarget:"ratio"};expression="";render();});return;
+ }
+ if(app==="Math Box"){
+  openMenu("",[{label:"Dice Roll"},{label:"Coin Toss"},{label:"Number Line"},{label:"Circle"}],item=>{
+   if(item.label==="Dice Roll"||item.label==="Coin Toss"){appState={type:"Math Box",mode:item.label,count:1,attempts:5,rows:[],result:false,tableRow:0,tableStart:0};toolsMenu();menuIndex=2;render();return;}
+   else if(item.label==="Number Line")appState={type:"Math Box",mode:item.label,lines:[],input:true};
+   else appState={type:"Math Box",mode:item.label,input:true};
+   expression="";if(item.label==="Circle")beginAppInput("Angle = ","angle");else if(item.label==="Number Line")beginAppInput("Inequality 1 = ","line");else render();
+  });return;
+ }
+ render();
+}
+
+function applyShift(label){
+ if(label==="AC"){powerDown();return true;}
+ if(label==="sin"||label==="cos"||label==="tan"){insertFunction({sin:"asin",cos:"acos",tan:"atan"}[label]);return true;}
+ if(label==="SQUARE ROOT"){insertNthRoot();return true;}
+ if(label==="SQUARE"){insertRecurring();return true;}
+ if(label==="LOG"){insertFunction("ln");return true;}
+ if(label==="−"){append("~");return true;}
+ if(label==="+"){append("¤");return true;}
+ if(label===")"){append(",");return true;}
+ if(label==="POWER"){append("^(-1)");return true;}
+ if(label==="7"){append("pi");return true;}
+ if(label==="8"){append("e");return true;}
+ if(label==="5"||label==="4"||label==="6"||label==="1"||label==="2"||label==="3"||label==="0"||label==="."){
+  const vars={"5":"B","4":"A","6":"C","1":"D","2":"E","3":"F","0":"x",".":"y"};
+  append(vars[label]);return true;
+ }
+ if(label==="×10ˣ"){append("z");return true;}
+ if(label==="x"){answer=null;answerDisplay="Casio Error: this is discontinued";render();return true;}
+ if(label==="FRACTION"){insertMixedFraction();return true;}
+ if(label==="CATALOG"){catalogMenu();return true;}
+ if(label==="FORMAT"){formatMenu();return true;}
+ return false;
+}
+function press(label){
+
+ if(label==="SHIFT"){shift=!shift;render();return;}
+ const shifted=shift;shift=false;
+ if(powerOff){if(label==="ON")powerOn();return;}
+ if(shifted&&applyShift(label)){render();return;}
+ if(label==="ON"){powerOn();return;}
+ if(editor){
+  if(label==="EXE"||label==="OK"){calculate();return;}
+  if(label==="BACK"){
+   const ret=editorReturn;editor=null;expression=ret.expression;answer=ret.answer;answerDisplay=ret.answerDisplay;lastExpression=ret.lastExpression;lastWasResult=ret.lastWasResult;cursor=ret.cursor;
+   menu=ret.menu;menuFrames=ret.frames;menuIndex=ret.index;menuScroll=ret.scroll;activeTemplate=null;render();return;
+  }
+  if(label==="AC"){expression="";cursor=0;render();return;}
+  if(label==="DELETE"){deleteAtom();return;}
+  if(label==="LEFT"){moveCursor(-1);return;}
+  if(label==="RIGHT"){moveCursor(1);return;}
+  if(/^[0-9]$/.test(label)||[".","+","−","×","÷","(",")"].includes(label)){append(label==="−"?"-":label==="×"?"*":label==="÷"?"/":label);return;}
+  if(label==="FRACTION"){insertFraction();return;}
+  if(label==="POWER"){insertPower();return;}
+  if(label==="SQUARE ROOT"){insertSquareRoot();return;}
+  if(label==="SQUARE"){append("^2");return;}
+  if(label==="LOG"){insertFunction("log");return;}
+  if(label==="ANS"){append("ans");return;}
+  if(label==="x"){append("x");return;}
+  if(label==="sin"||label==="cos"||label==="tan"){insertFunction(label);return;}
+  if(label==="CATALOG"){catalogMenu();return;}
+  if(label==="FUNCTION"){functionMenu();return;}
+  if(label==="×10ˣ"){append("*10^");return;}
+  return;
+ }
+ if(homeOpen){
+  if(label==="LEFT")homeIndex=(homeIndex+4)%5;
+  else if(label==="RIGHT")homeIndex=(homeIndex+1)%5;
+  else if(label==="UP"){if(homeIndex>=3)homeIndex-=3;}
+  else if(label==="DOWN"){if(homeIndex<3)homeIndex=Math.min(4,homeIndex+3); }
+  else if(label==="OK"||label==="EXE")chooseHome();
+  else if(label==="HOME"||label==="BACK"||label==="AC"){homeOpen=false;render();}
+  render();return;
+ }
+ if(menu){
+  if(label==="HOME"){homeMenu();return;}
+  if(label==="UP")moveMenu("UP");
+  else if(label==="DOWN")moveMenu("DOWN");
+  else if(label==="SCROLL UP")pageMenu("UP");
+  else if(label==="SCROLL DOWN")pageMenu("DOWN");
+  else if(label==="LEFT"||label==="BACK"||label==="AC")closeMenu();
+  else if(label==="RIGHT"||label==="OK"||label==="EXE")chooseMenu();
+  return;
+ }
+ if(appState){
+  if(label==="HOME"){appState=null;homeMenu();return;}
+  if(label==="BACK"||label==="AC"){handleAppBack();return;}
+  if(label==="TOOLS"){toolsMenu();return;}
+  if(label==="LEFT"||label==="RIGHT"||label==="UP"||label==="DOWN"){handleAppArrow(label);return;}
+  if(label==="OK"||label==="EXE"){calculate();return;}
+  if(label==="DELETE"){if(expression){deleteAtom();}else if(appState.type==="Statistics"&&appState.x.length){(appState.column===0?appState.x:appState.y).pop();render();}return;}
+  if(label==="FORMAT"&&appState.type==="Statistics"){appState.showResults=true;render();return;}
+  if(label==="SETTINGS"){settingsMenu();return;}
+  if(/^[0-9]$/.test(label)||[".","+","−","×","÷","(",")"].includes(label)||["x","ANS","FRACTION","SQUARE ROOT","POWER","SQUARE","LOG","sin","cos","tan","×10ˣ"].includes(label)){ 
+   if(label==="FRACTION")insertFraction();else if(label==="SQUARE ROOT")insertSquareRoot();else if(label==="POWER")insertPower();else if(label==="SQUARE")append("^2");else if(label==="LOG")insertFunction("log");else if(label==="ANS")append("ans");else if(label==="x")append("x");else if(["sin","cos","tan"].includes(label))insertFunction(label);else if(label==="×10ˣ")append("*10^");else append(label==="−"?"-":label==="×"?"*":label==="÷"?"/":label);return;
+  }
+  return;
+ }
+ if(label==="HOME"){homeMenu();return;}
+ if(label==="SETTINGS"){settingsMenu();return;}
+ if(label==="BACK"){if(historyCursor>=0){historyCursor=-1;render();}return;}
+ if(label==="UP"){if(moveTemplateVertical("UP"))return;historyMove("UP");return;}
+ if(label==="DOWN"){if(moveTemplateVertical("DOWN"))return;historyMove("DOWN");return;}
+ if(label==="LEFT"){moveCursor(-1);return;}
+ if(label==="RIGHT"){moveCursor(1);return;}
+ if(label==="VARIABLE"){variableMenu();return;}
+ if(label==="FUNCTION"){functionMenu();return;}
+ if(label==="CATALOG"){catalogMenu();return;}
+ if(label==="TOOLS"){toolsMenu();return;}
+ if(label==="OK"||label==="EXE"){calculate();return;}
+ if(label==="AC"){clearEntry();return;}
+ if(label==="DELETE"){deleteAtom();return;}
+ if(label==="FORMAT"){if(formatKeyMode==="S↔D Decimal"&&answer!==null){answerDisplay=answerDisplay===fmt(answer)?standardResult(answer):fmt(answer);render();}else formatMenu();return;}
+ if(label==="FRACTION"){insertFraction();return;}
+ if(label==="SQUARE ROOT"){insertSquareRoot();return;}
+ if(label==="POWER"){insertPower();return;}
+ if(label==="SQUARE"){append("^2");return;}
+ if(label==="LOG"){insertFunction("log");return;}
+ if(label==="sin"||label==="cos"||label==="tan"){insertFunction(label);return;}
+ if(label==="ANS"){append("ans");return;}
+ if(label==="x"){append("x");return;}
+ if(label==="×10ˣ"){append("*10^");return;}
+ if(label==="("||label===")"||label==="."||label==="+"||label==="−"||label==="×"||label==="÷"||/^[0-9]$/.test(label)){
+  append(label==="×"?"*":label==="÷"?"/":label==="−"?"-":label);return;
+ }
+}
+
+for(const [label,x,y] of keyLayout){
+ const button=document.createElement("button");button.type="button";button.className="key";button.setAttribute("aria-label",label);button.title=label;
+ button.style.left=(x/435*100)+"%";button.style.top=(y/913*100)+"%";
+ const scroll=label==="SCROLL UP"||label==="SCROLL DOWN",bottom=y>=650;
+ button.style.width=scroll?"9.5%":bottom?"12.2%":y<390?"9%":"10.2%";
+ button.style.height=scroll?"7%":bottom?"5.9%":y<390?"4.3%":"4.8%";
+ button.addEventListener("click",()=>press(label));container.appendChild(button);
+}
+panelEl.addEventListener("click",e=>{
+ const home=e.target.closest("[data-home]");
+ if(home){homeIndex=Number(home.dataset.home);chooseHome();return;}
+ const row=e.target.closest("[data-index]");
+ if(row&&menu){menuIndex=Number(row.dataset.index);chooseMenu(menuIndex);}
+});
+document.addEventListener("keydown",e=>{
+ if(e.key==="Shift"){press("SHIFT");}
+ else if(e.key==="Enter"||e.key==="="){e.preventDefault();press("EXE");}
+ else if(e.key==="Escape"){press("BACK");}
+ else if(e.key==="Backspace"){e.preventDefault();press("DELETE");}
+ else if(e.key==="ArrowLeft"){e.preventDefault();press("LEFT");}
+ else if(e.key==="ArrowRight"){e.preventDefault();press("RIGHT");}
+ else if(e.key==="ArrowUp"){e.preventDefault();press("UP");}
+ else if(e.key==="ArrowDown"){e.preventDefault();press("DOWN");}
+ else if(/^[0-9]$/.test(e.key)){e.preventDefault();press(e.key);}
+ else if(e.key==="."){e.preventDefault();press(".");}
+ else if(e.key==="*"){e.preventDefault();press("×");}
+ else if(e.key==="/"){e.preventDefault();press("÷");}
+ else if(e.key==="+"){e.preventDefault();press("+");}
+ else if(e.key==="-"){e.preventDefault();press("−");}
+ else if(e.key==="("||e.key===")"){e.preventDefault();press(e.key);}
+ else if(e.key==="^"){e.preventDefault();press("POWER");}
+});
+loadState();
+render();
+
 </script>
 </body>
 </html>
